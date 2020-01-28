@@ -1,0 +1,34 @@
+* {
+  margin: 0; 
+  padding: 0; 
+}
+body {
+  width: 960px;
+}
+#content{
+  margin: 0px 0px 0px 310px;
+  width: 480px;
+  float:left;
+}
+#menu{
+  display: none;
+}
+#header {
+  width: 790px;
+  height: 50px;
+}
+#drawer {
+  position : absolute;
+  float : left;
+  margin-top : -1px;
+  width : 300px;   
+  background-color: white;
+}
+
+.ad_frame_right {
+  position : fixed;
+  margin: 0px 0px 0px 10px; 
+}
+.pc_disp_none{
+  display: none;
+}
