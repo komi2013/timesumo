@@ -15,6 +15,8 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+Route::get('/htm/{page}', 'HtmController@index');
+
 $paths = explode('/', Request::path());
 $paths[0] = isset($paths[0]) ? ucfirst($paths[0]) : '';
 $paths[1] = isset($paths[1]) ? ucfirst($paths[1]) : '';
