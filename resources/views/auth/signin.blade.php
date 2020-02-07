@@ -32,11 +32,6 @@
         <img src="/img/icon/fb.jpg" class="icon">
     </a>
     </div>
-<!--    <div style="margin:20px;display: inline-block;">
-    <a href="/Manage/Twoauth/">
-        <img src="/img/icon/tw.jpg" class="icon">
-    </a>
-    </div>-->
     <div style="margin:20px;display: inline-block;">
     <a href="<?=$gp_url?>">
         <img src="/img/icon/gp.png" class="icon">
@@ -45,7 +40,7 @@
 <br>
 <div style="margin:20px;display: inline-block;">
     <input type="text" placeholder="email" id="email" style="height:30px;"><br>
-    <input type="text" placeholder="password" id="manager_pass" style="height:30px;"><br>
+    <input type="password" placeholder="password" id="password" style="height:30px;"><br>
     <input type="submit" value="login" id="login" style="padding:10px;">
     <input type="submit" value="reissue passowrd" class="send_mail" style="padding:10px;">
 </div>
@@ -62,9 +57,9 @@ $('.send_mail').click(function(){
     var param = {
         _token : $('[name="csrf-token"]').attr('content')
         ,email : $('#email').val()
-        ,manager_pass : $('#manager_pass').val()
+        ,password : $('#password').val()
     }
-    $.post('/Manage/Email/',param,function(){},"json")
+    $.post('/Auth/EmailSend/',param,function(){},"json")
     .always(function(res){
         console.log(res);
         if(res[0] == 1){
@@ -78,22 +73,20 @@ $('#login').click(function(){
     var param = {
         _token : $('[name="csrf-token"]').attr('content')
         ,email : $('#email').val()
-        ,manager_pass : $('#manager_pass').val()
+        ,password : $('#password').val()
     }
-    $.post('/Manage/Email/login/',param,function(){},"json")
+    $.post('/Auth/EmailLogin/',param,function(){},"json")
     .always(function(res){
         if(res[0] == 1){
-            location.href = '/Manage/Applicant/index/';
+            location.href = '/Auth/Applicant/index/';
         }else{
             alert('failed');
         }
     });
 });
 
-</script>
+setTimeout(function(){ga('send', 'pageview')},2000);
 
-<script>
-    setTimeout(function(){ga('send', 'pageview')},2000);
 </script>
 </body>
 </html>
