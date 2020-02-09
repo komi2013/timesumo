@@ -45,7 +45,7 @@ class FboauthController extends Controller {
         $request->session()->put('usr_id', $usr_id);
 
         $redirect = '/Calendar/Top/index/';
-        
+
         if ($request->session()->put('after_signin') == 1) {
             $obj = DB::connection('salon')->table('m_skill')
                     ->where('usr_id',$usr_id)
@@ -55,13 +55,13 @@ class FboauthController extends Controller {
 //                    ->where('usr_id',$usr_id)
 //                    ->first();
             } else {
-                $redirect = '/Salon/Dresser/index/';
+                $redirect = '/HairSalon/Dresser/index/';
             }
-            //check hairdresser usr id, 
+            //check hairdresser usr id,
             //check group id
         }
-        
-        
+
+
         return redirect($redirect);
     }
 
