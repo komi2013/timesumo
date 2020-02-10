@@ -4,42 +4,49 @@ namespace App\Http\Controllers\Auth;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
+use App\Models\Auth\AuthData;
 
 class EmailVerifyController extends Controller {
 
-    public function s(Request $request, $directory=null, $controller=null,
+    public function code(Request $request, $directory=null, $controller=null,
             $action=null, $auth) {
         if ($auth != session('email_auth')) {
             return view('errors.404');
         }
 
-        $obj = DB::connection('exam_manage')->table('t_manager')
+        $obj = DB::table('t_usr')
             ->where('email',session('email'))
             ->first();
-        if (isset($obj->manager_id) AND $obj->oauth_type == 3) {
-            DB::connection('exam_manage')->table('t_manager')
-                    ->where("manager_id",$obj->manager_id)
-                    ->update([
-                        "manager_pass" => session('manager_pass')
-                        ,"updated_at" => now()
-                    ]);
-            $manager_id = $obj->manager_id;
+        
+        if (isset($obj->usr_id) AND $obj->oauth_type == 3) {
+            DB::table('t_usr')
+                ->where("usr_id",$obj->usr_id)
+                ->update([
+                    "password" => session('password')
+                    ,"updated_at" => now()
+                ]);
+            $usr_id = $obj->usr_id;
+            $message = __('successfully password re-issued');
         } else {
-            $manager_id = DB::connection('exam_manage')
-                    ->select("select nextval('t_manager_manager_id_seq')")[0]->nextval;
-            DB::connection('exam_manage')->table('t_manager')->insert([
-                "manager_id" => $manager_id
+            $usr_id = DB::select("select nextval('t_usr_usr_id_seq')")[0]->nextval;
+            DB::table('t_usr')->insert([
+                "usr_id" => $usr_id
                 ,"oauth_type" => 3
                 ,"updated_at" => now()
                 ,"email" => session('email')
-                ,"manager_pass" => session('manager_pass')
+                ,"password" => session('password')
             ]);
+            $message = __('successfully registered');
         }
-
-        $request->session()->put('manager_id', $manager_id);
-
-        return redirect('/Manage/Applicant/index/');
+        
+        $request->session()->put('usr_id', $usr_id);
+        $authdata = new AuthData();
+        if ($request->cookie('after_signin')) {
+            
+        }
+        $redirect = $authdata->arr_redirect[$request->cookie('after_signin')] ?? '/';
+        return view('auth.email_complete', compact('redirect','message'));
+//        return redirect('/Auth/Applicant/index/');
     }
 }
 

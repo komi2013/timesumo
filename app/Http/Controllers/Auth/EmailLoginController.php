@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
-class EmailSendController extends Controller {
+class EmailLoginController extends Controller {
 
     public function lessuri(Request $request) {
 

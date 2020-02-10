@@ -10,7 +10,7 @@ use Carbon\Carbon;
 class SignController extends Controller {
 
     public function in(Request $request, $directory=null, $controller=null,
-            $action=null, $redirect='', $language='') {
+            $action=null, $redirect='none', $language='') {
 
         $fb_id = '593374818166961';
 
@@ -25,7 +25,10 @@ class SignController extends Controller {
           .'&scope=https://www.googleapis.com/auth/userinfo.profile'
           .'&redirect_uri=https://'.$_SERVER['HTTP_HOST'].'/Auth/Gpcallback/'
           ;
-        \Cookie::queue('after_signin',$redirect,60 * 24 * 10);
+        if ($redirect != 'none') {
+            \Cookie::queue('after_signin',$redirect,60 * 24 * 10);
+        }
+        
         if ($language){
             $lang = $language;
         } elseif ($request->cookie('lang')) {
