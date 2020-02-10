@@ -5,6 +5,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\DB;
 use App\Models\Auth\AuthData;
+use Illuminate\Support\Facades\Hash;
 
 class EmailVerifyController extends Controller {
 
@@ -22,7 +23,7 @@ class EmailVerifyController extends Controller {
             DB::table('t_usr')
                 ->where("usr_id",$obj->usr_id)
                 ->update([
-                    "password" => session('password')
+                    "password" => Hash::make(session('password'))
                     ,"updated_at" => now()
                 ]);
             $usr_id = $obj->usr_id;
@@ -34,19 +35,19 @@ class EmailVerifyController extends Controller {
                 ,"oauth_type" => 3
                 ,"updated_at" => now()
                 ,"email" => session('email')
-                ,"password" => session('password')
+                ,"password" => Hash::make(session('password'))
             ]);
             $message = __('successfully registered');
         }
-        
+//        if (Hash::check('komatsu', $test)) {
+//            echo 'ok';
+//        } else {
+//            echo 'false';
+//        }
         $request->session()->put('usr_id', $usr_id);
         $authdata = new AuthData();
-        if ($request->cookie('after_signin')) {
-            
-        }
         $redirect = $authdata->arr_redirect[$request->cookie('after_signin')] ?? '/';
         return view('auth.email_complete', compact('redirect','message'));
-//        return redirect('/Auth/Applicant/index/');
     }
 }
 
