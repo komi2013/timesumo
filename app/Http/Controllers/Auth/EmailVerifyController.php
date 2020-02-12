@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Auth;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\DB;
-use App\Models\Auth\AuthData;
 use Illuminate\Support\Facades\Hash;
 
 class EmailVerifyController extends Controller {
@@ -47,8 +46,8 @@ class EmailVerifyController extends Controller {
 //            echo 'false';
 //        }
         $request->session()->put('usr_id', $usr_id);
-        $authdata = new AuthData();
-        $redirect = $authdata->arr_redirect[$request->cookie('after_signin')] ?? '/';
+        $authRedirect = new \App\Models\Auth\Redirect();
+        $redirect = $authRedirect->arr[$request->cookie('after_signin')] ?? '/';
         return view('auth.email_complete', compact('redirect','message'));
     }
 }
