@@ -19,18 +19,16 @@ class EmailSendController extends Controller {
 
         $simple = new Simple();
         $simple->from_email = 'noreply@'.config('domain.my');
-        $simple->from_name = 'timesumo';
+        $simple->from_name = 'Timesumo';
         $simple->simple_subject = __('email_verify.verify');
         $simple->arr_variable = [
             "url" => "https://".config('domain.my')."/Auth/EmailVerify/code/" . $auth,
             "password" => $request->password
         ];
         $simple->template = 'mail.auth_emailsend';
-        $simple->arr_bcc = ['test@infoseek.jp'];
+        $simple->arr_bcc = ['komatsuka@yahoo.com'];
         $simple->arr_to = [$request->email];
         $simple->simple_send();
-
-        $headers = "From: noreply@".config('domain.my');
         $res[0] = 1;
 
         echo json_encode($res);

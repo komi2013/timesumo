@@ -11,6 +11,8 @@ class EmailVerifyController extends Controller {
 
     public function code(Request $request, $directory=null, $controller=null,
             $action=null, $auth) {
+        $lang = $request->cookie('lang') ?? 'en';
+        \App::setLocale($lang);
         if ($auth != session('email_auth')) {
             return view('errors.404');
         }
@@ -27,7 +29,7 @@ class EmailVerifyController extends Controller {
                     ,"updated_at" => now()
                 ]);
             $usr_id = $obj->usr_id;
-            $message = __('successfully password re-issued');
+            $message = __('email_verify.reissued');
         } else {
             $usr_id = DB::select("select nextval('t_usr_usr_id_seq')")[0]->nextval;
             DB::table('t_usr')->insert([
@@ -37,7 +39,7 @@ class EmailVerifyController extends Controller {
                 ,"email" => session('email')
                 ,"password" => Hash::make(session('password'))
             ]);
-            $message = __('successfully registered');
+            $message = __('email_verify.registered');
         }
 //        if (Hash::check('komatsu', $test)) {
 //            echo 'ok';

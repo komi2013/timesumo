@@ -28,7 +28,8 @@ class SignController extends Controller {
         if ($redirect != 'none') {
             \Cookie::queue('after_signin',$redirect,60 * 24 * 10);
         }
-        
+//        $request->session()->put('test1', 'komatsu');
+        var_dump($request->session()->get('test1'));
         if ($language){
             $lang = $language;
         } elseif ($request->cookie('lang')) {
