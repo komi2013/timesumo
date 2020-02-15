@@ -18,11 +18,11 @@ class EmailSendController extends Controller {
         \App::setLocale($request->cookie('lang'));
 
         $simple = new Simple();
-        $simple->from_email = 'noreply@'.config('domain.my');
+        $simple->from_email = 'noreply@'.config('my.domain');
         $simple->from_name = 'Timesumo';
         $simple->simple_subject = __('email_verify.verify');
         $simple->arr_variable = [
-            "url" => "https://".config('domain.my')."/Auth/EmailVerify/code/" . $auth,
+            "url" => "https://".config('my.domain')."/Auth/EmailVerify/code/" . $auth,
             "password" => $request->password
         ];
         $simple->template = 'mail.auth_emailsend';

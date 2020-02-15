@@ -1,6 +1,9 @@
 a {
   text-decoration: none;
 }
+body {
+  margin: 0 auto;
+}
 .icon {
   max-height: 48px;
   vertical-align: middle;
@@ -13,10 +16,6 @@ a {
   width:70%;
   height:40px;
 }
-
-
-
-
 
 #drawer td {
   background-color: #EEEEEE;

@@ -12,7 +12,7 @@
     <script src="/plugin/vue.min.js"></script>
     <script async src="https://www.googletagmanager.com/gtag/js?id=UA-57298122-3"></script>
     <script src="/js/analytics.js<?=config('my.cache_v')?>"></script>
-    <link rel="stylesheet" href="/css/basic.css?a<?=config('my.cache_v')?>">
+    <link rel="stylesheet" href="/css/basic.css<?=config('my.cache_v')?>">
     <link rel="stylesheet" href="/css/pc.css<?=config('my.cache_v')?>" media="only screen and (min-width : 711px)">
     <link rel="stylesheet" href="/css/sp.css<?=config('my.cache_v')?>" media="only screen and (max-width : 710px)">
     <meta name="viewport" content="width=device-width, user-scalable=no" >
@@ -114,37 +114,6 @@ const app = new Vue({
     },
   }
 });
-$('.send_mail').click(function(){
-    var param = {
-        _token : $('[name="csrf-token"]').attr('content')
-        ,email : $('#email').val()
-        ,password : $('#password').val()
-    }
-    $.post('/Auth/EmailSend/',param,function(){},"json")
-    .always(function(res){
-        console.log(res);
-        if(res[0] == 1){
-            alert('mail sent');
-        }else{
-            alert('failed');
-        }
-    });
-});
-//$('#login').click(function(){
-//    var param = {
-//        _token : $('[name="csrf-token"]').attr('content')
-//        ,email : $('#email').val()
-//        ,password : $('#password').val()
-//    }
-//    $.post('/Auth/EmailLogin/',param,function(){},"json")
-//    .always(function(res){
-//        if(res[0] == 1){
-//            location.href = '/Auth/Applicant/index/';
-//        }else{
-//            alert('failed');
-//        }
-//    });
-//});
 
 function MailCheck( mail ) {
     var mail_regex1 = new RegExp( '(?:[-!#-\'*+/-9=?A-Z^-~]+\.?(?:\.[-!#-\'*+/-9=?A-Z^-~]+)*|"(?:[!#-\[\]-~]|\\\\[\x09 -~])*")@[-!#-\'*+/-9=?A-Z^-~]+(?:\.[-!#-\'*+/-9=?A-Z^-~]+)*' );
