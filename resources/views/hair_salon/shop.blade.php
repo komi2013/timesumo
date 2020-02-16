@@ -54,7 +54,7 @@
         </td>
     </tr>
     <tr style="height:50px;">
-        <td style="width:25%;text-align: center;"><?=__('hair_salon.perm_dry')?></td>
+    <td style="width:25%;text-align: center;"><?=__('hair_salon.perm_dry')?></td>
         <td style="width:74%;">
             <select id="perm_dry_<?=$group_id?>" style="width:90%;height:30px;">
                 <?php $i = 0; while ($i < 5){?>

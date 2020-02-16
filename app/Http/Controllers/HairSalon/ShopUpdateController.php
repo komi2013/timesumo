@@ -63,9 +63,9 @@ class ShopUpdateController extends Controller {
             }
         } else {
             $group_id = DB::select("select nextval('m_group_group_id_seq')")[0]->nextval;
-            DB::connection('salon')->table('t_shop')->insert([
+            DB::table('m_group')->insert([
                 "group_id" => $group_id
-                ,"shop_name" => $request->shop_name
+                ,"group_name" => $request->shop_name
                 ,"updated_at" => now()
             ]);
             DB::table('r_group_relate')->insert([

@@ -37,9 +37,9 @@ class ShopController extends Controller {
         $shop[0]['perm_dry'] = 0;
         
         if ($is_group_relate) {
-            $obj = DB::connection('salon')->table('t_shop')->whereIn('group_id', $arr_group_id)->get();
+            $obj = DB::table('m_group')->whereIn('group_id', $arr_group_id)->get();
             foreach ($obj as $d) {
-                $arr['shop_name'] = $d->shop_name;
+                $arr['shop_name'] = $d->group_name;
                 $shop[$d->group_id] = $arr;
             }
 //            $shop = json_decode($obj, true);
