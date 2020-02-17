@@ -36,15 +36,17 @@ class MenuController extends Controller {
             $menu[$d->menu_id] = $arr;
         }
         $obj = DB::table('t_menu_necessary')->whereIn('menu_id', $arr_menu_id)->get();
+        $arr_facility_id = [0];
         foreach ($obj as $d) {
             $arr = [];
-            $arr['service_id'] = $d->service_id;
-            $arr['facility_id'] = $d->facility_id;
+            $arr['service_id'] = $d->service_id;  // from m_service_id
+            $arr['facility_id'] = $d->facility_id; // from m_service_id
             $arr['start_minute'] = $d->start_minute;
             $arr['end_minute'] = $d->end_minute;
             $menu[$d->menu_id]['necessary'][$d->menu_necessary_id] = $arr;
+            $arr_facility_id[] = $d->facility_id;
         }
-
+        $obj = DB::table('t_facility')->whereIn('facility_id', $arr_facility_id)->get();
         krsort($menu);
         return view('hair_salon.menu', compact('menu'));
     }
