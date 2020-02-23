@@ -47,12 +47,14 @@ class MenuController extends Controller {
             $arr['necessary'] = [];
             $menu[$d->menu_id] = $arr;
         }
+
         $obj = DB::connection('salon')->table('t_menu_necessary')->whereIn('menu_id', $arr_menu_id)->get();
         $arr_facility_id = [];
+
         foreach ($obj as $d) {
             $arr = [];
-            $arr['service_id'] = $d->service_id;
-            $arr['facility_id'] = $d->facility_id;
+            $arr['service_id'] = $d->service_id;  // from m_service_id
+            $arr['facility_id'] = $d->facility_id; // from m_service_id
             $arr['start_minute'] = $d->start_minute;
             $arr['end_minute'] = $d->end_minute;
             $menu[$d->menu_id]['necessary'][$d->menu_necessary_id] = $arr;
@@ -74,8 +76,8 @@ class MenuController extends Controller {
                 $d['facility'] = $facilitys[$d2['facility_id']] ?? '';
             }
         }
-        krsort($menu);
-//        dd($menu);
+        $obj = DB::table('t_facility')->whereIn('facility_id', $arr_facility_id)->get();
+
         return view('hair_salon.menu', compact('menu','shops','group_id'));
     }
 }
