@@ -22,23 +22,15 @@ class MenuController extends Controller {
             $arr_group_id[] = $d->group_id;
         }
         $request->session()->put('group_ids', json_encode($arr_group_id));
-        $obj = DB::connection('salon')->table('t_shop')->whereIn('group_id',$arr_group_id)->get();
+        $obj = DB::table('m_group')->whereIn('group_id',$arr_group_id)->get();
         $shops = [];
         foreach ($obj as $d) {
-            $shops[$d->group_id] = $d->shop_name;
+            $shops[$d->group_id] = $d->group_name;
             $group_id = $group_id ?: $d->group_id;
         }
 
         $obj = DB::connection('salon')->table('t_menu')->where('group_id',$group_id)->get();
         $menu = [];
-        $menu[0]['menu_name'] = 'test';
-        $arr['service_id'] = '';
-        $arr['facility_id'] = '';
-        $arr['service'] = 'servie';
-        $arr['facility'] = 'faciii';
-        $arr['start_minute'] = 0;
-        $arr['end_minute'] = 30;
-        $menu[0]['necessary'][0] = $arr;
         $arr_menu_id = [0];
         foreach ($obj as $d) {
             $arr_menu_id[] = $d->menu_id;
@@ -57,7 +49,7 @@ class MenuController extends Controller {
             $arr['facility_id'] = $d->facility_id; // from m_service_id
             $arr['start_minute'] = $d->start_minute;
             $arr['end_minute'] = $d->end_minute;
-            $menu[$d->menu_id]['necessary'][$d->menu_necessary_id] = $arr;
+            $menu[$d->menu_id]['necessary'][] = $arr;
             $arr_facility_id[] = $d->facility_id;
         }
         $obj = DB::table('t_facility')->whereIn('facility_id', $arr_facility_id)->get();
@@ -70,14 +62,24 @@ class MenuController extends Controller {
         foreach ($obj as $d) {
             $services[$d->service_id] = $d->service_name;
         }
+
         foreach ($menu as $menu_id => $d) {
-            foreach ($d['necessary'] as $necessary_id => $d2) {
-                $d['service'] = $services[$d2['service_id']] ?? '';
-                $d['facility'] = $facilitys[$d2['facility_id']] ?? '';
+            $final_end_min = 0;
+            foreach ($d['necessary'] as $k => $d2) {
+                $arr = [];
+                $arr['service'] = $services[$d2['service_id']] ?? '';
+                $arr['facility'] = $facilitys[$d2['facility_id']] ?? '';
+                $arr['start_minute'] = $d2['start_minute'];
+                $arr['end_minute'] = $d2['end_minute'];
+                $menu[$menu_id]['necessary'][$k] = $arr;
+                if ($final_end_min < $d2['end_minute']) {
+                    $final_end_min = $d2['end_minute'];
+                }
+                $menu[$menu_id]['final_end_min'] = $final_end_min;
             }
         }
         $obj = DB::table('t_facility')->whereIn('facility_id', $arr_facility_id)->get();
-
+//dd($menu);
         return view('hair_salon.menu', compact('menu','shops','group_id'));
     }
 }

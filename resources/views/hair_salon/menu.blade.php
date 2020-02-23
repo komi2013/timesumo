@@ -2,7 +2,7 @@
 <html>
   <head>
     <meta charset="UTF-8" />
-    <title>login</title>
+    <title>Menu Index</title>
     <meta name="google-site-verification" content="" />
 
     <link rel="shortcut icon" href="" />
@@ -34,21 +34,28 @@
 </div>
 <br>
 <?php foreach($menu as $menu_id => $d) { ?>
-<a href="/HairSalon/MenuEdit/edit/<?=$menu_id?>">
-<div style="width:93%; padding: 1%;">
-{{$d['menu_name']}}
-</div></a>
-    <?php foreach($d['necessary'] as $menu_necessary_id => $d2) { ?>
-        <div style="width:90%;padding: 1%;">
-            &nbsp;{{$d2['service']}}
-        </div>
-        <div style="width:90%;padding: 1%;">
-            &nbsp;{{$d2['facility']}}
-        </div>
-        <div style="width:90%;padding: 1%;">
-            &nbsp;<?=$d2['start_minute']?> - <?=$d2['end_minute']?>
-        </div>
+    <br>
+    <a href="/HairSalon/MenuEdit/edit/<?=$menu_id?>">
+      <div style="width:93%;">
+      {{$d['menu_name']}}
+      </div>
+    </a>
+    <?php foreach($d['necessary'] as $k => $d2) { ?>
+    <div style="width:90%;padding: 1%;">
+        &nbsp;{{$d2['service']}}
+    </div>
+    <div style="width:90%;padding: 1%;">
+        &nbsp;{{$d2['facility']}}
+    </div>
+    <div style="padding: 1%; background-color:green;
+         margin-left:<?= $d2['start_minute'] / $d['final_end_min'] * 99 ?>%;
+         width:<?= ($d2['end_minute'] - $d2['start_minute']) / $d['final_end_min'] * 95 ?>%;
+         ">
+        <?=$d2['end_minute'] - $d2['start_minute']?> minute
+    </div>
+    <div style="line-height: 10px;">&nbsp;</div>
     <?php } ?>
+    <div style="line-height: 10px;width:100%;border-bottom:1px solid silver; ">&nbsp;</div>
 <?php } ?>
 </div>
 <div id="ad_right"><iframe src="/htm/ad_right/" width="160" height="600" frameborder="0" scrolling="no"></iframe></div>
