@@ -18,51 +18,54 @@ class ShopUpdateController extends Controller {
 //        ,shop_name : $('#shop_name_'+g).val()
 //        ,seat : $('#seat_'+g).val()
 //        ,shampoo_seat : $('#shampoo_seat_'+g).val()
-//        ,perm_dry : $('#perm_dry_'+g).val()
+//        ,digital_perm : $('#digital_perm_'+g).val()
         if ($request->group_id > 0) {
 //            $usr_id = DB::select("select nextval('t_usr_usr_id_seq')")[0]->nextval;
             $arr_group_id = json_decode( $request->session()->get('group_ids'),true );
             if(in_array($request->group_id, $arr_group_id)){
-                DB::connection('salon')->table('t_shop')
+                DB::connection('salon')->beginTransaction();
+                DB::table('m_group')
                     ->where("group_id",$request->group_id)
                     ->update([
-                        "shop_name" => $request->shop_name
-                        ,"updated_at" => now()
+                        "group_name" => $request->shop_name
                     ]);
                 $obj = DB::table('t_facility')
                         ->where('group_id', $request->group_id)
                         ->get();
+                $salon_facility = new \App\Models\HairSalon\SalonFacility();
                 foreach ($obj as $d) {
-                    if ($d->facility_name == 'seat') {
+                    if (in_array($d->facility_name, $salon_facility->seat)) {
                         DB::table('t_facility')
                             ->where("facility_id",$d->facility_id)
                             ->update([
-                                "amount" => $request->seat
+                                "amount" => $request->seat_amount
                                 ,"updated_at" => now()
                             ]);
                     }
-                    if ($d->facility_name == 'shampoo_seat') {
+                    if (in_array($d->facility_name, $salon_facility->shampoo_seat)) {
                         DB::table('t_facility')
                             ->where("facility_id",$d->facility_id)
                             ->update([
-                                "amount" => $request->shampoo_seat
+                                "amount" => $request->shampoo_seat_amount
                                 ,"updated_at" => now()
                             ]);
                     }
-                    if ($d->facility_name == 'perm_dry') {
+                    if (in_array($d->facility_name, $salon_facility->digital_perm)) {
                         DB::table('t_facility')
                             ->where("facility_id",$d->facility_id)
                             ->update([
-                                "amount" => $request->perm_dry
+                                "amount" => $request->digital_perm_amount
                                 ,"updated_at" => now()
                             ]);
                     }
                 }
+                DB::connection('salon')->commit();
             } else {
                 //wow this guy try to do something
             }
         } else {
             $group_id = DB::select("select nextval('m_group_group_id_seq')")[0]->nextval;
+            DB::connection('salon')->beginTransaction();
             DB::table('m_group')->insert([
                 "group_id" => $group_id
                 ,"group_name" => $request->shop_name
@@ -76,26 +79,27 @@ class ShopUpdateController extends Controller {
             ]);
             DB::table('t_facility')->insert([
                 "group_id" => $group_id
-                ,"facility_name" => 'seat'
+                ,"facility_name" => $request->seat_name
                 ,"updated_at" => now()
-                ,"amount" => $request->seat
+                ,"amount" => $request->seat_amount
             ]);
-            if ($request->shampoo_seat > 0) {
+            if ($request->shampoo_seat_amount > 0) {
                 DB::table('t_facility')->insert([
                     "group_id" => $group_id
-                    ,"facility_name" => 'shampoo_seat'
+                    ,"facility_name" => $request->shampoo_seat_name
                     ,"updated_at" => now()
-                    ,"amount" => $request->shampoo_seat
+                    ,"amount" => $request->shampoo_seat_amount
                 ]);   
             }
-            if ($request->perm_dry > 0) {
+            if ($request->digital_perm_amount > 0) {
                 DB::table('t_facility')->insert([
                     "group_id" => $group_id
-                    ,"facility_name" => 'perm_dry'
+                    ,"facility_name" => $request->digital_perm_name
                     ,"updated_at" => now()
-                    ,"amount" => $request->perm_dry
+                    ,"amount" => $request->digital_perm_amount
                 ]);
             }
+            DB::connection('salon')->commit();
         }
         $res[0] = 1;
         die( json_encode($res) );

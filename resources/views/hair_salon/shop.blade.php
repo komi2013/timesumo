@@ -2,7 +2,7 @@
 <html>
   <head>
     <meta charset="UTF-8" />
-    <title>login</title>
+    <title>shop</title>
     <meta name="google-site-verification" content="" />
 
     <link rel="shortcut icon" href="" />
@@ -34,31 +34,31 @@
 
 <table style="width:100%;"><tbody>
     <tr style="height:50px;">
-        <td style="width:25%;text-align: center;"><?=__('hair_salon.seat')?></td>
-        <td style="width:74%;">
+        <td style="width:50%;text-align: center;" id="seat_name_<?=$group_id?>"><?=$d['seat']?></td>
+        <td style="width:49%;">
             <select id="seat_<?=$group_id?>" style="width:90%;height:30px;">
                 <?php $i = 1; while ($i < 21){?>
-                <option value="<?=$i?>" <?= $i==$d['seat'] ? 'selected' : ''?> ><?=$i?></option>
+                <option value="<?=$i?>" <?= $i==$d['seat_amount'] ? 'selected' : ''?> ><?=$i?></option>
                 <?php ++$i;}?>
             </select>
         </td>
     </tr>
     <tr style="height:50px;">
-        <td style="width:25%;text-align: center;"><?=__('hair_salon.shampoo_seat')?></td>
-        <td style="width:74%;">
+        <td style="width:50%;text-align: center;" id="shampoo_seat_name_<?=$group_id?>"><?=$d['shampoo_seat']?></td>
+        <td style="width:49%;">
             <select id="shampoo_seat_<?=$group_id?>" style="width:90%;height:30px;">
                 <?php $i = 0; while ($i < 5){?>
-                <option value="<?=$i?>" <?= $i==$d['shampoo_seat'] ? 'selected' : ''?> ><?=$i?></option>
+                <option value="<?=$i?>" <?= $i==$d['shampoo_seat_amount'] ? 'selected' : ''?> ><?=$i?></option>
                 <?php ++$i;}?>
             </select>
         </td>
     </tr>
     <tr style="height:50px;">
-    <td style="width:25%;text-align: center;"><?=__('hair_salon.perm_dry')?></td>
-        <td style="width:74%;">
-            <select id="perm_dry_<?=$group_id?>" style="width:90%;height:30px;">
+    <td style="width:50%;text-align: center;" id="digital_perm_name_<?=$group_id?>"><?=$d['digital_perm']?></td>
+        <td style="width:49%;">
+            <select id="digital_perm_<?=$group_id?>" style="width:90%;height:30px;">
                 <?php $i = 0; while ($i < 5){?>
-                <option value="<?=$i?>" <?= $i==$d['perm_dry'] ? 'selected' : ''?> ><?=$i?></option>
+                <option value="<?=$i?>" <?= $i==$d['digital_perm_amount'] ? 'selected' : ''?> ><?=$i?></option>
                 <?php ++$i;}?>
             </select>
         </td>
@@ -88,9 +88,12 @@ $('.submit').click(function(){
         _token : $('[name="csrf-token"]').attr('content')
         ,group_id : g
         ,shop_name : $('#shop_name_'+g).val()
-        ,seat : $('#seat_'+g).val()
-        ,shampoo_seat : $('#shampoo_seat_'+g).val()
-        ,perm_dry : $('#perm_dry_'+g).val()
+        ,seat_name : $('#seat_name_'+g).html()
+        ,seat_amount : $('#seat_'+g).val()
+        ,shampoo_seat_name : $('#shampoo_seat_name_'+g).html()
+        ,shampoo_seat_amount : $('#shampoo_seat_'+g).val()
+        ,digital_perm_name : $('#digital_perm_name_'+g).html()
+        ,digital_perm_amount : $('#digital_perm_'+g).val()
     }
     $.post('/HairSalon/ShopUpdate/',param,function(){},"json")
     .always(function(res){

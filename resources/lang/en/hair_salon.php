@@ -3,9 +3,9 @@
 return [
 
     'shop_name' => 'Shop Name',
-    'seat' => 'seat',
-    'shampoo_seat' => 'shampoo seat',
-    'perm_dry' => 'perm dry set',
+    'seat' => 'Seat',
+    'shampoo_seat' => 'Shampoo Seat',
+    'digital_perm' => 'Hot Rod',
     'shopNameError' => 'input 1 ~ 30 characters',
     'update' => 'update',
     'update_ok' => 'update successfully',
