@@ -17,8 +17,12 @@ class MenuEditController extends Controller {
 //        \Cookie::queue('lang', $lang);
 //        \App::setLocale($lang);
         $menu = DB::connection('salon')->table('t_menu')->where('menu_id',$menu_id)->first();
+        $shop_group = DB::connection('salon')->table('t_shop_group')
+                ->where('group_id',$menu->group_id)
+                ->where('usr_id',$usr_id)
+                ->first();
         $request->session()->put('group_id', $menu->group_id);
-        if (!in_array($usr_id,json_decode($menu->usr_ids,true))) {
+        if (!$shop_group->shop_group_id) {
             die("which menu are you ?");
             return redirect('/Auth/Sign/in/0/');
         }

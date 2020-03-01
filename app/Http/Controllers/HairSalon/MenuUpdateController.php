@@ -44,7 +44,6 @@ class MenuUpdateController extends Controller {
                 "menu_id" => $menu_id
                 ,"menu_name" => $request->menu_name
                 ,"group_id" => $group_id
-                ,"usr_ids" => json_encode($arr_usr_id)
             ]);
         }
         foreach ($request->necessary as $d) {
