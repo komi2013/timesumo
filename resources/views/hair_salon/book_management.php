@@ -11,7 +11,7 @@
     <link rel="stylesheet" href="/css/basic.css<?=config('my.cache_v')?>" />
     <link rel="stylesheet" href="/css/pc.css<?=config('my.cache_v')?>" media="only screen and (min-width : 711px)">
     <link rel="stylesheet" href="/css/sp.css<?=config('my.cache_v')?>" media="only screen and (max-width : 710px)">
-    <meta name="viewport" content="width=device-width, user-scalable=no" >
+
     <meta name="csrf-token" content="<?=csrf_token()?>" />
     
   </head>
@@ -60,7 +60,7 @@
     <?php  foreach ($days21 as $date => $d) {?>
         <?php $u = strtotime($date);?>
         <?php if(date('D',$u) == 'Sun' && date('H:i',$u) == $openTime){?> <tr> <?php }?>
-            <?php if(date('H:i',$u ) == '10:00'){?>  
+            <?php if(date('H:i',$u ) == $openTime){?>  
             <td border="0" date="<?=$date?>"> 
             <div class="day"><?=date('m-d',$u)?></div>                
             <?php }?>
@@ -76,8 +76,8 @@
                 
             </div>
             <?php if($d['available']) {?> </a> <?php } ?>
-            <?php if(date('H:i',$u ) == '21:50'){?> </td> <?php }?>
-        <?php if(date('D',$u) == 'Sat' && date('H:i',$u ) == '21:50'){?> </tr> <?php }?>
+            <?php if(date('H:i',$u ) == $closeTime){?> </td> <?php }?>
+        <?php if(date('D',$u) == 'Sat' && date('H:i',$u ) == $closeTime){?> </tr> <?php }?>
     <?php } ?>
 </table>
     <template v-for="(d,k) in detail">

@@ -1,7 +1,6 @@
 <?php
 
 return [
-
     'shop_name' => '店名',
     'seat' => '席',
     'shampoo_seat' => 'シャンプー台',
@@ -13,4 +12,16 @@ return [
     'menu_new' => 'この内容でメニューの追加登録',
     'menu_edit' => 'このメニューで更新',
     'serviceAdd' => '...サービスの追加',
+    'day0' => '日',
+    'day1' => '月',
+    'day2' => '火',
+    'day3' => '水',
+    'day4' => '木',
+    'day5' => '金',
+    'day6' => '土',
+    'advance' => '詳細',
+    'simple' => '基本',
+    'work' => '勤務',
+    'break' => '休憩',
+
 ];
