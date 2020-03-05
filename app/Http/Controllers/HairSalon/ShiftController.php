@@ -17,9 +17,8 @@ class ShiftController extends Controller {
 //        $usr_id = $request->session()->get('usr_id');
 //        \Cookie::queue('lang', $lang);
         \App::setLocale('ja');
-        $usr_id = 2;
+        $usr_id = 3;
         $group_id = 1;
-//        $usr = DB::table('t_usr')->where('usr_id',$usr_id)->first();
         $i = 0;
         while ($i < 7) {
             $arr['routine_id'] = 0;
@@ -36,6 +35,10 @@ class ShiftController extends Controller {
             } else {
                 $arr['shift_'.$i] = 'O';
             }
+            $Hstart = $arr['Hstart_'.$i];
+            $Hend = $arr['Hend_'.$i];
+            $Mstart = $arr['Mstart_'.$i];
+            $Mend = $arr['Mend_'.$i];
             ++$i;
         }
         $obj = DB::table('r_routine')
@@ -50,15 +53,23 @@ class ShiftController extends Controller {
             $start_time = $d->start_0;
             $end_time = $d->end_0;
             $break_start_time = $d->break_start_0;
-            $break_end_time = $d->break_end_0;
+            $break_end_time = $d->break_end_0;   
             while ($i < 7) {
                 $start = 'start_'.$i;
                 $end = 'end_'.$i;
                 $break_start = 'break_start_'.$i;
                 $break_end = 'break_end_'.$i;
-                if ($start_time != $d->$start OR $end_time != $d->$end OR
-                        $break_start_time != $d->$break_start OR $break_end_time != $d->$break_end) {
-                    $advance = true;
+                if ($d->$start) {
+                    if (  ($start_time AND $start_time != $d->$start)
+                       OR ($end_time AND $end_time != $d->$end )
+                       OR ($break_start_time AND $break_start_time != $d->$break_start)
+                       OR ($break_end_time AND $break_end_time != $d->$break_end) ) {
+                        $advance = true;
+                    }
+                    $start_time = $d->$start;
+                    $end_time = $d->$end;
+                    $break_start_time = $d->$break_start;
+                    $break_end_time = $d->$break_end;
                 }
                 $arr['H'.$start] = substr($d->$start, 0, 2);
                 $arr['H'.$end] = substr($d->$end, 0, 2);
@@ -70,6 +81,10 @@ class ShiftController extends Controller {
                 $arr['M'.$break_end] = substr($d->$break_end, 3, 2);
                 if ($d->$start) {
                     $arr['shift_'.$i] = 'O';
+                    $Hstart = $arr['H'.$start];
+                    $Hend = $arr['H'.$end];
+                    $Mstart = $arr['M'.$start];
+                    $Mend = $arr['M'.$end];
                 } else {
                     $arr['shift_'.$i] = 'X';
                 }
@@ -108,7 +123,8 @@ class ShiftController extends Controller {
         $minutes = json_encode($minutes);
         $week = json_encode($week);
         return view('hair_salon.shift_regular', 
-                compact('routine','startOption','endOption','minutes','week','advance'));
+                compact('routine','startOption','endOption','minutes','week','advance',
+                        'Hstart','Hend','Mstart','Mend'));
     }
 }
 

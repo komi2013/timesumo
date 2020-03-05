@@ -58,12 +58,12 @@
 <table>
     <tr>
         <td>
-            <select style="height:30px;">
+            <select style="height:30px;" v-on:change="startH" v-model="Hstart">
                 <template v-for="i in startOption" >
                 <option v-bind:value="i">{{i}}</option>
                 </template>
             </select>
-            <select style="height:30px;">
+            <select style="height:30px;" v-on:change="startM" v-model="Mstart">
                 <template v-for="i in minutes">
                 <option v-bind:value="i">{{i}}</option>
                 </template>
@@ -71,12 +71,12 @@
         </td>
         <td> ~ </td>
         <td>
-            <select style="height:30px;">
+            <select style="height:30px;" v-on:change="endH" v-model="Hend">
                 <template v-for="i in endOption">
                 <option v-bind:value="i">{{i}}</option>
                 </template>
             </select>
-            <select style="height:30px;">
+            <select style="height:30px;" v-on:change="endM" v-model="Mend">
                 <template v-for="i in minutes">
                 <option v-bind:value="i">{{i}}</option>
                 </template>
@@ -85,7 +85,7 @@
     </tr>
 </table>
 <table><tr><td>
-    <input type="submit" value="<?=__('hair_salon.update')?>">
+    <input type="submit" value="<?=__('hair_salon.update')?>" v-on:click="update">
 </td></tr></table>
 <table><tr><td>
     <a style="color: blue;" v-on:click="advanceToggle"> - - <?=__('hair_salon.advance')?> - - </a>
@@ -95,8 +95,9 @@
 <table v-show="advance">
     <template v-for="(d,k) in week" >
     <tr v-bind:class="routine[0]['shift_'+k]">
-        <td rowspan="2" v-on:click="toggle(k)">{{d}}</td>
-        <td v-on:click="toggle(k)"><?=__('hair_salon.work')?></td>
+        <td v-on:click="toggle(k)" v-show="!advance2">{{d}}</td>
+        <td rowspan="2" v-on:click="toggle(k)" v-show="advance2">{{d}}</td>
+        <td v-on:click="toggle(k)" v-show="advance2"><?=__('hair_salon.work')?></td>
         <td>
             <select style="height:30px;" v-model="routine[0]['Hstart_'+k]">
                 <template v-for="i in startOption">
@@ -123,7 +124,7 @@
             </select>
         </td>
     </tr>
-    <tr v-bind:class="routine[0]['shift_'+k]">
+    <tr v-bind:class="routine[0]['shift_'+k]" v-show="advance2">
         <td v-on:click="toggle(k)"><?=__('hair_salon.break')?></td>
         <td>
             <select style="height:30px;">
@@ -159,6 +160,9 @@
 <table v-show="advance"><tr><td>
     <a style="color: blue;" v-on:click="advanceToggle"> - - <?=__('hair_salon.simple')?> - - </a>
 </td></tr></table>
+<table v-show="advance && !advance2"><tr><td>
+    <a style="color: blue;" v-on:click="advance2Toggle"> - - <?=__('hair_salon.advance')?> - - </a>
+</td></tr></table>
 
 </div>
 <div id="ad_right"><iframe src="/htm/ad_right/" width="160" height="600" frameborder="0" scrolling="no"></iframe></div>
@@ -173,7 +177,12 @@ const app = new Vue({
     endOption: eval(<?=$endOption?>),
     minutes: eval(<?=$minutes?>),
     week: eval(<?=$week?>),
-    advance: <?=$advance?>,
+    advance: eval(<?=$advance?>),
+    advance2: false,
+    Hstart: '<?=$Hstart?>',
+    Hend: '<?=$Hend?>',
+    Mstart: '<?=$Mstart?>',
+    Mend: '<?=$Mend?>',
   },
   methods: {
     update: function (menu_id) {
@@ -195,15 +204,53 @@ const app = new Vue({
             this.$set(this.routine[0],['shift_'+k],'X');
         } else {
             this.$set(this.routine[0],['shift_'+k],'O');
+            if(!this.advance){
+                for (  var i = 0;  i < 7;  i++  ) {
+                    if(this.routine[0]['Hstart_'+i]){ var Hstart = this.routine[0]['Hstart_'+i]}
+                    if(this.routine[0]['Mstart_'+i]){ var Mstart = this.routine[0]['Mstart_'+i]}
+                    if(this.routine[0]['Hend_'+i]){ var Hend = this.routine[0]['Hend_'+i]}
+                    if(this.routine[0]['Mend_'+i]){ var Mend = this.routine[0]['Mend_'+i]}
+                }
+                this.$set(this.routine[0],['Hstart_'+k],Hstart);
+                this.$set(this.routine[0],['Mstart_'+k],Mstart);
+                this.$set(this.routine[0],['Hend_'+k],Hend);
+                this.$set(this.routine[0],['Mend_'+k],Mend);
+            }
+
         }
     },
     advanceToggle: function (e) {
         if(this.advance){
             this.advance = false;
+            this.advance2 = false;
         }else{
             this.advance = true;
         }
     },
+    advance2Toggle: function (e) {
+        this.advance2 = true;
+    },
+    startH: function (e) {
+        for (  var i = 0;  i < 7;  i++  ) {
+            this.$set(this.routine[0],['Hstart_'+i],e.target.value);
+        }
+    },
+    startM: function (e) {
+        for (  var i = 0;  i < 7;  i++  ) {
+            this.$set(this.routine[0],['Mstart_'+i],e.target.value);
+        }
+    },
+    endH: function (e) {
+        for (  var i = 0;  i < 7;  i++  ) {
+            this.$set(this.routine[0],['Hend_'+i],e.target.value);
+        }
+    },
+    endM: function (e) {
+        for (  var i = 0;  i < 7;  i++  ) {
+            this.$set(this.routine[0],['Mend_'+i],e.target.value);
+        }
+    },
+    
   },
   computed: {
 //    final_end_min() {
