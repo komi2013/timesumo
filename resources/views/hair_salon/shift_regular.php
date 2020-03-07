@@ -2,7 +2,7 @@
 <html>
   <head>
     <meta charset="UTF-8" />
-    <title>menu edit</title>
+    <title>shift regular</title>
     <link rel="shortcut icon" href="" />
 
     <script src="/plugin/jquery-3.4.0.min.js"></script>

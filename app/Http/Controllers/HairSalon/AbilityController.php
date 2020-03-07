@@ -18,19 +18,25 @@ class AbilityController extends Controller {
 //        \Cookie::queue('lang', $lang);
 //        \App::setLocale($lang);
 
-        $usr_id = 4;
+        $usr_id = 5;
         \App::setLocale('ja');
         Cookie::queue('areas',$areas, 60 * 24 * 365);
         $arr_area = explode(",", $areas);
         $obj = DB::connection('salon')->table('m_service')->whereIn('area',$arr_area)->get();
         $service = [];
         $key_area = [];
+        $i = 0;
         foreach ($obj as $d) {
             $arr['service_name'] = $d->service_name;
             $arr['area'] = $d->area;
-            $arr['ability'] = '';
+            if ( $i < 6 ) {
+                $arr['ability'] = 'ability';
+            } else {
+                $arr['ability'] = '';
+            }
             $service[$d->service_id] = $arr;
             $key_area[$d->area] = 1;
+            ++$i;
         }
         foreach ($key_area as $k => $d) {
             $area[] = $k;
