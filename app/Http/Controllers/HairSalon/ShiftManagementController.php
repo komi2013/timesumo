@@ -39,17 +39,15 @@ class ShiftManagementController extends Controller {
                 ++$i;
             }
         }
-        
-//        echo $openHour.'<br>';
-//        echo $closeHour.'<br>';
-//        echo date('w');
-//        die;
-        
 
         $openHour = strtotime(date('H:00:00',$openHour));
         if (date('H:00:00',$closeHour) != date('H:i:s',$closeHour)) {
             $closeHour = strtotime(date('H:00:00',$closeHour)) + (60 * 60); // 1 hour
+
         }
+        $openTime = date('H:00',$openHour);
+        $closeTime = $closeHour - (60 * 10); 
+        $closeTime = date('H:i',$closeTime);
 
         $frameDate->setTime(date('H',$openHour), 0, 0);
         $days7 = [];
@@ -73,6 +71,7 @@ class ShiftManagementController extends Controller {
         $obj = DB::table('r_routine')->where('group_id',$group_id)->get();
         $i = 0;
         $arr_usr_id = [];
+        $max = 0;
         foreach ($obj as $d) {
             $i = 0;
             while ($i < 7) {
@@ -84,6 +83,10 @@ class ShiftManagementController extends Controller {
                     while ($start < $end) {
 //                        echo '<pre>'; var_dump('start_'.$i.' '.$start->format('H:i:s')); echo '</pre>';
                         $days7['start_'.$i.' '.$start->format('H:i:s')][] = $d->usr_id;
+                        
+                        if ( $max < count($days7['start_'.$i.' '.$start->format('H:i:s')]) ) {
+                            $max = count($days7['start_'.$i.' '.$start->format('H:i:s')]);
+                        }
                         $start->addSecond(60 * 10);
                     }   
                 }
@@ -98,7 +101,8 @@ class ShiftManagementController extends Controller {
         }
         $usr_ids = json_encode($usr_ids);
 //        dd($days7);
-        return view('hair_salon.shift_management', compact('days7','usr_ids'));
+        return view('hair_salon.shift_management', 
+                compact('days7','usr_ids','openTime','closeTime','max'));
     }
 }
 
