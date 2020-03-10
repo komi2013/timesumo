@@ -23,5 +23,7 @@ return [
     'simple' => '基本',
     'work' => '勤務',
     'break' => '休憩',
+    'delete' => '削除',
+    'customer' => 'お客様',
 
 ];

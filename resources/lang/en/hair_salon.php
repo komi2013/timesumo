@@ -24,4 +24,6 @@ return [
     'simple' => 'simple',
     'work' => 'work',
     'break' => 'break',
+    'delete' => 'delete',
+    'customer' => 'customer',
 ];
