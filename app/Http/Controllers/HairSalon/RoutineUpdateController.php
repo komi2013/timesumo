@@ -35,8 +35,8 @@ class RoutineUpdateController extends Controller {
             ++$i;
         }
         if ($request->session()->get('routine_id') > 0) {
-            DB::beginTransaction();
-            DB::table('r_routine')
+            DB::connection('shift')->beginTransaction();
+            DB::connection('shift')->table('r_routine')
                 ->where('usr_id',$usr_id)
                 ->where('group_id',$group_id)
                 ->update($arr);
@@ -44,9 +44,9 @@ class RoutineUpdateController extends Controller {
             DB::beginTransaction();
             $arr['usr_id'] = $usr_id;
             $arr['group_id'] = $group_id;
-            DB::table('r_routine')->insert($arr);
+            DB::connection('shift')->table('r_routine')->insert($arr);
         }
-        DB::commit();
+        DB::connection('shift')->commit();
         $res[0] = 1;
         die( json_encode($res) );
     }

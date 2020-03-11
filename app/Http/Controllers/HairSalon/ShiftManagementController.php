@@ -22,7 +22,7 @@ class ShiftManagementController extends Controller {
         $today = Carbon::today();
         $frameDate = Carbon::createFromDate($today->year, $today->month, $today->startOfWeek()->format('d'));
         
-        $obj = DB::table('r_routine')->where('group_id',$group_id)->get();
+        $obj = DB::connection('shift')->table('r_routine')->where('group_id',$group_id)->get();
         $openHour = strtotime('23:59:59');
         $closeHour = strtotime('00:00:00');
         foreach ($obj as $d) {
@@ -68,7 +68,7 @@ class ShiftManagementController extends Controller {
             ++$i;
         }
 
-        $obj = DB::table('r_routine')->where('group_id',$group_id)->get();
+        $obj = DB::connection('shift')->table('r_routine')->where('group_id',$group_id)->get();
         $i = 0;
         $arr_usr_id = [];
         $max = 0;
