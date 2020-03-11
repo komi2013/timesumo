@@ -2,7 +2,7 @@
 <html>
   <head>
     <meta charset="UTF-8" />
-    <title>book management</title>
+    <title>book</title>
     <link rel="shortcut icon" href="" />
 
     <script src="/plugin/jquery-3.4.0.min.js"></script>

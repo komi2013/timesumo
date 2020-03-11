@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
-class BookManagementController extends Controller {
+class BookController extends Controller {
 
     public function index(Request $request, $directory=null, $controller=null,
             $action=null, $menu_id='', $language='') {
@@ -118,7 +118,7 @@ class BookManagementController extends Controller {
         $today = date('Y-m-d');
         $openTime = $openHour.':00';
         $closeTime = $closeHour - 1 .':50';
-        return view('hair_salon.book_management', compact('days21','today','menu_id','openTime','closeTime'));
+        return view('hair_salon.book', compact('days21','today','menu_id','openTime','closeTime'));
     }
 }
 
