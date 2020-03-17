@@ -9,14 +9,25 @@ use Carbon\Carbon;
 class BookController extends Controller {
 
     public function index(Request $request, $directory=null, $controller=null,
-            $action=null, $menu_id='', $language='') {
+            $action=null, $menu_id='', $staff=0) {
 //        if (!$request->session()->get('usr_id')) {
 //            return redirect('/Auth/Sign/in/0/');
 //        }
         $usr_id = $request->session()->get('usr_id');
         $usr_id = 1;
 //        \Cookie::queue('lang', $lang);
+        $group_id = 1;
         \App::setLocale('ja');
+        $menu = DB::connection('salon')->table('t_menu')->where('menu_id', $menu_id)->first();
+        if ($staff > 0) {
+            if ($menu->group_id != $group_id) {
+                die('you are not staff');
+            }
+            $customer = '';
+        } else {
+            $customer = \Cookie::get('usr_name');
+        }
+
         $today = Carbon::today();
 //        $today = $month ? Carbon::parse($month.date('-d')) : Carbon::today();
         Carbon::setWeekStartsAt(Carbon::SUNDAY);
@@ -55,8 +66,8 @@ class BookController extends Controller {
             while ($hour < $closeHour) {
                 $frame = 0;
                 while ($frame < 6) {
-                    $required['j'] = $frameDate->format('j');
-                    $required['day'] = $frameDate->format('D');
+//                    $required['j'] = $frameDate->format('j');
+//                    $required['day'] = $frameDate->format('D');
                     $required['available'] = false;
                     $days21[$frameDate->format('Y-m-d H:i:s')] = $required;
                     $frameDate->addSecond(60 * 10);
@@ -98,6 +109,7 @@ class BookController extends Controller {
         }
         foreach ($days21 as $date => $d) {
             $available = true;
+            $end_minute = 0;
             foreach ($necessary as $d2) {
                 $start = new Carbon($date);
                 $start->addSecond(60 * $d2['start_minute']);
@@ -111,6 +123,9 @@ class BookController extends Controller {
                     $start->addSecond(60 * 10);
                     $i = $i + 10;
                 }
+                if ($end_minute < $d2['end_minute']) {
+                    $end_minute = $d2['end_minute'];
+                }
             }
             $days21[$date]['available'] = $available;
         }
@@ -118,7 +133,8 @@ class BookController extends Controller {
         $today = date('Y-m-d');
         $openTime = $openHour.':00';
         $closeTime = $closeHour - 1 .':50';
-        return view('hair_salon.book', compact('days21','today','menu_id','openTime','closeTime'));
+        return view('hair_salon.book', 
+            compact('days21','today','menu_id','openTime','closeTime','menu','end_minute','staff','customer'));
     }
 }
 
