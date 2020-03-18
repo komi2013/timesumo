@@ -13,7 +13,7 @@ class RoutineUpdateController extends Controller {
     public function lessuri(Request $request, $directory=null, $controller=null,
             $action=null, $one='', $two='') {
         $usr_id = $request->session()->get('usr_id');
-        $usr_id = 3;
+        $usr_id = 4;
         $group_id = 1;
 
         $r = $request->routine;

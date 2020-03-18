@@ -17,7 +17,7 @@ class ShiftController extends Controller {
 //        $usr_id = $request->session()->get('usr_id');
 //        \Cookie::queue('lang', $lang);
         \App::setLocale('ja');
-        $usr_id = 3;
+        $usr_id = 4;
         $group_id = 1;
         $i = 0;
         while ($i < 7) {

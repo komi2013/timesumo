@@ -24,10 +24,6 @@
         text-align: center;
         height : 50px;
     }
-/*    .O {
-        background-color: greenyellow;
-        opacity:0.1;
-    }*/
     .X {
         background-color: gray;
         opacity: 0.2;
@@ -84,9 +80,6 @@
         </td>
     </tr>
 </table>
-<table><tr><td>
-    <input type="submit" value="<?=__('hair_salon.update')?>" v-on:click="update">
-</td></tr></table>
 <table><tr><td>
     <a style="color: blue;" v-on:click="advanceToggle"> - - <?=__('hair_salon.advance')?> - - </a>
 </td></tr></table>
@@ -154,15 +147,21 @@
     </tr>
     </template>
 </table>
-<table v-show="advance"><tr><td>
-    <input type="submit" value="<?=__('hair_salon.update')?>" v-on:click="update">
-</td></tr></table>
+
 <table v-show="advance"><tr><td>
     <a style="color: blue;" v-on:click="advanceToggle"> - - <?=__('hair_salon.simple')?> - - </a>
 </td></tr></table>
 <table v-show="advance && !advance2"><tr><td>
     <a style="color: blue;" v-on:click="advance2Toggle"> - - <?=__('hair_salon.advance')?> - - </a>
 </td></tr></table>
+
+<div style="width:100%;text-align: center;">
+    <input type="submit" value="<?=__('hair_salon.update')?>" class="column1" v-on:click="update">
+</div>
+
+<div style="width:100%;text-align: center;">
+    <input type="submit" value="<?=__('hair_salon.shiftAdd')?>" class="column1" v-on:click="shiftAdd">
+</div>
 
 </div>
 <div id="ad_right"><iframe src="/htm/ad_right/" width="160" height="600" frameborder="0" scrolling="no"></iframe></div>
@@ -192,7 +191,20 @@ const app = new Vue({
         }
         $.post('/HairSalon/RoutineUpdate/',param,function(){},"json")
         .always(function(res){
-            if(res[0]){
+            if(res[0] == 1){
+                location.href = '';
+            }else{
+                alert('system error');
+            }
+        });
+    },
+    shiftAdd: function (e) {
+        var param = {
+            _token : $('[name="csrf-token"]').attr('content')
+        }
+        $.post('/HairSalon/ShiftAdd/',param,function(){},"json")
+        .always(function(res){
+            if(res[0] == 1){
                 location.href = '';
             }else{
                 alert('system error');
@@ -250,7 +262,6 @@ const app = new Vue({
             this.$set(this.routine[0],['Mend_'+i],e.target.value);
         }
     },
-    
   },
   computed: {
 //    final_end_min() {

@@ -26,4 +26,5 @@ return [
     'break' => 'break',
     'delete' => 'delete',
     'customer' => 'customer',
+    'shiftAdd' => 'add this shift',
 ];

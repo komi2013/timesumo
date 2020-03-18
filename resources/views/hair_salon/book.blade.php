@@ -89,7 +89,6 @@
             <td border="0"> 
             <div class="day"><?=date('m/d',$u)?> <?=__('hair_salon.day'.date('w',$u))?></div>                
             <?php }?>
-            <?php if($d['available']) {?> <a href="/HairSalon/Booking/<?=$menu_id?>/<?=$u?>/"> <?php } ?>
             <div date="<?=date('m/d',$u)?> <?=__('hair_salon.day'.date('w',$u))?>"
                  unix="<?=$u?>"
                  start="<?=date('H:i',$u)?>" end="<?=date('H:i',($u + 60 * $end_minute))?>"
@@ -103,7 +102,6 @@
                 >
                 
             </div>
-            <?php if($d['available']) {?> </a> <?php } ?>
             <?php if(date('H:i',$u ) == $closeTime){?> </td> <?php }?>
         <?php if(date('D',$u) == 'Sat' && date('H:i',$u ) == $closeTime){?> </tr> <?php }?>
     <?php } ?>

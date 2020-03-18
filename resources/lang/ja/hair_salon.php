@@ -25,5 +25,6 @@ return [
     'break' => '休憩',
     'delete' => '削除',
     'customer' => 'お客様',
+    'shiftAdd' => 'シフトの追加',
 
 ];

@@ -27,13 +27,14 @@ class BookController extends Controller {
         } else {
             $customer = \Cookie::get('usr_name');
         }
-
+        $shop = DB::connection('salon')->table('t_shop')->where('group_id', $group_id)->first();
+        
         $today = Carbon::today();
 //        $today = $month ? Carbon::parse($month.date('-d')) : Carbon::today();
         Carbon::setWeekStartsAt(Carbon::SUNDAY);
         Carbon::setWeekEndsAt(Carbon::SATURDAY);
         $frameDate = Carbon::createFromDate($today->year, $today->month, $today->startOfWeek()->format('d'));
-        $openHour = 10;
+        $openHour = substr($shop->open_time,0,2);
         $frameDate->setTime($openHour, 0, 0);
         $begin = $frameDate->format('Y-m-d H:00:00');
         $obj = DB::connection('salon')->table('t_menu_necessary')->where('menu_id', $menu_id)->get();
@@ -60,7 +61,10 @@ class BookController extends Controller {
         }
         $days21 = [];
         $i = 0;
-        $closeHour = 22;
+        $closeHour = substr($shop->close_time,0,2);
+        if (substr($shop->close_time,3,2) != '00') {
+            ++$closeHour;
+        }
         while ($i < 21) {
             $hour = $openHour;
             while ($hour < $closeHour) {
@@ -95,14 +99,16 @@ class BookController extends Controller {
             while ($start->lte($end)) {
                 $startI = floor($start->format('i')/10) * 10;
                 $k = $start->format('Y-m-d H:').str_pad($startI, 2, 0, STR_PAD_LEFT).':00';
-                if (in_array($d->usr_id,$arr_facility_id)) {
-                    --$days21[$k]['facility_'.$d->usr_id];
-//                    var_dump($k);
-//                    echo 'komatsu<br>';
-                } else {
-                    foreach ($ability[$d->usr_id] as $service_id) {
-                        ++$days21[$k]['service_'.$service_id];
-                    }
+                if (isset($days21[$k])) {
+                    if (in_array($d->usr_id,$arr_facility_id)) {
+                        --$days21[$k]['facility_'.$d->usr_id];
+    //                    var_dump($k);
+    //                    echo 'komatsu<br>';
+                    } else {
+                        foreach ($ability[$d->usr_id] as $service_id) {
+                            ++$days21[$k]['service_'.$service_id];
+                        }
+                    }   
                 }
                 $start->addSecond(60 * 10);
             }
@@ -129,7 +135,6 @@ class BookController extends Controller {
             }
             $days21[$date]['available'] = $available;
         }
-//dd($days21);
         $today = date('Y-m-d');
         $openTime = $openHour.':00';
         $closeTime = $closeHour - 1 .':50';
