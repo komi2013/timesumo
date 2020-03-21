@@ -51,6 +51,15 @@
             line-height: 12px;
             margin-left: -2px;
         }
+        .sunday {
+            width: 100px;
+            height: 30px;
+            border-right-style: solid;
+            border-width: thin;
+            line-height: 12px;
+            margin-left: -2px;
+            border-left-style: solid;
+        }
         .hour {
             border-bottom-style: dotted;
             border-bottom-color: silver;
@@ -92,14 +101,14 @@
             <div date="<?=date('m/d',$u)?> <?=__('hair_salon.day'.date('w',$u))?>"
                  unix="<?=$u?>"
                  start="<?=date('H:i',$u)?>" end="<?=date('H:i',($u + 60 * $end_minute))?>"
-                class="min10 
+                class="<?= date('D',$u) == 'Sun' ? 'sunday' : 'min10'?> 
                 <?php if(date('H:i',$u ) == $closeTime){
                     echo 'closeTime';
                 }else if(date('i',$u ) == '50'){
                     echo 'hour';
                 } ?>
-                <?=$d['available'] ? 'available' : 'unavailable'?>" 
-                >
+                <?=$d['available'] ? 'available' : 'unavailable'?>
+                ">
                 
             </div>
             <?php if(date('H:i',$u ) == $closeTime){?> </td> <?php }?>
@@ -113,7 +122,7 @@
 <script>
 
 //let target = document.getElementById('content');
-$('.min10').click(function(){
+$('.available').click(function(){
     var check = $('#menu_name').html()+"\r\n";
     check = check + $(this).attr('date')+"\r\n";
     check = check + $(this).attr('start');
@@ -133,7 +142,7 @@ $('.min10').click(function(){
         $.post('/HairSalon/BookUpdate/',param,function(){},"json")
         .always(function(res){
             if(res[0] == 1){
-    //            location.href = '/HairSalon/Cancel/index/';
+                location.href = '';
             }else{
                 alert('system error');
             }
