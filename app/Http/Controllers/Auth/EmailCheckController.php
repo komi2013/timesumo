@@ -16,8 +16,7 @@ class EmailCheckController extends Controller {
         if (isset($obj->usr_id) AND Hash::check($request->password, $obj->password)) {
             $login = true;
             $request->session()->put('usr_id', $obj->usr_id);
-            $authRedirect = new \App\Models\Auth\Redirect();
-            $redirect = $authRedirect->arr[$request->cookie('after_signin')] ?? '/';
+            $redirect = $request->cookie('redirect');
         } else {
             $login = false;
             $redirect = '/';

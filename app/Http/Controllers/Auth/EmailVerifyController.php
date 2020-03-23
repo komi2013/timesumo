@@ -8,10 +8,9 @@ use Illuminate\Support\Facades\Hash;
 
 class EmailVerifyController extends Controller {
 
-    public function code(Request $request, $directory=null, $controller=null,
-            $action=null, $auth) {
-        $lang = $request->cookie('lang') ?? 'en';
-        \App::setLocale($lang);
+    public function code(Request $request, $directory=null, $controller=null,$action=null,
+            $auth) {
+        \App::setLocale($request->cookie('lang'));
         if ($auth != session('email_auth')) {
             return view('errors.404');
         }
@@ -40,14 +39,9 @@ class EmailVerifyController extends Controller {
             ]);
             $message = __('email_verify.registered');
         }
-//        if (Hash::check('komatsu', $test)) {
-//            echo 'ok';
-//        } else {
-//            echo 'false';
-//        }
+
         $request->session()->put('usr_id', $usr_id);
-        $authRedirect = new \App\Models\Auth\Redirect();
-        $redirect = $authRedirect->arr[$request->cookie('after_signin')] ?? '/';
+        $redirect = $request->cookie('redirect') ?? '/';
         return view('auth.email_complete', compact('redirect','message'));
     }
 }

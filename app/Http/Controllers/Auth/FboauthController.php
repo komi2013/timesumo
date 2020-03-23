@@ -11,8 +11,6 @@ class FboauthController extends Controller {
     public function lessuri(Request $request, $page) {
         $client_id = '593374818166961';
         $client_secret = 'f38fea9ea17bf1e769748e90f1fc1231';
-//    'fb_id' => '430706947760829',
-//    'fb_secret' => 'd9f112f5c9af5535aea1f68dad3bd300',
         $fb_url = 'https://graph.facebook.com/oauth/access_token?';
         $redirect_uri = 'redirect_uri=https://'.$_SERVER['HTTP_HOST'].'/Auth/Fboauth/&';
 
@@ -21,9 +19,6 @@ class FboauthController extends Controller {
 
         $contents = file_get_contents('https://graph.facebook.com/me?access_token='.$contents['access_token']);
         $contents = json_decode($contents);
-//        dd($contents);
-//  +"name": "Seigi Komatsu"
-//  +"id": "10216221617110572"
 
         $obj = DB::table('t_usr')
                 ->where('oauth_type',2)
@@ -44,23 +39,7 @@ class FboauthController extends Controller {
         }
         $request->session()->put('usr_id', $usr_id);
 
-        $redirect = '/Calendar/Top/index/';
-
-        if ($request->session()->put('after_signin') == 1) {
-            $obj = DB::connection('salon')->table('m_skill')
-                    ->where('usr_id',$usr_id)
-                    ->first();
-            if (isset($obj->usr_id)) {
-//                $obj = DB::connection('salon')->table('m_skill')
-//                    ->where('usr_id',$usr_id)
-//                    ->first();
-            } else {
-                $redirect = '/HairSalon/Dresser/index/';
-            }
-            //check hairdresser usr id,
-            //check group id
-        }
-
+        $redirect = $request->cookie('redirect') ?? '/';
 
         return redirect($redirect);
     }

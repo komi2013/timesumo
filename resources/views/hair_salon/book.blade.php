@@ -13,9 +13,6 @@
     
   </head>
 <body>
-
-
-
     <style>
         body {
             width:1180px;
@@ -84,6 +81,8 @@
             z-index: 2;
         }
     </style>
+<?php $this_page = 'hi';?>
+<?=view('header_left',compact('this_page'));?>
 <table id="drawer">
   <tr><td id="ad_menu"><iframe src="/htm/ad_menu/" width="300" height="250" frameborder="0" scrolling="no"></iframe></td></tr>
 </table>
