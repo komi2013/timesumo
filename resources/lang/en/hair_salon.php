@@ -27,4 +27,5 @@ return [
     'delete' => 'delete',
     'customer' => 'customer',
     'shiftAdd' => 'add this shift',
+    'date' => 'd M',
 ];

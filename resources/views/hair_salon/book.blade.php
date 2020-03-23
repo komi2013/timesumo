@@ -89,14 +89,14 @@
 </table>
 <div id="content">
 <p id="menu_name"><?=$menu->menu_name?></p>
-<input type="text" value="<?=$customer?>" placeholder="<?=__('hair_salon.customer')?>" id="customer">
+<?php if($staff){ ?><input type="text" value="<?=$customer?>" placeholder="<?=__('hair_salon.customer')?>" id="customer"><?php } ?>
 <table>
     <?php  foreach ($days21 as $date => $d) {?>
         <?php $u = strtotime($date);?>
         <?php if(date('D',$u) == 'Sun' && date('H:i',$u) == $openTime){?> <tr> <?php }?>
             <?php if(date('H:i',$u ) == $openTime){?>  
             <td border="0"> 
-            <div class="day"><?=date('m/d',$u)?> <?=__('hair_salon.day'.date('w',$u))?></div>                
+            <div class="day"><?=date(__('hair_salon.date'),$u)?> <?=__('hair_salon.day'.date('w',$u))?></div>                
             <?php }?>
             <div date="<?=date('m/d',$u)?> <?=__('hair_salon.day'.date('w',$u))?>"
                  unix="<?=$u?>"

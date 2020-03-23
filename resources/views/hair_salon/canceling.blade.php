@@ -62,7 +62,7 @@ $('.cancel').click(function(){
     $.post('/HairSalon/CancelUpdate/',param,function(){},"json")
     .always(function(res){
         if(res[0] == 1){
-//            location.href = '/HairSalon/Cancel/index/';
+            location.href = '/HairSalon/Cancel/index/';
         }else{
             alert('system error');
         }

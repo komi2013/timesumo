@@ -45,26 +45,41 @@
         }
         table td {
             border-width: 0px;
-            max-width: 100px;
+            width : 100px;
+            max-width: 200px;
+            border-right-style: solid;
+            border-bottom-style: solid;
+            border-width: thin;
+            line-height: 20px;
+            margin-left: -2px;
+            height: 30px;
+        }
+        .sunday {
+            border-width: 0px;
+            width : 100px;
+            max-width: 200px;
+            border-right-style: solid;
+            border-bottom-style: solid;
+            border-width: thin;
+            line-height: 20px;
+            margin-left: -2px;
+            height: 30px;
+            border-left-style: solid;
         }
     </style>
 <table id="drawer">
   <tr><td id="ad_menu"><iframe src="/htm/ad_menu/" width="300" height="250" frameborder="0" scrolling="no"></iframe></td></tr>
 </table>
 <div id="content">
-    
+<br>
 <table>
     <?php foreach ($days21 as $date => $d) {?>
         <?php $u = strtotime($date.' 00:00:00');?>
         <?php if(date('D',$u) == 'Sun'){?>
         <tr>
-            <?php $i = 0; while($i < 7){ ?>
-            <th><?=__('hair_salon.day'.$i)?></th>
-            <?php ++$i;} ?>
-        </tr>
-        <tr>
         <?php }?>
-        <td>
+        <td class="<?= date('D',$u) == 'Sun' ? 'sunday' : ''?> ">
+            <div class="day"><?=date(__('hair_salon.date'),$u)?> <?=__('hair_salon.day'.date('w',$u))?></div> 
             <?php foreach($d as $k2 => $d2){?>
             <a href="/HairSalon/Canceling/index/<?=$k2?>/">
             <?=$d2?>

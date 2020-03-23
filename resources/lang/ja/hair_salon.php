@@ -26,5 +26,6 @@ return [
     'delete' => '削除',
     'customer' => 'お客様',
     'shiftAdd' => 'シフトの追加',
-
+    'date' => 'm/d',
+    
 ];

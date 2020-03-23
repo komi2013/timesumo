@@ -9,17 +9,18 @@ use Carbon\Carbon;
 class CancelingController extends Controller {
 
     public function index(Request $request, $directory=null, $controller=null,
-            $action=null, $schedule_id='', $language='') {
+            $action=null, $schedule_id='') {
 //        if (!$request->session()->get('usr_id')) {
 //            return redirect('/Auth/Sign/in/0/');
 //        }
         $usr_id = $request->session()->get('usr_id');
         $usr_id = 1;
-        $group_id = 1;
+        $group_id = 6;
         \App::setLocale('ja');
         
         $obj = DB::table('t_schedule')->where('schedule_id',$schedule_id)->get();
         $access_right = false;
+        $arr_customer = [];
         foreach ($obj as $d) {
             if ($d->tag != 7) {
                 if ($d->tag == 4) {

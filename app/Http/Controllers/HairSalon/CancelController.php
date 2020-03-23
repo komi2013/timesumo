@@ -9,13 +9,13 @@ use Carbon\Carbon;
 class CancelController extends Controller {
 
     public function index(Request $request, $directory=null, $controller=null,
-            $action=null, $menu_id='', $language='') {
+            $action=null) {
 //        if (!$request->session()->get('usr_id')) {
 //            return redirect('/Auth/Sign/in/0/');
 //        }
         $usr_id = $request->session()->get('usr_id');
         $usr_id = 1;
-        $group_id = 1;
+        $group_id = 6;
         \App::setLocale('ja');
         Carbon::setWeekStartsAt(Carbon::SUNDAY);
         Carbon::setWeekEndsAt(Carbon::SATURDAY);
@@ -45,8 +45,9 @@ class CancelController extends Controller {
                 ->where('time_start','>=',date('Y-m-d ').$shop->open_time)
                 ->where('time_end','<=',$frameDate->format('Y-m-d ').$shop->close_time)
                 ->where('group_id',$group_id)
-                ->where('tag',6)
+                ->where('tag',4)
                 ->orderBy('time_start','ASC')->get();
+//        dd(json_decode($obj,true));
         foreach ($obj as $d) {
             
             $days21[substr($d->time_start,0,10)][$d->schedule_id] = substr($d->time_start,11,5).' '.$d->title;
