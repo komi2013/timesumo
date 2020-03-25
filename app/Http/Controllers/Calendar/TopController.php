@@ -8,10 +8,9 @@ use Carbon\Carbon;
 
 class TopController extends Controller {
 
-    public function index(Request $request, $directory=null, $controller=null, 
-            $action=null, $month=null) {
+    public function index(Request $request, $directory=null, $controller=null,$action=null,
+            $month=null) {
         
-        $today = Carbon::today();
         $today = $month ? Carbon::parse($month.date('-d')) : Carbon::today();
         $month = $today->format('Y-m');
 
@@ -55,7 +54,7 @@ class TopController extends Controller {
                 $arr_35days[$k] = $d;
             }
         }
-        $today = date('Y-m-d');
+
         return view('calendar.top', compact('arr_35days','month','today'));
         
     }

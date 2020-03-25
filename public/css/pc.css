@@ -6,10 +6,13 @@ body {
   width: 480px;
   float:left;
 }
-#menu{
+#menu_button{
   display: none;
 }
-#header {
+#menu_td{
+  width: 300px;
+}
+#head_menu {
   width: 790px;
   height: 50px;
 }

@@ -31,7 +31,7 @@ class MyController extends Controller {
         }
         $end = $tempDate->format('Y-m-d 00:00:00');
         $bind = [
-            'usr_id' => 2
+            'usr_id' => 4
             ,'begin' => $begin
             ,'end' => $end
         ];

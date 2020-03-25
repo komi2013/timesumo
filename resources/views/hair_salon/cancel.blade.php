@@ -11,7 +11,7 @@
     <link rel="stylesheet" href="/css/basic.css<?=config('my.cache_v')?>" />
     <link rel="stylesheet" href="/css/pc.css<?=config('my.cache_v')?>" media="only screen and (min-width : 711px)">
     <link rel="stylesheet" href="/css/sp.css<?=config('my.cache_v')?>" media="only screen and (max-width : 710px)">
-
+    <meta name="viewport" content="width=device-width, user-scalable=no" >
     <meta name="csrf-token" content="<?=csrf_token()?>" />
     
   </head>
@@ -20,7 +20,7 @@
 
 
     <style>
-        body {
+/*        body {
             width:1180px;
         }
         #drawer {
@@ -39,51 +39,84 @@
             margin: 0px 0px 0px 10px;
             width: 160px;
             float:left;
-        }
+        }*/
         table {
             border-collapse: collapse;
         }
-        table td {
-            border-width: 0px;
-            width : 100px;
-            max-width: 200px;
+        .day_th {
+            border-style: solid solid solid none;
+            border-width: 1px;
+            border-color: silver;
+            font-size: 10px;
+            width : 7%;
+        }
+        .sunday_th {
+            border-style: solid;
+            border-width: 1px;
+            border-color: silver;
+            font-size: 10px;
+            width : 7%;
+        }
+        .weekday {
             border-right-style: solid;
             border-bottom-style: solid;
-            border-width: thin;
+            border-color: silver;
+            border-width: 1px;
             line-height: 20px;
-            margin-left: -2px;
             height: 30px;
+            font-size: 10px;
         }
         .sunday {
-            border-width: 0px;
-            width : 100px;
-            max-width: 200px;
             border-right-style: solid;
             border-bottom-style: solid;
-            border-width: thin;
+            border-color: silver;
+            border-width: 1px;
             line-height: 20px;
-            margin-left: -2px;
             height: 30px;
             border-left-style: solid;
+            font-size: 10px;
         }
     </style>
+
+<table id="head_menu" style="width: 100%;">
+<tr>
+  <td id="menu_td">
+    <img src="/img/icon/menu.png" class="icon" id="menu_button">
+  </td>
+  <td style="text-align: center;">
+    2020 3
+  </td>
+  <td style="text-align:center;width:25%;">
+    <a href="/"><img src="/img/icon/home.png" class="icon"></a>
+  </td>
+  </tr>
+</table>
+
 <table id="drawer">
   <tr><td id="ad_menu"><iframe src="/htm/ad_menu/" width="300" height="250" frameborder="0" scrolling="no"></iframe></td></tr>
+  <tr><td style="text-align: center;" >
+    <a href="/HairSalon/Ability/"> ability </a></td></tr>
 </table>
+
 <div id="content">
-<br>
-<table>
+<table style="width:100%;">
+    <thead><tr>
+        <th class="sunday_th"><?=__('hair_salon.day0')?></th>
+    <?php $i = 1; while($i < 7){ ?>
+        <th class="day_th"><?=__('hair_salon.day'.$i)?></th>
+    <?php ++$i; } ?>
+    </tr></thead>
     <?php foreach ($days21 as $date => $d) {?>
         <?php $u = strtotime($date.' 00:00:00');?>
         <?php if(date('D',$u) == 'Sun'){?>
         <tr>
         <?php }?>
-        <td class="<?= date('D',$u) == 'Sun' ? 'sunday' : ''?> ">
-            <div class="day"><?=date(__('hair_salon.date'),$u)?> <?=__('hair_salon.day'.date('w',$u))?></div> 
+        <td class="<?= date('D',$u) == 'Sun' ? 'sunday' : 'weekday'?>" <?=count($d)? 'style="width:14%;"' : '' ?> >
+            <div style="text-align: center;"><?=date('d',$u)?></div>
             <?php foreach($d as $k2 => $d2){?>
-            <a href="/HairSalon/Canceling/index/<?=$k2?>/">
-            <?=$d2?>
-            </a><br>
+                <div><a href="/HairSalon/Canceling/index/<?=$k2?>/">
+                <?=$d2?>
+                </a></div>
             <?php } ?>
         </td>
         <?php if(date('D',$u) == 'Sat'){?>
