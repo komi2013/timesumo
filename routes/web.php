@@ -11,9 +11,7 @@
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
-});
+Route::get('/{month?}', 'Calendar\TopController@index');
 
 Route::get('/htm/{page}', 'HtmController@index');
 
@@ -27,6 +25,6 @@ if (file_exists(app_path().'/Http/Controllers/'.$paths[0].'/'.$paths[1].'Control
   if (method_exists($instance,$paths[2])) {
     Route::group(['namespace' => $paths[0]], function () use ($paths) {
       Route::any('{directory}/{controller}/{action?}/{id?}/{five?}/{six?}/{seven?}/', $paths[1] . 'Controller@' . $paths[2]);
-    });      
+    });
   }
 }
