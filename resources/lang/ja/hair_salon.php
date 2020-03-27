@@ -27,5 +27,6 @@ return [
     'customer' => 'お客様',
     'shiftAdd' => 'シフトの追加',
     'date' => 'm/d',
+    'today' => 'Y/m/d',
     
 ];

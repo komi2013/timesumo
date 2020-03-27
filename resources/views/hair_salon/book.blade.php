@@ -4,58 +4,32 @@
     <meta charset="UTF-8" />
     <title>book</title>
     <link rel="shortcut icon" href="" />
-
-    <script src="/plugin/jquery-3.4.0.min.js"></script>
-    <script src="/plugin/jquery.cookie.js"></script>
-    <script src="/plugin/vue.min.js"></script>
+    <script src="/plugin/min.js"></script>
     <link rel="stylesheet" href="/css/basic.css<?=config('my.cache_v')?>" />
+    <link rel="stylesheet" href="/css/pc.css<?=config('my.cache_v')?>" media="only screen and (min-width : 711px)">
+    <link rel="stylesheet" href="/css/sp.css<?=config('my.cache_v')?>" media="only screen and (max-width : 710px)">
+    <meta name="viewport" content="width=device-width, user-scalable=no" >
     <meta name="csrf-token" content="<?=csrf_token()?>" />
     
   </head>
 <body>
     <style>
-        body {
-            width:1180px;
-        }
-        #drawer {
-          position : absolute;
-          float : left;
-          margin-top : -1px;
-          width : 300px;   
-          background-color: white;
-        }
-        #content{
-            margin: 0px 0px 0px 310px;
-            width: 700px;
-            float:left;
-        }
-        #ad_right{
-            margin: 0px 0px 0px 10px;
-            width: 160px;
-            float:left;
-        }
         table {
             border-collapse: collapse;
         }
-        table td {
-            border-width: 0px;
+        .day_td {
+            width : 14%;
+        }
+        .sunday_td {
+            width : 14%;
         }
         .min10 {
-            width: 100px;
+            width: 100%;
             height: 30px;
             border-right-style: solid;
             border-width: thin;
             line-height: 12px;
             margin-left: -2px;
-        }
-        .sunday {
-            width: 100px;
-            height: 30px;
-            border-right-style: solid;
-            border-width: thin;
-            line-height: 12px;
-            margin-left: -2px;
-            border-left-style: solid;
         }
         .hour {
             border-bottom-style: dotted;
@@ -72,17 +46,21 @@
         .unavailable {
             background: gray;
         }
-        .showConfirm {
-            position:fixed;
-            background-color:silver;
-            padding:30px;
-            width:220px;
-            height:220px;
-            z-index: 2;
-        }
     </style>
-<?php $this_page = 'hi';?>
-<?=view('header_left',compact('this_page'));?>
+<table id="head_menu" style="width: 100%;">
+<tr>
+  <td id="menu_td">
+    <img src="/img/icon/menu.png" class="icon" id="menu_button">
+  </td>
+  <td style="text-align: center;">
+    <?=date(__('hair_salon.today'))?>
+  </td>
+  <td style="text-align:center;width:25%;">
+    <a href="/"><img src="/img/icon/home.png" class="icon"></a>
+  </td>
+  </tr>
+</table>
+
 <table id="drawer">
   <tr><td id="ad_menu"><iframe src="/htm/ad_menu/" width="300" height="250" frameborder="0" scrolling="no"></iframe></td></tr>
 </table>
@@ -94,13 +72,13 @@
         <?php $u = strtotime($date);?>
         <?php if(date('D',$u) == 'Sun' && date('H:i',$u) == $openTime){?> <tr> <?php }?>
             <?php if(date('H:i',$u ) == $openTime){?>  
-            <td border="0"> 
+            <td border="0" class="day_td"> 
             <div class="day"><?=date(__('hair_salon.date'),$u)?> <?=__('hair_salon.day'.date('w',$u))?></div>                
             <?php }?>
             <div date="<?=date('m/d',$u)?> <?=__('hair_salon.day'.date('w',$u))?>"
                  unix="<?=$u?>"
                  start="<?=date('H:i',$u)?>" end="<?=date('H:i',($u + 60 * $end_minute))?>"
-                class="<?= date('D',$u) == 'Sun' ? 'sunday' : 'min10'?> 
+                class="min10
                 <?php if(date('H:i',$u ) == $closeTime){
                     echo 'closeTime';
                 }else if(date('i',$u ) == '50'){
@@ -108,7 +86,9 @@
                 } ?>
                 <?=$d['available'] ? 'available' : 'unavailable'?>
                 ">
-                
+                <?php if ( date('i',$u ) == '00' && $d['available'] ) {?>
+                    <?=date('H:i',$u)?>
+                <?php } ?>
             </div>
             <?php if(date('H:i',$u ) == $closeTime){?> </td> <?php }?>
         <?php if(date('D',$u) == 'Sat' && date('H:i',$u ) == $closeTime){?> </tr> <?php }?>

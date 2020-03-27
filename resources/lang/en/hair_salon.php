@@ -28,4 +28,5 @@ return [
     'customer' => 'customer',
     'shiftAdd' => 'add this shift',
     'date' => 'd M',
+    'today' => 'd M Y',
 ];
