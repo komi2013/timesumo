@@ -91,7 +91,7 @@
         <td class="<?= date('D',$u) == 'Sun' ? 'sunday' : 'weekday'?>" <?=count($d)? 'style="width:14%;"' : '' ?> >
             <div style="text-align: center;"><?=date('d',$u)?></div>
             <?php foreach($d as $k2 => $d2){?>
-                <div><a href="/Calendar/Detail/index/<?=$k2?>/">
+                <div><a href="/Calendar/Schedule/edit/<?=$k2?>/">
                     {{$d2}}
                 </a></div>
             <?php } ?>
@@ -106,10 +106,6 @@
 
 <div id="ad_right"><iframe src="/htm/ad_right/" width="160" height="600" frameborder="0" scrolling="no"></iframe></div>
 
-<script>
-
-//$(function(){ ga('send', 'pageview'); });
-</script>
 <script defer src="https://www.googletagmanager.com/gtag/js?id=UA-57298122-1"></script>
 <script defer src="/js/common.js<?=config('my.cache_v')?>"></script>
 </body>

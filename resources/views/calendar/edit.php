@@ -3,15 +3,8 @@
   <head>
     <meta charset="UTF-8" />
     <title><?=date('Y/m/d',strtotime($date))?></title>
-    <meta name="google-site-verification" content="" />
-
     <link rel="shortcut icon" href="" />
-
-    <script src="/plugin/jquery-3.4.0.min.js"></script>
-    <script src="/plugin/jquery.cookie.js"></script>
-    <script src="/plugin/vue.min.js"></script>
-    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-57298122-3"></script>
-    <script src="/js/analytics.js<?=config('my.cache_v')?>"></script>
+    <script src="/plugin/min.js"></script>
     <link rel="stylesheet" type="text/css" href="/css/basic.css<?=config('my.cache_v')?>" />
     <link rel="stylesheet" href="/css/pc.css<?=config('my.cache_v')?>" media="only screen and (min-width : 711px)">
     <link rel="stylesheet" href="/css/sp.css<?=config('my.cache_v')?>" media="only screen and (max-width : 710px)">
@@ -19,6 +12,20 @@
     <meta name="csrf-token" content="<?=csrf_token()?>" />
   </head>
 <body>
+
+<table id="head_menu" style="width: 100%;">
+<tr>
+  <td id="menu_td">
+    <img src="/img/icon/menu.png" class="icon" id="menu_button">
+  </td>
+  <td style="text-align: center;">
+    
+  </td>
+  <td style="text-align:center;width:25%;">
+    <a href="/"><img src="/img/icon/home.png" class="icon"></a>
+  </td>
+  </tr>
+</table>
 
 <table id="drawer">
   <tr><td id="ad_menu"><iframe src="/htm/ad_menu/" width="300" height="250" frameborder="0" scrolling="no"></iframe></td></tr>
@@ -55,12 +62,12 @@
 <div id="content">
     <div class="centerize">
         <select name='tag' style="height:30px;width:80%;">
-            <option value="0">タグ</option>
-            <?php foreach($tags as $d){ ?>
-            <option value="<?=$d[0]?>" v-bind:style="'background-color:'+tag_color[<?=$d[0]?>]" <?=$d[1]?>><?=trans('tag.'.$d[0])?></option>
+            <?php foreach($tags as $k =>  $d){ ?>
+            <option value="<?=$k?>" style="background-color: <?=$d[1]?>" <?=$d[2]?>><?=$d[0]?></option>
             <?php } ?>
         </select><br>
-        <input type="text" placeholder="タイトル" id="title" value="<?=$a['title']?>" style="height:50px;width:80%;">
+        <input type="text" placeholder="タイトル" id="title" value="<?=htmlspecialchars($title)?>" style="height:50px;width:80%;">
+        <div style="color:red;display:none;" id="titleErr">1文字以上10文字以内でお願いします</div>
     </div>
     <div class="centerize">
         <?=date('m/d',strtotime($date))?>&nbsp;
@@ -86,24 +93,31 @@
         <?php }?>
         </select>
     </div>
+    <br>
     <div class="centerize">
-        <textarea id="todo" style="width:90%;height:120px;" placeholder="内容"><?=$a['todo']?></textarea>
+    <?php if($schedule_id){?>
+        <input type="button" value="更新" style="height:30px;width:40%;" onclick="update()">
+        <input type="button" value="削除" style="height:30px;width:40%;" onclick="del()">
+    <?php }else{?>
+        <input type="button" value="登録" style="height:30px;width:80%;" onclick="update()">
+    <?php }?>
     </div>
     <br>
     <div class="centerize">
-    <input type="button" value="登録・更新"　style="height:30px;width:80%;" id="submit">
+        <textarea style="width:90%;height:120px;" placeholder="内容" id="todo"><?=htmlspecialchars($todo)?></textarea>
     </div>
     <br>
+    <div id="app">
     <div class="centerize">
+        <select style="height:30px;width:80%;" v-model="group_id" v-on:change="groupChange(group_id)">
+            <option disabled>所属グループ</option>
+            <template v-for="(d,k) in arr_group">
+            <option v-bind:value="d['group_id']">{{d['group_name']}}</option>
+            </template>
+        </select><br>
     <div style="width:100%;display:inline-block;">
         <input type="text" placeholder="ユーザー検索" style="height:40px;">
-        <img src="/img/icon/magnifier.png" id="search" oauth="people" class="icon">
-        <select class="group" id="people_group" style="height:30px;width:80%;" oauth="people">
-            <option disabled>所属グループ</option>
-            <?php foreach($arr_group as $d){ ?>
-            <option <?=$d['priority'] == 1 ? 'selected' : '' ?> value="<?=$d['group_id']?>"><?=$d['group_name']?></option>
-            <?php }?>
-        </select><br>
+        <img src="/img/icon/magnifier.png" v-on:click="search" class="icon">
     </div>
     <div class="joining">
         <div>候補者</div>
@@ -118,76 +132,78 @@
     <div class="centerize">↓</div>
     <div class="joining">
     <template v-for="(d,k) in reverseUsrs">
-        <div>{{d[1]}}</div>
+        <template v-for="(d2,k2) in d">
+        <div v-if="k2 == 1">{{d2}}</div>
+        </template>
     </template>
         <div>参加者</div>
     </div>
     </div>
-    <br>
-    <a target="_blank" v-bind:href="'/Calendar/Space/hours12/<?=$date?>/'+checkSchedule+'/'">空き時間を確認</a>
-    <br>
     <div class="centerize">
-        <input type="radio" name="group" value="0" id="public" v-model="group_radio">
-        <label for="public"> 公開</label>
-        <input type="radio" name="group" value="1" id="private" v-model="group_radio">
-        <label for="private"> 非公開</label>
-        <input type="radio" name="group" value="2" id="group" v-model="group_radio">
-        <label for="group"> 一部</label><br>
-        <div v-if="group_radio == 2">
-        <select id="select_group" style="height:30px;width:80%;" oauth="people" >
-            <option>所属グループ</option>
-            <?php foreach($arr_group as $d){ ?>
-            <option <?=$d['selected']?> value="<?=$d['group_id']?>"><?=$d['group_name']?></option>
-            <?php }?>
-        </select>
-        <br>
-        </div>
+    <div style="width:100%;display:inline-block;">
+        <input type="text" placeholder="施設検索" style="height:40px;">
+        <img src="/img/icon/magnifier.png" fac_usr="facility" class="icon">
     </div>
-    <br>
+    <div class="joining">
+        <div>候補施設</div>
+    <template v-for="(d,k) in group_facility">
+        <label v-bind:for="d[0]"><div style="margin:5px;">
+            <div style="width:80%;display:inline-block;">{{d[1]}}</div>
+            <div style="width:10%;display:inline-block;">
+                <input type="checkbox"　v-bind:value="d" v-model="join_facility" v-bind:id="d[0]">
+            </div></div></label>
+    </template>
+    </div>
+    <div class="centerize">↓</div>
+    <div class="joining">
+    <template v-for="(d,k) in reverseFacility">
+        <div>{{d[1]}}</div>
+    </template>
+        <div>使用施設</div>
+    </div>
+    </div>
+    <a target="_blank" v-bind:href="'/Calendar/Space/hours12/<?=$date?>/'+checkSchedule+'/'">空き時間を確認</a>
+    </div> <!-- end vue app -->
     <div class="centerize">
         <select name="public_tag" style="height:30px;width:80%;">
             <option value="0">公開タグ</option>
-            <?php foreach($public_tags as $d){ ?>
-            <option value="<?=$d[0]?>" v-bind:style="'background-color:'+tag_color[<?=$d[0]?>]" <?=$d[1]?>><?=trans('tag.'.$d[0])?></option>
+            <?php foreach($public_tags as $k => $d){ ?>
+            <option value="<?=$k?>" style="background-color: <?=$d[1]?>" <?=$d[2]?>><?=$d[0]?></option>
             <?php } ?>
         </select><br>
-        <input type="text" placeholder="公開タイトル" id="public_title" value="<?=$a['public_title']?>" style="height:50px;width:80%;">
-    </div>
-    <br>
-    <div class="centerize">
-        <?php foreach($arr_group as $d){ if($d['owner_flg'] == 1){ ?>
-        <div style="width:90%;text-align:left;display:inline-block;">
-        <a href="/Calendar/Group/edit/<?=$d['group_id']?>/" target="_blank"><?=$d['group_name']?>
-            <img src="/img/icon/pencil.png" style="height:20px;width:20px;"></a>
-        </div>
-        <?php }}?>
+        <input type="text" placeholder="公開タイトル" id="public_title" value="<?=$public_title?>" style="height:50px;width:80%;">
     </div>
 </div>
 <br>
 <div id="ad_right"><iframe src="/htm/ad_right/" width="160" height="600" frameborder="0" scrolling="no"></iframe></div>
 
 <script>
-
-var tag_color = ['','rgba(0,0,255,0.2)','rgba(0,128,0,0.2)','rgba(255,255,0,0.2)','rgba(255,0,0,0.2)','rgba(128,0,128,0.2)'];
-//1=meeting, 2=off, 3=out, 4=task, 5=shift
-var group_ids = '<?=$group_ids?>';
-var group_radio = '<?=$group_radio?>';
-var date = '<?=$date?>';
-var common_id = '<?=$common_id?>';
-var usr_id = '<?=$usr_id?>';
-var arr_usr = <?=$arr_usr?>;
-var content = new Vue({
-  el: '#content',
+let date = '<?=$date?>';
+var app = new Vue({
+  el: '#app',
   data: {
-      join_usrs:[]
+//      join_usrs:[]
+      join_usrs:eval(<?=$join_usrs?>)
+//      ,group_usrs:[[1,'hi'],[2,'ddkk']]
       ,group_usrs:[]
       ,join_facility:[]
       ,group_facility:[]
-      ,group_radio:group_radio
+      ,group_ids: eval(<?=$group_ids?>)
+      ,arr_group:eval(<?=$arr_group?>)
+      ,schedule_id:'<?=$schedule_id?>'
+      ,group_id: <?=$group_id?>
   },
   computed: {
     reverseUsrs() {
-        return this.join_usrs.slice().reverse();
+        var arr = [];
+        for(var i = 0; i < this.join_usrs.length; i++){
+//            arr.push(this.join_usrs[i][0]);
+            var param = this.join_usrs[i][0];
+            if(this.join_usrs[i][0]){
+                arr[this.join_usrs[i][0]] = this.join_usrs[i];
+            }
+        }
+        return arr.slice().reverse();
     },
     reverseFacility() {
         return this.join_facility.slice().reverse();
@@ -195,16 +211,38 @@ var content = new Vue({
     checkSchedule() {
         var arr = [];
         for (var i = 0; i < this.join_usrs.length; i++) {
-            arr.push(this.join_usrs[i]);
+            arr.push(this.join_usrs[i][0]);
         }
         for (var i = 0; i < this.join_facility.length; i++) {
-            arr.push(this.join_facility[i]);
+            arr.push(this.join_facility[i][0]);
         }
         return encodeURIComponent(JSON.stringify(arr));
     },
+  },
+  methods: {
+    groupChange: function (group_id) {
+        $.get('/Calendar/GroupGet/get/'+group_id +'/',{},function(){},"json")
+        .always(function(res){
+            if(res[0] == 1){
+                app.group_usrs = res[1];
+                app.group_facility = res[2];   
+            }else{
+                alert('system error');
+            }
+        });
+    },
+    search: function (group_id) {
+        var param = {group_ids:this.group_ids};
+        $.get('/Calendar/Get/searchUsr/'+$('#searchUsr').val() +'/'+$('#search').attr('fac_usr')+'/',param,function(){},"json")
+        .always(function(res){
+            this.group_usrs = res;
+        });
+    },
   }
 });
-$('#submit').click(function(){
+app.groupChange(app.group_id);
+
+function update(){
     var validate = 1;
     if($('[name=tag]').val()==0){
         $('[name=tag]').css({'border-color':'red'});
@@ -212,27 +250,23 @@ $('#submit').click(function(){
     }else{
         $('[name=tag]').css({'border-color':''});
     }
-    if($('#title').val()==''){
+    if($('#title').val().length < 1 || $('#title').val().length > 10){
         $('#title').css({'border-color':'red'});
+        $('#titleErr').css({'display':''});
         validate=2;
     }else{
         $('#title').css({'border-color':''});
-    }
-    if($('#todo').val()==''){
-        $('#todo').css({'border-color':'red'});
-        validate=2;
-    }else{
-        $('#todo').css({'border-color':''});
+        $('#titleErr').css({'display':'none'});
     }
     if(validate==2){
       return;
     }
     var arr = [];
-    for (var i = 0; i < content.join_usrs.length; i++) {
-        arr.push(content.join_usrs[i]);
+    for (var i = 0; i < app.join_usrs.length; i++) {
+        arr.push(app.join_usrs[i][0]);
     }
-    for (var i = 0; i < content.join_facility.length; i++) {
-        arr.push(content.join_facility[i]);
+    for (var i = 0; i < app.join_facility.length; i++) {
+        arr.push(app.join_facility[i][0]);
     }
     var param = {
         _token : $('[name="csrf-token"]').attr('content')
@@ -242,84 +276,37 @@ $('#submit').click(function(){
         ,time_end : date +' '+ $('[name=hour_end]').val() + ':' + $('[name=minute_end]').val() + ':00'
         ,todo : $('#todo').val()
         ,usrs : arr
-        ,public : $('[name=group]:checked').val()
-        ,group_id : $('#select_group').val()
-        ,common_id : common_id
+        ,group_id : app.group_id
+        ,schedule_id : app.schedule_id
         ,public_tag : $('[name=public_tag]').val()
         ,public_title : $('#public_title').val()
     }
-    $.post('/Calendar/Update/',param,function(){},"json")
+    var post_url =  app.schedule_id ? '/Calendar/ScheduleEdit/' : '/Calendar/ScheduleAdd/' ;
+    $.post(post_url,param,function(){},"json")
     .always(function(res){
-        console.log(res);
-    });
-});
-$('#search').click(function(){
-    var param = {group_ids:JSON.parse(group_ids)};
-    $.get('/Calendar/Get/searchUsr/'+$('#searchUsr').val() +'/'+$('#search').attr('oauth')+'/',param,function(){},"json")
-    .always(function(res){
-        content.group_usrs = res;
-    });
-});
-groupChange($('#people_group option:selected').val(),'people');
-groupChange($('#facility_group option:selected').val(),'facility');
-$('.group').change(function(){
-    var group_id = $(this).val();
-    var oauth = $(this).attr('oauth');
-    groupChange(group_id,oauth);
-});
-function groupChange(group_id,oauth){
-    $.get('/Calendar/Get/groupUsr/'+group_id +'/'+oauth+'/',{},function(){},"json")
-    .always(function(res){
-        if(oauth == 'facility'){
-//            var join = [];
-//            var i = 0;
-//            var duplicate = false;
-//            for (var k in usrs) {
-//                if(res[k]){
-//                    for (var i3=0; content.join_facility.length > i3; i3++) {
-//                        if(content.join_facility[i3]['usr_id'] == res[k]['usr_id']){
-//                            duplicate = true;
-//                        }
-//                    }
-//                    if(!duplicate){
-//                       join[i] = res[k];
-//                    }
-//                    i++;
-//                }
-//            }
-//            for (var i3=0; content.join_facility.length > i3; i3++) {
-//                join.push(content.join_facility[i3]);
-//            }
-//            content.group_facility = res;
-//            content.join_facility = join;
+        if(res[0]){
+            location.href = '/Calendar/Top/index/'+date.substr(0,7)+'/';
         }else{
-//            var join = [];
-//            var i = 0;
-//            var duplicate = false;
-//            for (var k in arr_usr) {
-//                console.log(k);
-//                if(res[k]){
-//                    for (var i3=0; content.join_usrs.length > i3; i3++) {
-//                        if(content.join_usrs[i3]['usr_id'] == res[usrs[k]]['usr_id']){
-//                            duplicate = true;
-//                        }
-//                    }
-//                    if(!duplicate){
-//                       join[i] = res[usrs[k]];
-//                    }
-//                    i++;
-//                }
-//            }
-//            for (var i3=0; content.join_usrs.length > i3; i3++) {
-//                join.push(content.join_usrs[i3]);
-//            }
-            content.group_usrs = res;
-//            content.join_usrs = join;
+            alert('system error');
         }
-        
     });
 }
-//$(function(){ ga('send', 'pageview'); });
+function del(){
+    var param = {
+        _token : $('[name="csrf-token"]').attr('content')
+        ,schedule_id : app.schedule_id
+    }
+    $.post('/Calendar/ScheduleDelete/',param,function(){},"json")
+    .always(function(res){
+        if(res[0]){
+            location.href = '/Calendar/Top/index/'+date.substr(0,7)+'/';
+        }else{
+            alert('system error');
+        }
+    });
+}
 </script>
+<script defer src="https://www.googletagmanager.com/gtag/js?id=UA-57298122-1"></script>
+<script defer src="/js/common.js<?=config('my.cache_v')?>"></script>
 </body>
 </html>

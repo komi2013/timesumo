@@ -6,9 +6,9 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
-class GetController extends Controller {
+class GroupGetController extends Controller {
 
-    public function groupUsr(Request $request, $directory=null, $controller=null, 
+    public function get(Request $request, $directory=null, $controller=null, 
             $action=null, $group_id=null, $oauth_type=null) {
         $bind = [
             'group_id' => $group_id
@@ -18,40 +18,43 @@ class GetController extends Controller {
         $usr_ids = [];
         foreach ($obj as $d) {
             $usr_ids[] = $d->usr_id;
-            $arr[3] = $d->group_id;
-            $arr[2] = $d->owner_flg;
-            $arr_usr[$d->usr_id] = $arr;
+//            $arr[3] = $d->group_id;
+//            $arr[2] = $d->owner_flg;
+//            $arr_usr[$d->usr_id] = $arr;
         }
         $obj = DB::table('t_usr')
-                ->select('usr_id','usr_name_mb','oauth_type')
+                ->select('usr_id','usr_name')
                 ->whereIn("usr_id", $usr_ids)->get();
-//        if ($oauth_type == 'facility') {
-//            $obj = DB::table('t_usr')->select('usr_id','usr_name_mb','usr_name_mb')
-//                    ->whereIn("usr_id", $usr_ids)->get();
-//        } else {
-//            $obj = DB::table('t_usr')->select('usr_id', 'usr_name_mb')
-//                    ->whereIn("usr_id", $usr_ids)->where("oauth_type","<>",5)->get();
-//        }
         foreach ($obj as $d) {
-            if ($oauth_type == 'facility' AND $d->oauth_type == 5) {
-                $arr_usr[$d->usr_id][0] = $d->usr_id;
-                $arr_usr[$d->usr_id][1] = $d->usr_name_mb;                
-            } else if ($oauth_type == 'people' AND $d->oauth_type != 5) {
-                $arr_usr[$d->usr_id][0] = $d->usr_id;
-                $arr_usr[$d->usr_id][1] = $d->usr_name_mb;                
-//            } else if ($oauth_type == 'facility_owner') {
-//                $arr_usr[$d->usr_id][0] = $d->usr_id;
-//                $arr_usr[$d->usr_id][1] = $d->usr_name_mb;
-//                $arr_usr[$d->usr_id][4] = $d->oauth_type;
-            }
+            $arr_usr[$d->usr_id][0] = $d->usr_id;
+            $arr_usr[$d->usr_id][1] = $d->usr_name;
         }
-        $arr = [];
+        foreach ($arr_usr as $k => $d) {
+            $arr_usr[$k][0] = $d[0];
+            $arr_usr[$k][1] = $d[1];
+//            $arr_usr[$k][2] = $d[2];
+//            $arr_usr[$k][3] = $d[3];
+        }
+        $group_usrs = [];
         foreach ($arr_usr as $k => $d) {
             if (isset($d[0])) {
-                $arr[$k] = $d;
+                $group_usrs[$k] = $d;
             }
         }
-        die(json_encode($arr));
+        $obj = DB::table('t_facility')
+                ->select('facility_id','facility_name','amount')
+                ->where("group_id", $group_id)->get();
+        $group_facility = [];
+        foreach ($obj as $d) {
+            $arr[0] = $d->facility_id;
+            $arr[1] = $d->facility_name;
+            $arr[2] = $d->amount;
+            $group_facility[] = $arr;
+        }
+        $res[0] = 1;
+        $res[1] = $group_usrs;
+        $res[2] = $group_facility;
+        die( json_encode($res) );
     }
     public function searchUsr(Request $request, $directory=null, $controller=null, 
             $action=null, $word=null, $oauth_type=null) {
