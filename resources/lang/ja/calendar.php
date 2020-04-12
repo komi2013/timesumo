@@ -9,4 +9,9 @@ return [
     'day4' => '木',
     'day5' => '金',
     'day6' => '土',
+    'date' => 'm/d',
+    'today' => 'Y/m/d',
+    'compensatory' => '代休',
+    'day' => '日',
+    'hour' => '時間',
 ];

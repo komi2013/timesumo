@@ -10,7 +10,7 @@ class ScheduleEditController extends Controller {
 
     public function lessuri(Request $request, $directory=null, $controller=null, $action=null) {
 
-        $usr_id = 10;
+        $usr_id = 2;
         $arr3 = [];
         $usrs = $request->input('usrs');
         $schedule_id = $request->input('schedule_id');
@@ -36,17 +36,16 @@ class ScheduleEditController extends Controller {
             $time_end = $d->time_end;
             $title = $d->title;
             $tag = $d->tag;
-            $editable_flg = $d->editable_flg;
+            $access_right = $d->access_right;
             $group_id = $d->group_id;
             $updated_at = $d->updated_at;
             $arr = [];
-            $arr['public_tag'] = $public_tag = $d->public_tag;
             $arr['public_title'] = $public_title = $d->public_title;
             $db[$d->usr_id] = $arr;
 
             $usr_ids[] = $d->usr_id;
         }
-        if (!$mydata AND $editable_flg == 0) {
+        if (!$mydata AND $access_right == 0) {
             $res[0] = 2;
             $res[1] = 'you can not update because you can not change others schedule';
             die(json_encode($res));
@@ -72,11 +71,6 @@ class ScheduleEditController extends Controller {
             $schedule[$d]['usr_id'] = $d;
             $schedule[$d]['schedule_id'] = $schedule_id;
             $schedule[$d]['group_id'] = $request->input('group_id');
-            if ($d != $usr_id AND isset($db[$d]['public_tag'])) {
-                $schedule[$d]['public_tag'] = $db[$d]['public_tag'];
-            } else {
-                $schedule[$d]['public_tag'] = $request->input('public_tag') ?? '';
-            }
             if ($d != $usr_id AND isset($db[$d]['public_title'])) {
                 $schedule[$d]['public_title'] = $db[$d]['public_title'];
             } else {
@@ -95,7 +89,7 @@ class ScheduleEditController extends Controller {
                 ,"tag" => $tag
                 ,"group_id" => $group_id
                 ,"updated_at" => $updated_at
-                ,"editable_flg" => $editable_flg
+                ,"access_right" => $access_right
                 ,"action_by" => $usr_id
                 ,"action_at" => date('Y-m-d H:i:s')
                 ,"action_flg" => 1

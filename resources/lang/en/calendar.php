@@ -9,4 +9,9 @@ return [
     'day4' => 'Thu',
     'day5' => 'Fri',
     'day6' => 'Sat',
+    'date' => 'd M',
+    'today' => 'd M Y',
+    'compensatory' => 'compensatory',
+    'day' => 'day',
+    'hour' => 'hour',
 ];

@@ -108,71 +108,7 @@
     </div>
     <br>
     <div id="app">
-    <div class="centerize">
-        <select style="height:30px;width:80%;" v-model="group_id" v-on:change="groupChange(group_id)">
-            <option disabled>所属グループ</option>
-            <template v-for="(d,k) in arr_group">
-            <option v-bind:value="d['group_id']">{{d['group_name']}}</option>
-            </template>
-        </select><br>
-    <div style="width:100%;display:inline-block;">
-        <input type="text" placeholder="ユーザー検索" style="height:40px;">
-        <img src="/img/icon/magnifier.png" v-on:click="search" class="icon">
-    </div>
-    <div class="joining">
-        <div>候補者</div>
-    <template v-for="(d,k) in group_usrs">
-        <label v-bind:for="d[0]"><div style="margin:5px;">
-            <div style="width:80%;display:inline-block;">{{d[1]}}</div>
-            <div style="width:10%;display:inline-block;">
-                <input type="checkbox"　v-bind:value="d" v-model="join_usrs" v-bind:id="d[0]">
-            </div></div></label>
-    </template>
-    </div>
-    <div class="centerize">↓</div>
-    <div class="joining">
-    <template v-for="(d,k) in reverseUsrs">
-        <template v-for="(d2,k2) in d">
-        <div v-if="k2 == 1">{{d2}}</div>
-        </template>
-    </template>
-        <div>参加者</div>
-    </div>
-    </div>
-    <div class="centerize">
-    <div style="width:100%;display:inline-block;">
-        <input type="text" placeholder="施設検索" style="height:40px;">
-        <img src="/img/icon/magnifier.png" fac_usr="facility" class="icon">
-    </div>
-    <div class="joining">
-        <div>候補施設</div>
-    <template v-for="(d,k) in group_facility">
-        <label v-bind:for="d[0]"><div style="margin:5px;">
-            <div style="width:80%;display:inline-block;">{{d[1]}}</div>
-            <div style="width:10%;display:inline-block;">
-                <input type="checkbox"　v-bind:value="d" v-model="join_facility" v-bind:id="d[0]">
-            </div></div></label>
-    </template>
-    </div>
-    <div class="centerize">↓</div>
-    <div class="joining">
-    <template v-for="(d,k) in reverseFacility">
-        <div>{{d[1]}}</div>
-    </template>
-        <div>使用施設</div>
-    </div>
-    </div>
-    <a target="_blank" v-bind:href="'/Calendar/Space/hours12/<?=$date?>/'+checkSchedule+'/'">空き時間を確認</a>
     </div> <!-- end vue app -->
-    <div class="centerize">
-        <select name="public_tag" style="height:30px;width:80%;">
-            <option value="0">公開タグ</option>
-            <?php foreach($public_tags as $k => $d){ ?>
-            <option value="<?=$k?>" style="background-color: <?=$d[1]?>" <?=$d[2]?>><?=$d[0]?></option>
-            <?php } ?>
-        </select><br>
-        <input type="text" placeholder="公開タイトル" id="public_title" value="<?=$public_title?>" style="height:50px;width:80%;">
-    </div>
 </div>
 <br>
 <div id="ad_right"><iframe src="/htm/ad_right/" width="160" height="600" frameborder="0" scrolling="no"></iframe></div>

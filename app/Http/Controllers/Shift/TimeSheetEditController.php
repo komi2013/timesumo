@@ -26,7 +26,6 @@ class TimeSheetEditController extends Controller {
             $arr = [];
             $arr['time_in'] = '';
             $arr['time_out'] = '';
-            $arr['note'] = '';
             $date = str_pad($i + 1, 2, 0, STR_PAD_LEFT);
             $arr['day'] = __('calendar.day'.$thisMonth->format('w'));
             $monthly[$date] = $arr;
@@ -53,18 +52,15 @@ class TimeSheetEditController extends Controller {
         foreach ($request->days as $d) {
             
             if( $monthly[$d['date']]['time_in'] != $d['time_in'] OR
-                $monthly[$d['date']]['time_out'] != $d['time_out'] OR
-                $monthly[$d['date']]['note'] != $d['note'] ){
+                $monthly[$d['date']]['time_out'] != $d['time_out'] ){
                 $action_flg = 0;
                 if( $d['time_in'] OR
-                    $d['time_out'] OR
-                    $d['note'] ){
+                    $d['time_out'] ){
                     $arr = [];
                     $time_in = $request->month.'-'.$d['date'].' '.$d['time_in'].':00';
                     $time_out = $request->month.'-'.$d['date'].' '.$d['time_out'].':00';
                     $arr['time_in'] = $time_in;
                     $arr['time_out'] = $time_out;
-                    $arr['note'] = $d['note'] ?? '';
                     $arr['group_id'] = $group_id;
                     $arr['usr_id'] = $usr_id;
                     $arr['manual_flg'] = 1;
@@ -72,8 +68,7 @@ class TimeSheetEditController extends Controller {
                     $action_flg = 1;
                 }
                 if( $monthly[$d['date']]['time_in'] OR
-                    $monthly[$d['date']]['time_out'] OR
-                    $monthly[$d['date']]['note'] ){
+                    $monthly[$d['date']]['time_out'] ){
                     $arr = $monthly[$d['date']];
                     $time_in = $request->month.'-'.$d['date'].' '.$monthly[$d['date']]['time_in'].':00';
                     $time_out = $request->month.'-'.$d['date'].' '.$monthly[$d['date']]['time_out'].':00';

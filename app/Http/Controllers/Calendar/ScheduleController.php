@@ -9,23 +9,22 @@ use Carbon\Carbon;
 class ScheduleController extends Controller {
 
     public function edit(Request $request, $directory=null, $controller=null,$action=null, 
-            $id_date=null) {
+            $id_date=null,$tag=1) {
         $usr_id = $request->session()->get('usr_id');
         $lang = 'ja';
-        $usr_id = 10;
+        \App::setLocale('ja');
+        $usr_id = 2;
         $group_id = $request->session()->get('group_id');
+        $group_id = 2;
         $schedule_id = null;
-        $minute_start = $minute_end = $minutes = [['00',''],['15',''],['30',''],['45','']];
+        $minutes = ['00','15','30','45'];
         for ($i=0; $i<24; $i++) {
-            $k = str_pad($i,2,0,STR_PAD_LEFT);
-            $k = (string) $k; 
-            $hours[$k] = [$k,''];
+            $arr[] = str_pad($i,2,0,STR_PAD_LEFT);
         }
-        $hour_start = $hour_end = $hours;
+        $hours = $arr;
         $Arr = new \App\Models\Calendar\Arr();
         $arr_tags = 'tags_'.$lang;
         $tags = $Arr->$arr_tags;
-        $public_tags = $tags;
         $bind = [
             'usr_id' => $usr_id
         ];
@@ -53,57 +52,30 @@ class ScheduleController extends Controller {
         $title = '';
         $todo = '';
         $public_title = '';
-        $mydata = 0;
+        $leave_id = null;
         if ( strpos($id_date,"-") ) { //new
             $date = $id_date;
-            $hours[date('H')][1] = 'selected';
-            $hour_start = $hour_end = $hours;
-            if (date('i') < 15) {
-                $minutes[0][1] = 'selected';
-            } else if (date('i') < 30) {
-                $minutes[1][1] = 'selected';
-            } else if (date('i') < 45) {
-                $minutes[2][1] = 'selected';
-            } else {
-                $minutes[3][1] = 'selected';
-            }
-            $minute_start = $minute_end = $minutes;
-            $hour_start = $hour_end = $hours;
+            $date_end = date('Y-m-d',strtotime($date));
+            $dt = new Carbon();
+            $hourStart = $dt->addHour()->format('H');
+            $hourEnd = $dt->addHour()->format('H');
             $obj = DB::table('t_usr')->where("usr_id", $usr_id)->get();
             foreach ($obj as $d) {
+                $arr = [];
                 $arr['usr_name'] = $d->usr_name;
                 $arr_usr[$d->usr_id] = $arr;
             }
         } else {  //edit
             $schedule_id = $id_date;
             $obj = DB::table('t_schedule')->where("schedule_id", $schedule_id)->get();
-            $date = date('Y-m-d');
-            $mydata = 1;
+
             foreach ($obj as $d) {
-                if (date('i', strtotime($d->time_start)) < 15) {
-                    $minute_start[0][1] = 'selected';
-                } else if (date('i', strtotime($d->time_start)) < 30) {
-                    $minute_start[1][1] = 'selected';
-                } else if (date('i', strtotime($d->time_start)) < 45) {
-                    $minute_start[2][1] = 'selected';
-                } else if (date('i', strtotime($d->time_start)) <= 59) {
-                    $minute_start[3][1] = 'selected';
-                }
-                if (date('i', strtotime($d->time_end)) < 15) {
-                    $minute_end[0][1] = 'selected';
-                } else if (date('i', strtotime($d->time_end)) < 30) {
-                    $minute_end[1][1] = 'selected';
-                } else if (date('i', strtotime($d->time_end)) < 45) {
-                    $minute_end[2][1] = 'selected';
-                } else if (date('i', strtotime($d->time_end)) <= 59) {
-                    $minute_end[3][1] = 'selected';
-                }
-                $hour_start[date('H', strtotime($d->time_start))][1] = 'selected';
-                $hour_end[date('H', strtotime($d->time_end))][1] = 'selected';
-                $tags[$d->tag][1] = 'selected';
-                if (isset($public_tags[$d->public_tag][1])) {
-                    $public_tags[$d->public_tag][1] = 'selected';
-                }
+                $hourStart = date('H', strtotime($d->time_start));
+                $minuteStart = date('i', strtotime($d->time_start));
+                $hourEnd = date('H', strtotime($d->time_end));
+                $minuteEnd = date('i', strtotime($d->time_end));
+                $tag = $d->tag;
+
                 if(isset($arr_group[$d->group_id]['selected'])) {
                     $arr_group[$d->group_id]['selected'] = 'selected';
                 }
@@ -111,7 +83,7 @@ class ScheduleController extends Controller {
                 $public_title = $d->public_title;
                 $group_id = $d->group_id;
                 $date = date('Y-m-d', strtotime($d->time_start));
-                $mydata = 2;
+                $date_end = date('Y-m-d',strtotime($d->time_end));
                 $usr_ids[] = $d->usr_id;
             }
             $is = DB::table('r_group_relate')
@@ -128,6 +100,12 @@ class ScheduleController extends Controller {
                 $arr['usr_name'] = $d->usr_name;
                 $arr_usr[$d->usr_id] = $arr;
             }
+            if ($tag == 2) {
+                $arr = $tags;
+                $tags = [];
+                $tags[2] = $arr[2];
+                $leave_id = $title;
+            }
         }
         // join_usrs:[{0:2,1:"test2usesr",2:0,3:4}]
         foreach ($arr_usr as $k => $d) {
@@ -141,12 +119,18 @@ class ScheduleController extends Controller {
         }
         $request->session()->put('view_time', date('Y-m-d H:i:s'));
         $join_usrs = json_encode($join_usrs);
-
+        
         $arr_group = json_encode($arr_group);
-
-        return view('calendar.edit', compact('date','arr_group','group_ids','schedule_id',
-                'mydata','hour_start','hour_end','minute_start','minute_end','tags',
-                'usr_id','public_tags','group_id','join_usrs','todo','title','public_title'));
+        $dt = new Carbon($date);
+        $i = 0;
+        while ($i < 30) {
+            $next[] = $dt->format(__('calendar.date'));
+            $dt->addDay();
+            ++ $i;
+        }
+        return view('calendar.schedule', compact('date','date_end','arr_group','group_ids','schedule_id',
+                'hours','hourStart','hourEnd','minutes','tags','tag','usr_id',
+                'group_id','join_usrs','todo','title','public_title','next','leave_id'));
     }
 }
 

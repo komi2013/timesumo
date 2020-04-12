@@ -17,9 +17,6 @@
     .time {
         width: 40px;
     }
-    .note {
-        width: 150px;
-    }
 </style>
 <body>
 
@@ -45,13 +42,13 @@
 
 <div id="content" >
     <table>
-        <tr><th style="width:60px;"></th><th>出社</th><th>退社</th><th>備考</th></tr>
+        <tr><th style="width:60px;"></th><th>出社</th><th>退社</th><th>休憩</th></tr>
         <template v-for="(d,k) in days">
         <tr>
             <td>{{d['date']}} {{d['day']}}</td>
             <td><input type="text" v-value="d['time_in']" v-model="d['time_in']" placeholder="00:00" class="time"></td>
             <td><input type="text" v-value="d['time_out']" v-model="d['time_out']" placeholder="00:00" class="time"></td>
-            <td><input type="text" v-value="d['note']" v-model="d['note']" class="note"></td>
+            <td>{{d['break']}}</td>
         </tr>
         </template>
     </table>
