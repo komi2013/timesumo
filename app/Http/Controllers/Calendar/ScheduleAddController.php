@@ -31,7 +31,6 @@ class ScheduleAddController extends Controller {
         $schedule_id = DB::select("select nextval('t_schedule_schedule_id_seq')")[0]->nextval;
 
         $group_id = $request->input('group_id');
-        $public_tag = $request->input('public_tag') ?? '';
         $public_title = $request->input('public_title') ?? '';
         foreach ($usrs as $d) {
             $schedule[$d]['time_start'] = $request->input('time_start');
@@ -41,7 +40,6 @@ class ScheduleAddController extends Controller {
             $schedule[$d]['usr_id'] = $d;
             $schedule[$d]['schedule_id'] = $schedule_id;
             $schedule[$d]['group_id'] = $group_id;
-            $schedule[$d]['public_tag'] = $public_tag;
             $schedule[$d]['public_title'] = $public_title;
             $schedule[$d]['updated_at'] = now();
         }

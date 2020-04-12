@@ -23,12 +23,17 @@ class OffDeleteController extends Controller {
             die(json_encode($res));
         }
         $todo = DB::table('t_todo')->where("schedule_id", $schedule_id)->first();
-        // t_leave_amount, t_compensatory
+        $obj = DB::table('t_variation')->where("schedule_id", $schedule_id)->get();
+        foreach ($obj as $d) {
+            if ($d->variation_name == 'leave_id') {
+                $leave_id = $d->variation_value;
+            }
+        }
         $now = date('Y-m-d H:i:s');
         DB::beginTransaction();
         DB::connection('shift')->beginTransaction();
-        if (strpos($schedule->title,'schedule') > -1) { // compensatory leave
-            $leave_schedule_id = str_replace("schedule_", "", $schedule->title);
+        if (strpos($leave_id,'schedule') > -1) { // compensatory leave
+            $leave_schedule_id = str_replace("schedule_", "", $leave_id);
             $compensatory = DB::connection('shift')->table('t_compensatory')
                     ->where('usr_id', $usr_id)
                     ->where('group_id', $group_id)
@@ -41,7 +46,7 @@ class OffDeleteController extends Controller {
                     ,"compensatory_end" => $compensatory->compensatory_end
                     ,"usr_id" => $compensatory->usr_id
                     ,"group_id" => $compensatory->group_id
-                    ,"schedule_id" => $schedule_id
+                    ,"schedule_id" => $compensatory->schedule_id
                     ,"updated_at" => $compensatory->updated_at
                     ,"action_by" => $usr_id
                     ,"action_at" => $now
@@ -60,7 +65,11 @@ class OffDeleteController extends Controller {
             $leave_amount = DB::connection('shift')->table('t_leave_amount')
                     ->where('usr_id', $usr_id)
                     ->where('group_id', $group_id)
-                    ->where('leave_id', $schedule->title)
+                    ->where('leave_id', $leave_id)
+                    ->first();
+            $pre_leave_amount = DB::connection('shift')->table('h_leave_amount')
+                    ->where('schedule_id', $schedule_id)
+                    ->orderBy('action_at','DESC')
                     ->first();
             DB::connection('shift')->table('h_leave_amount')->insert([
                     "leave_amount_id" => $leave_amount->leave_amount_id
@@ -78,12 +87,14 @@ class OffDeleteController extends Controller {
                     ,"action_flg" => 0
                     ,"original_by" => 'OffDelete'
                 ]);
-            DB::connection('shift')->raw("UPDATE t_leave_amount SET "
-                    . " used_days = used_days - 1"
-                    . ",updated_at = ".$now
-                    . " WHERE usr_id = " . $usr_id
-                    . " AND group_id = " . $group_id
-                    . " AND leave_id = " . $schedule->title);
+            DB::connection('shift')->table('t_leave_amount')
+                ->where('usr_id', $usr_id)
+                ->where('group_id', $group_id)
+                ->where('leave_id', $leave_id)
+                ->update([
+                    "used_days" => $pre_leave_amount->used_days
+                    ,"updated_at" => $now
+                ]);
         }
         DB::connection('shift')->table('h_schedule')->insert([
                 "schedule_id" => $schedule_id

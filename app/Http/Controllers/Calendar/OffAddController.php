@@ -41,12 +41,12 @@ class OffAddController extends Controller {
                     ,"compensatory_end" => $compensatory->compensatory_end
                     ,"usr_id" => $compensatory->usr_id
                     ,"group_id" => $compensatory->group_id
-                    ,"schedule_id" => $schedule_id
+                    ,"schedule_id" => $compensatory->schedule_id
                     ,"updated_at" => $compensatory->updated_at
                     ,"action_by" => $usr_id
                     ,"action_at" => $now
-                    ,"action_flg" => 0
-                    ,"original_by" => 'OffDelete'
+                    ,"action_flg" => 1
+                    ,"original_by" => 'OffAdd'
                 ]);
             DB::connection('shift')->table('t_compensatory')
                 ->where('usr_id', $usr_id)
@@ -99,7 +99,17 @@ class OffAddController extends Controller {
                 }
                 $start->addDay();
             }
-
+            DB::connection('shift')->table('t_leave_amount')
+                ->where('usr_id', $usr_id)
+                ->where('group_id', $group_id)
+                ->where('leave_id', $leave_id)
+                ->update([
+                    "used_days" => $leave_amount->used_days + $use_days
+                    ,"updated_at" => $now
+                ]);
+        }
+        $schedule_id = DB::select("select nextval('t_schedule_schedule_id_seq')")[0]->nextval;
+        if ( !isset($leave_schedule_id) ) {
             DB::connection('shift')->table('h_leave_amount')->insert([
                     "leave_amount_id" => $leave_amount->leave_amount_id
                     ,"usr_id" => $leave_amount->usr_id
@@ -113,34 +123,33 @@ class OffAddController extends Controller {
                     ,"leave_id" => $leave_amount->leave_id
                     ,"action_by" => $usr_id
                     ,"action_at" => $now
-                    ,"action_flg" => 0
-                    ,"original_by" => 'OffDelete'
-                ]);
-            DB::connection('shift')->table('t_leave_amount')
-                ->where('usr_id', $usr_id)
-                ->where('group_id', $group_id)
-                ->where('leave_id', $leave_id)
-                ->update([
-                    "used_days" => $leave_amount->used_days + $use_days
-                    ,"updated_at" => $now
-                ]);
+                    ,"action_flg" => 1
+                    ,"original_by" => 'OffAdd'
+                    ,"schedule_id" => $schedule_id
+                ]);            
         }
-        $schedule_id = DB::select("select nextval('t_schedule_schedule_id_seq')")[0]->nextval;
+
         $schedule[0]['time_start'] = $request->input('time_start');
         $schedule[0]['time_end'] = $request->input('time_end');
-        $schedule[0]['title'] = $request->input('leave_id');
+        $schedule[0]['title'] = $request->input('title');
         $schedule[0]['tag'] = $request->input('tag');
         $schedule[0]['usr_id'] = $usr_id;
         $schedule[0]['schedule_id'] = $schedule_id;
         $schedule[0]['group_id'] = $group_id;
         $schedule[0]['public_title'] = $request->input('public_title') ?? '';
-        $schedule[0]['updated_at'] = now();
+        $schedule[0]['updated_at'] = $now;
         DB::table('t_schedule')->insert($schedule);
+        $variation[0]['schedule_id'] = $schedule_id;
+        $variation[0]['variation_name'] = 'leave_id';
+        $variation[0]['variation_value'] = $request->input('leave_id');
+        $variation[0]['variation_category'] = 'leave';
+        $variation[0]['updated_at'] = $now;
+        DB::table('t_variation')->insert($variation);
         if ($request->input('todo')) {
             DB::table('t_todo')->insert([
                 'todo' => $request->input('todo'),
                 'schedule_id' => $schedule_id,
-                'updated_at' => now()
+                'updated_at' => $now
             ]);
         }
 

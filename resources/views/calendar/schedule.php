@@ -207,7 +207,7 @@ var app = new Vue({
       ,title:<?=json_encode($title)?>
       ,titleErr:false
       ,off_tags:[]
-      ,leave_id:'<?=$leave_id?>'
+      ,leave_id:null
       ,next:[]
       ,date_end:'<?=$date_end?>'
       ,hours:eval(<?=json_encode($hours)?>)
@@ -305,13 +305,13 @@ var app = new Vue({
         this.todoEdit = this.todoEdit ? false : true;
     },
     copy: function () {
-        if(!this.public_title){
-            if(this.tag == 2){
-                title = this.tags[2][0];
-            }else{
-                title = this.title;
-            }
-            this.public_title = title;
+        if(this.tag == 2 && !this.public_title){
+            this.public_title = this.tags[2][0];
+            this.title = this.off_tags[0]['leave_name'];
+        }else if(this.tag == 2){
+            this.title = this.off_tags[0]['leave_name'];
+        }else if(!this.public_title){
+            this.public_title = this.title;
         }
     },
   }
@@ -388,10 +388,10 @@ function del(){
         }
     });
 }
-$.get('/Calendar/OffGet/',{date:date,leave_id:app.leave_id},function(){},"json")
+$.get('/Calendar/OffGet/',{date:date,schedule_id:app.schedule_id},function(){},"json")
 .always(function(res){
     app.off_tags = res[1];
-    app.leave_id = app.leave_id ? app.leave_id : res[2];
+    app.leave_id = res[2];
     app.next = res[3];
 //    app.date_end = '04/30';
 });

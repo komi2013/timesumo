@@ -100,11 +100,14 @@ class ScheduleController extends Controller {
                 $arr['usr_name'] = $d->usr_name;
                 $arr_usr[$d->usr_id] = $arr;
             }
-            if ($tag == 2) {
-                $arr = $tags;
-                $tags = [];
-                $tags[2] = $arr[2];
-                $leave_id = $title;
+            $arr = $tags;
+            $tags = [];
+            foreach ($arr as $k => $d) {
+                if ($k == 2 AND $tag == 2) {
+                    $tags[$k] = $d;
+                } else if ($k != 2 AND $tag != 2) {
+                    $tags[$k] = $d;
+                }   
             }
         }
         // join_usrs:[{0:2,1:"test2usesr",2:0,3:4}]
@@ -130,7 +133,7 @@ class ScheduleController extends Controller {
         }
         return view('calendar.schedule', compact('date','date_end','arr_group','group_ids','schedule_id',
                 'hours','hourStart','hourEnd','minutes','tags','tag','usr_id',
-                'group_id','join_usrs','todo','title','public_title','next','leave_id'));
+                'group_id','join_usrs','todo','title','public_title','next'));
     }
 }
 

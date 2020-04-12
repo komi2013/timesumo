@@ -28,24 +28,36 @@ class OffGetController extends Controller {
                 ->where('tag',2)
                 ->orderBy('time_start','ASC')
                 ->get();
-        $leave = [];
+                
+        $schedule = [];
+        $arr_schedule_id = [];
         foreach ($obj as $d) {
             $start = new Carbon($d->time_start);
             $end = new Carbon($d->time_end);
+            $arr = [];
+            $arr['time_start'] = $d->time_start;
+            $arr['time_end'] = $d->time_end;
+            $schedule[$d->schedule_id] = $arr;
+            $arr_schedule_id[] = $d->schedule_id;
+        }
+        $obj = DB::table('t_variation')->whereIn('schedule_id', $arr_schedule_id)->get();
+        $leave = [];
+        $leave_id = 0;
+        foreach ($obj as $d) {
+            $start = new Carbon($schedule[$d->schedule_id]['time_start']);
+            $end = new Carbon($schedule[$d->schedule_id]['time_end']);
             $amount = $start->diffInDays($end) + 1;
-//            if ( isset($leave[$d->title]) ) {
-//            echo $d->title;
-//            echo $request->leave_id;
-            if ($d->title == $request->leave_id) {
-                
-            } else if ( isset($leave[$d->title])  ) {
-                $leave[$d->title] = $leave[$d->title] + $amount;
-            } else {
-                $leave[$d->title] = $amount;
+            if ($d->variation_name == 'leave_id') {
+                if ($d->schedule_id == $request->schedule_id) {
+                    $leave_id = $d->variation_value;
+                } else if ( isset($leave[$d->variation_value])  ) {
+                    $leave[$d->variation_value] = $leave[$d->variation_value] + $amount;
+                } else {
+                    $leave[$d->variation_value] = $amount;
+                }   
             }
         }
-//        var_dump($leave); die;
-//        $leave = [];
+
         $obj = DB::connection('shift')->table('t_leave_amount')
                 ->where("usr_id", $usr_id)
                 ->where("group_id", $group_id)
@@ -95,7 +107,7 @@ class OffGetController extends Controller {
         foreach ($obj as $d) {
             $arr = [];
             $arr['leave_id'] = 'schedule_'.$d->schedule_id;
-            if ( 'schedule_'.$d->schedule_id == $request->leave_id 
+            if ( 'schedule_'.$d->schedule_id == $leave_id
                     OR $d->compensatory_status == 1 ) {
                 $arr['available'] = 1;
             } else {
@@ -161,7 +173,7 @@ class OffGetController extends Controller {
 
         $res[0] = 1;
         $res[1] = $leave;
-        $res[2] = $leave[0]['leave_id'];
+        $res[2] = $leave_id ?? $leave[0]['leave_id'];
         $res[3] = $next;
         echo json_encode($res);
 //        $thisDay = new Carbon($request->date);
