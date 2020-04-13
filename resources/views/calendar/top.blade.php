@@ -14,8 +14,6 @@
   </head>
 <body>
 
-
-
     <style>
         table {
             border-collapse: collapse;
@@ -89,7 +87,7 @@
         <tr>
         <?php }?>
         <td class="<?= date('D',$u) == 'Sun' ? 'sunday' : 'weekday'?>" <?=count($d)? 'style="width:14%;"' : '' ?> >
-            <div style="text-align: center;"><?=date('d',$u)?></div>
+            <div style="text-align: center;"><a href="/Calendar/Schedule/edit/<?=date('Y-m-d',$u)?>/"><?=date('d',$u)?></a></div>
             <?php foreach($d as $k2 => $d2){?>
                 <div><a href="/Calendar/Schedule/edit/<?=$k2?>/">
                     {{$d2}}

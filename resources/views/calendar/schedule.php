@@ -66,7 +66,7 @@
                     v-bind:style="'background-color:' + d[1]">{{d[0]}}</option>
         </select>
         <template v-if="tag==2">
-        <select style="width:80%;" v-model="leave_id">
+        <select style="width:80%;" v-model="leave_id" @change="copy">
             <option v-for="(d,k) in off_tags" v-bind:value="d['leave_id']">{{d['leave_name']}}</option>
         </select>
         </template>
@@ -101,7 +101,7 @@
         <option v-for="d in minutes" v-bind:value="d">{{d}}</option>
         </select>
         </template>
-        <table style="width:100%;" v-if="tag == 2"><tr>
+        <table style="width:100%;" v-if="tag == 999"><tr><!--not now implementation-->
             <td style="width:49%;">
                 <input type="radio" id="day" value="day" v-model="off_base">
                 <label for="day"><?=__('calendar.day')?></label></td>
@@ -112,12 +112,16 @@
     </div>
     <br>
     <div class="centerize">
-    <?php if($schedule_id){?>
+    <template v-if="schedule_id && tag == 2">
+        <input type="button" value="削除" style="height:30px;width:80%;" onclick="del()">
+    </template>
+    <template v-else-if="schedule_id">
         <input type="button" value="更新" style="height:30px;width:40%;" onclick="update()">
         <input type="button" value="削除" style="height:30px;width:40%;" onclick="del()">
-    <?php }else{?>
+    </template>
+    <template v-else>
         <input type="button" value="登録" style="height:30px;width:80%;" onclick="update()">
-    <?php }?>
+    </template>
     </div>
     <br>
     <div style="width:97%;padding-left:2%;">
@@ -305,11 +309,16 @@ var app = new Vue({
         this.todoEdit = this.todoEdit ? false : true;
     },
     copy: function () {
+        for (var i = 0; i < this.off_tags.length; i++) {
+            if(this.off_tags[i]['leave_id'] == this.leave_id){
+                var title = this.off_tags[i]['leave_name']
+            }
+        }
         if(this.tag == 2 && !this.public_title){
             this.public_title = this.tags[2][0];
-            this.title = this.off_tags[0]['leave_name'];
+            this.title = title;
         }else if(this.tag == 2){
-            this.title = this.off_tags[0]['leave_name'];
+            this.title = title;
         }else if(!this.public_title){
             this.public_title = this.title;
         }
@@ -360,11 +369,10 @@ function update(){
     }else if(app.schedule_id){
         post_url = '/Calendar/ScheduleEdit/';
     }
-//    var post_url =  app.schedule_id ? '/Calendar/ScheduleEdit/' : '/Calendar/ScheduleAdd/' ;
     $.post(post_url,param,function(){},"json")
     .always(function(res){
         if(res[0] == 1){
-//            location.href = '/Calendar/Top/index/'+date.substr(0,7)+'/';
+            location.href = '/Calendar/Top/index/'+date.substr(0,7)+'/';
         }else{
             alert('system error');
         }
@@ -393,7 +401,6 @@ $.get('/Calendar/OffGet/',{date:date,schedule_id:app.schedule_id},function(){},"
     app.off_tags = res[1];
     app.leave_id = res[2];
     app.next = res[3];
-//    app.date_end = '04/30';
 });
 function AutoLink(str) {
     var regexp_url = /((h?)(ttps?:\/\/[a-zA-Z0-9.\-_@:/~?%&;=+#',()*!]+))/g; // ']))/;

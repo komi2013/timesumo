@@ -98,6 +98,10 @@ class OffGetController extends Controller {
             $arr['prove_flg'] = $d->prove_flg;
             $leave[$d->leave_id] = $arr;
         }
+        $routine = DB::connection('shift')->table('r_routine')
+                ->where('usr_id', $usr_id)
+                ->where('group_id', $group_id)
+                ->first();
         $obj = DB::connection('shift')->table('t_compensatory')
             ->where('usr_id', $usr_id)
             ->where('group_id', $group_id)
@@ -107,8 +111,9 @@ class OffGetController extends Controller {
         foreach ($obj as $d) {
             $arr = [];
             $arr['leave_id'] = 'schedule_'.$d->schedule_id;
-            if ( 'schedule_'.$d->schedule_id == $leave_id
-                    OR $d->compensatory_status == 1 ) {
+            if ( ('schedule_'.$d->schedule_id == $leave_id
+                    OR $d->compensatory_days > 0 OR $d->compensatory_hours > 0 )
+                    AND $routine->work_time_unit > 0) {
                 $arr['available'] = 1;
             } else {
                 $arr['available'] = 0;
@@ -129,15 +134,9 @@ class OffGetController extends Controller {
                 ++$k;                
             }
         }
-//        var_dump($enable_ends);
-//        var_dump($leave);
-        
+
         array_multisort($enable_ends, SORT_ASC, $leave);
 
-        $routine = DB::connection('shift')->table('r_routine')
-                ->where('usr_id', $usr_id)
-                ->where('group_id', $group_id)
-                ->first();
         $thisDay = new Carbon($request->date);
         $begin = $thisDay->format('Y-m-d');
         $i = 0;
@@ -173,24 +172,10 @@ class OffGetController extends Controller {
 
         $res[0] = 1;
         $res[1] = $leave;
-        $res[2] = $leave_id ?? $leave[0]['leave_id'];
+        $res[2] = $leave_id > 0 ? $leave_id : $leave[0]['leave_id'];
         $res[3] = $next;
         echo json_encode($res);
-//        $thisDay = new Carbon($request->date);
-//        $begin = $thisDay->format('Y-m-d');
-//        $thisDay->addDay($extra->compensatory_within);
-//        $end = $thisDay->format('Y-m-d');
-//        $i = 0;
-//        while ($i < 7) {
-//            $day = 'day'.$i.'_flg'; //day0_flg
-//            if ($extra->$day) {
-//                $off_day[] = $i;
-//            }
-//        }
-//        if ($extra->holiday_flg) {
-//
 
-//        }
     }
 }
 

@@ -19,6 +19,10 @@ class OffAddController extends Controller {
             die(json_encode($res));
         }
         $now = date('Y-m-d H:i:s');
+        $routine = DB::connection('shift')->table('r_routine')
+                ->where('usr_id', $usr_id)
+                ->where('group_id', $group_id)
+                ->first();
         DB::beginTransaction();
         DB::connection('shift')->beginTransaction();
         if (strpos($request->input('leave_id'),'schedule') > -1) { // compensatory leave
@@ -26,17 +30,16 @@ class OffAddController extends Controller {
             $compensatory = DB::connection('shift')->table('t_compensatory')
                 ->where('usr_id', $usr_id)
                 ->where('group_id', $group_id)
-                ->where('compensatory_status', 1)
                 ->where('schedule_id', $leave_schedule_id)
                 ->first();
-            if (!isset($compensatory->usr_id)) {
+            if ( ( $compensatory->compensatory_days == 0 AND $compensatory->compensatory_hours == 0 )
+                    OR $routine->work_time_unit == 0) {
                 $res[0] = 2;
-                $res[1] = 'this is not available leave';
+                $res[1] = 'this compensatory leave is not available';
                 die(json_encode($res));
             }
             DB::connection('shift')->table('h_compensatory')->insert([
                     "compensatory_id" => $compensatory->compensatory_id
-                    ,"compensatory_status" => $compensatory->compensatory_status
                     ,"compensatory_start" => $compensatory->compensatory_start
                     ,"compensatory_end" => $compensatory->compensatory_end
                     ,"usr_id" => $compensatory->usr_id
@@ -47,69 +50,71 @@ class OffAddController extends Controller {
                     ,"action_at" => $now
                     ,"action_flg" => 1
                     ,"original_by" => 'OffAdd'
+                    ,"compensatory_hours" => $compensatory->compensatory_hours
+                    ,"compensatory_days" => $compensatory->compensatory_days
                 ]);
             DB::connection('shift')->table('t_compensatory')
                 ->where('usr_id', $usr_id)
                 ->where('group_id', $group_id)
                 ->where('schedule_id', $leave_schedule_id)
                 ->update([
-                    "compensatory_status" => "2"
+                    "compensatory_days" => $compensatory->compensatory_days -1
                     ,"updated_at" => $now
                 ]);
         } else { //paid leave
             $leave_id = $request->input('leave_id');
-            $leave_amount = DB::connection('shift')->table('t_leave_amount')
-                    ->where("usr_id", $usr_id)
-                    ->where("group_id", $group_id)
-                    ->where("leave_id", $leave_id)
-                    ->first();
-            if (!isset($leave_amount->usr_id)) {
-                $res[0] = 2;
-                $res[1] = 'this is not exist leave';
-                die(json_encode($res));
-//            } else if ( ($leave_amount->grant_days - $leave_amount->used_days ) < 1) {
-//                $res[0] = 2;
-//                $res[1] = 'no more leave days';
-//                die(json_encode($res));
-            }
-            $routine = DB::connection('shift')->table('r_routine')
+            $m_leave = DB::connection('shift')->table('m_leave')->where("leave_id", $leave_id)->first();
+            if ($m_leave->leave_amount_flg == 1) {
+
+                $leave_amount = DB::connection('shift')->table('t_leave_amount')
+                        ->where("usr_id", $usr_id)
+                        ->where("group_id", $group_id)
+                        ->where("leave_id", $leave_id)
+                        ->first();
+                if (!isset($leave_amount->usr_id)) {
+                    $res[0] = 2;
+                    $res[1] = 'this is not exist leave';
+                    die(json_encode($res));
+                }
+
+                $holidays = [];
+                if ($routine->holiday_flg == 1) {
+                    $obj = DB::table('c_holiday')->select('holiday_date')
+                            ->where('country', 'jp')
+                            ->where('holiday_date','>', $request->time_start)
+                            ->where('holiday_date','<=', $request->time_end)
+                            ->get();
+                    foreach ($obj as $d) {
+                        $holidays[] = $d->holiday_date;
+                    }
+                }
+
+                $start = new Carbon($request->time_start);
+                $end = new Carbon($request->time_end);
+                $use_days = 0;
+                while ($start < $end) {
+                    $day = 'start_'.$start->format('w');
+    //                var_dump($day);
+                    if ($routine->$day AND !in_array($start->format('Y-m-d'),$holidays)) {
+                        ++$use_days;
+                    }
+                    $start->addDay();
+                }
+                if ($leave_amount->grant_days < $leave_amount->used_days + $use_days) {
+                    die('you try to take more than you can');
+                }
+                DB::connection('shift')->table('t_leave_amount')
                     ->where('usr_id', $usr_id)
                     ->where('group_id', $group_id)
-                    ->first();
-            $holidays = [];
-            if ($routine->holiday_flg == 1) {
-                $obj = DB::table('c_holiday')->select('holiday_date')
-                        ->where('country', 'jp')
-                        ->where('holiday_date','>', $request->time_start)
-                        ->where('holiday_date','<=', $request->time_end)
-                        ->get();
-                foreach ($obj as $d) {
-                    $holidays[] = $d->holiday_date;
-                }
+                    ->where('leave_id', $leave_id)
+                    ->update([
+                        "used_days" => $leave_amount->used_days + $use_days
+                        ,"updated_at" => $now
+                    ]);
             }
-
-            $start = new Carbon($request->time_start);
-            $end = new Carbon($request->time_end);
-            $use_days = 0;
-            while ($start < $end) {
-                $day = 'start_'.$start->format('w');
-//                var_dump($day);
-                if ($routine->$day AND !in_array($start->format('Y-m-d'),$holidays)) {
-                    ++$use_days;
-                }
-                $start->addDay();
-            }
-            DB::connection('shift')->table('t_leave_amount')
-                ->where('usr_id', $usr_id)
-                ->where('group_id', $group_id)
-                ->where('leave_id', $leave_id)
-                ->update([
-                    "used_days" => $leave_amount->used_days + $use_days
-                    ,"updated_at" => $now
-                ]);
         }
         $schedule_id = DB::select("select nextval('t_schedule_schedule_id_seq')")[0]->nextval;
-        if ( !isset($leave_schedule_id) ) {
+        if ( !isset($leave_schedule_id) AND isset($leave_amount->usr_id) ) {
             DB::connection('shift')->table('h_leave_amount')->insert([
                     "leave_amount_id" => $leave_amount->leave_amount_id
                     ,"usr_id" => $leave_amount->usr_id
