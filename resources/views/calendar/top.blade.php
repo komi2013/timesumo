@@ -59,7 +59,7 @@
     <img src="/img/icon/menu.png" class="icon" id="menu_button">
   </td>
   <td style="text-align: center;">
-    <?=$today->format(__('calendar.month'))?>
+    <?=$today->format(__('calendar.month_f'))?>
   </td>
   <td style="text-align:center;width:25%;">
     <a href="/"><img src="/img/icon/home.png" class="icon"></a>

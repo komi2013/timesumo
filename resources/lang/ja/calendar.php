@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'month' => 'Y年m月',
+    'month_f' => 'Y年m月',
     'day0' => '日',
     'day1' => '月',
     'day2' => '火',
@@ -14,4 +14,5 @@ return [
     'compensatory' => '代休',
     'day' => '日',
     'hour' => '時間',
+    'month' => '月',
 ];

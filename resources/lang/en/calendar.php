@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'month' => 'Y M',
+    'month_f' => 'Y M',
     'day0' => 'Sun',
     'day1' => 'Mon',
     'day2' => 'Tue',
@@ -14,4 +14,5 @@ return [
     'compensatory' => 'compensatory',
     'day' => 'day',
     'hour' => 'hour',
+    'month' => 'month',
 ];
