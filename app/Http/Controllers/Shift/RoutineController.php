@@ -18,6 +18,7 @@ class RoutineController extends Controller {
 
         $obj = DB::connection('shift')->table('r_routine')
                 ->where('group_id', $group_id)
+                ->orderBy('updated_at','ASC')
                 ->get();
         $i = 0;
         while ($i < 7) {
