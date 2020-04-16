@@ -15,4 +15,5 @@ return [
     'day' => 'day',
     'hour' => 'hour',
     'month' => 'month',
+    'week' => 'week',
 ];

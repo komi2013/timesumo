@@ -9,85 +9,88 @@ use Carbon\Carbon;
 class ExtraController extends Controller {
 
     public function index(Request $request, $directory=null, $controller=null,$action=null,
-            $month=null) {
+            $target_usr=0) {
         $usr_id = $request->session()->get('usr_id');
-        $usr_id = 4;
+        $usr_id = 2;
         $group_id = $request->session()->get('group_id');
         $group_id = 2;
 //        \App::setLocale('ja');
-        $month = $month ?? date('Y-m');
-        $thisMonth = new Carbon($month);
-        $thisMonth = new Carbon($thisMonth->format('Y-m-01 00:00:00'));
-        $begin = $thisMonth->format('Y-m-d H:i:s');
-//        die($begin);
+        $r_group = DB::table('r_group_relate')
+                ->where('usr_id', $usr_id)
+                ->where('group_id', $group_id)
+                ->first();
+        if (!isset($r_group->usr_id)) {
+            die('you should belong group at first');
+        }
+        $routine = DB::connection('shift')->table('r_routine')
+                ->where('usr_id', $usr_id)
+                ->where('group_id', $group_id)
+                ->first();
+        if (!isset($routine->usr_id)) {
+            die('you should go to routine page');
+        }
+        if ($r_group->owner_flg == 0 AND $routine->approver1 == 0 AND $routine->approver2 == 0) {
+            die('you have no access right');
+        }
+        $obj = DB::connection('shift')->table('r_extra')
+                ->where('group_id', $group_id)
+                ->get();
+        $arr['Hstart'] = '08';
+        $arr['Hend'] = '22';
+        $arr['Mstart'] = '00';
+        $arr['Mend'] = '00';
+        $arr['dayoff_flg'] = 0;
+        $arr['usr_id'] = $target_usr;
+        $arr['group_id'] = $group_id;
+        $arr['extra_percent'] = 0;
+        $arr['over_flg'] = 0;
+        $arr['hour_start'] = 0;
+        $arr['hour_end'] = 0;
+        $new = $arr;
+        $extra = [];
+        $previous = [];
+        $is_data = 0;
+        foreach ($obj as $d) {
+            $arr['Hstart'] = substr($d->extra_start, 0, 2);
+            $arr['Hend'] = substr($d->extra_end, 0, 2);
+            $arr['Mstart'] = substr($d->extra_start, 3, 2);
+            $arr['Mend'] = substr($d->extra_end, 3, 2);
+            $arr['dayoff_flg'] = $d->dayoff_flg;
+            $arr['usr_id'] = $d->usr_id;
+            $arr['group_id'] = $d->group_id;
+            $arr['extra_percent'] = $d->extra_percent;
+            $arr['over_flg'] = $d->over_flg;
+            $arr['hour_start'] = $d->hour_start;
+            $arr['hour_end'] = $d->hour_end;
+            if ($target_usr == $d->usr_id) {
+                $extra[] = $arr;
+            } else {
+                $previous[0] = $arr;
+            }
+            $is_data = 1;
+        }
+
+        if (count($extra) == 0 AND $is_data > 0) {
+            $extra = $previous;
+        }
         $i = 0;
-        $monthly = [];
-        $endOfMonth = $thisMonth->daysInMonth;
-        while ($i < $endOfMonth) {
-            $arr = [];
-            $arr['time_in'] = '';
-            $arr['time_out'] = '';
-            $arr['break'] = '';
-            $date = str_pad($i + 1, 2, 0, STR_PAD_LEFT);
-            $arr['day'] = __('calendar.day'.$thisMonth->format('w'));
-            $monthly[$date] = $arr;
-            $thisMonth->addDay();
+        while ($i < 24) {
+            $hours[] = str_pad($i, 2, "0", STR_PAD_LEFT); 
             ++$i;
         }
-        $thisMonth->addDay();
-        $obj = DB::connection('shift')->table('t_timestamp')
-                ->where('usr_id', $usr_id)
-                ->where('group_id', $group_id)
-                ->where('time_in','>', $begin)
-                ->where('time_in','<', $thisMonth->format('Y-m-01 00:00:00'))
-                ->orderBy('time_in','ASC')
-                ->get();
-
-        $pre_time_out = null; // null will be 19700101 
-        foreach ($obj as $d) {
-            $date = date('d',strtotime($d->time_in));
-            $monthly[$date]['time_out'] = substr($d->time_out,11,5);
-            $pre = new Carbon($pre_time_out);
-            $thisIn = new Carbon($d->time_in);
-            if ($pre->format('d') == $thisIn->format('d')) {
-                $breakMin = $breakMin + $pre->diffInMinutes($thisIn);
-            } else {
-                $breakMin = 0;
-                $monthly[$date]['time_in'] = substr($d->time_in, 11,5);
-            }
-            $monthly[$date]['break'] = $breakMin;
-            $pre_time_out = $d->time_out;
+        $i = 0;
+        while ($i < 6) {
+            $minutes[] = str_pad($i * 10, 2, "0", STR_PAD_LEFT); 
+            ++$i;
         }
-        $obj = DB::table('t_schedule')
-                ->where('usr_id', $usr_id)
-                ->where('group_id', $group_id)
-                ->where('time_start','>', $begin)
-                ->where('time_end','<', $thisMonth->format('Y-m-01 00:00:00'))
-                ->where('tag',2)
-                ->orderBy('time_start','ASC')
-                ->get();
-        foreach ($obj as $d) {
-            $date = date('d',strtotime($d->time_start));
-            $start = new Carbon($d->time_start);
-            $end = new Carbon($d->time_end);
-            $breakMin = $start->diffInMinutes($end);
-            $monthly[$date]['break'] = $monthly[$date]['break'] + $breakMin;
-        }
-        foreach ($monthly as $k => $d) {
-            $arr = [];
-            $arr['time_in'] = $d['time_in'];
-            $arr['time_out'] = $d['time_out'];
-            $arr['day'] = $d['day'];
-            $arr['date'] = $k;
-            if ($d['break']) {
-                $arr['break'] = str_pad(floor($d['break']/60), 2, 0, STR_PAD_LEFT) .
-                        ':' . str_pad($d['break']%60, 2, 0, STR_PAD_LEFT);
-            }
-            $days[] = $arr;
-        }
-        // r_routine, t_leave_amount, m_leave, r_extra
-        $month = new Carbon($month);
-        return view('shift.extra', compact('days','month'));
+        $over_flg[0] = '';
+        $over_flg[1] = __('calendar.month');
+        $over_flg[2] = __('calendar.week');
+        $over_flg[3] = __('calendar.day');
+        $usr = DB::table('t_usr')->where('usr_id', $target_usr)->first();
+//        $usr = json_decode($usr,true);
+        $usr_name = $usr->usr_name;
+        return view('shift.extra', compact('extra','hours','minutes','usr','over_flg',
+                'new','is_data','usr_name'));
     }
 }
-
