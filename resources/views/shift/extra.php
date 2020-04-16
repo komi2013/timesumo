@@ -42,6 +42,7 @@
 
 <div id="content" >
     <template v-for="(d,k) in extra">
+    <div style="width:100%;text-align:right;"><span style="font-size:20px;background-color: silver;" v-on:click="del(k)">&nbsp;-&nbsp;</span></div>
     <table>
     <tr>
         <th>残業時間帯</th>
@@ -66,7 +67,12 @@
     </table>
     <table>
     <tr><th>休日出勤</th><td><input type="checkbox" v-value="d['dayoff_flg']" v-model="d['dayoff_flg']"></td></tr>
-    <tr><th>手当の割合</th><td><input type="text" v-value="d['extra_percent']" v-model="d['extra_percent']"></td></tr>
+    <tr><th>手当の割合(%)</th>
+        <td>
+            <input type="text" v-value="d['extra_percent']" v-model="d['extra_percent']">
+            <i style="color: red;font-size: 12px;" v-if="d['extra_percent'] < 1 || isNaN(d['extra_percent'])" ><br>数値１以上お願いします</i>
+        </td>
+    </tr>
     <tr>
         <th>勤務時間超単位</th>
         <td>
@@ -75,10 +81,19 @@
             </select>
         </td>
     </tr>
-    <tr><th>〜時間以上</th><td><input type="text" v-value="d['hour_start']" v-model="d['hour_start']"></td></tr>
-    <tr><th>〜時間未満</th><td><input type="text" v-value="d['hour_end']" v-model="d['hour_end']"></td></tr>
+    <template v-if="d['over_flg'] > 0">
+    <tr><th>〜時間以上</th><td>
+            <input type="text" v-value="d['hour_start']" v-model="d['hour_start']">
+        <i style="color: red;font-size: 12px;" v-if="d['hour_start'] < 1 || isNaN(d['hour_start'])" ><br>数値１以上お願いします</i>
+        </td></tr>
+    <tr><th>〜時間未満</th><td>
+            <input type="text" v-value="d['hour_end']" v-model="d['hour_end']">
+        <i style="color: red;font-size: 12px;" v-if="d['hour_end'] < 1 || isNaN(d['hour_end'])" ><br>数値１以上お願いします</i>
+        </td></tr>
+    </template>
     </table>
     </template>
+    <div style="width:100%;text-align:right;"><span style="font-size:20px;background-color:silver;" v-on:click="add">&nbsp;+&nbsp;</span></div>
     <div style="width:100%;text-align:center;">
         <input type="submit" value="更新" style="padding:10px;" v-on:click="update">
     </div>
@@ -122,10 +137,8 @@ var app = new Vue({
 });
 
 var is_data = <?=$is_data?>;
-console.log(is_data);
 if(is_data === 0){
     app.add();
-    console.log(app.new);
 }
 
 </script>

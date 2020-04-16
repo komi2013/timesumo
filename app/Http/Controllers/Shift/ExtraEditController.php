@@ -11,7 +11,7 @@ class ExtraEditController extends Controller {
     public function lessuri(Request $request, $directory=null, $controller=null,$action=null,
             $month=null) {
         $usr_id = $request->session()->get('usr_id');
-        $usr_id = 4;
+        $usr_id = 2;
         $group_id = $request->session()->get('group_id');
         $group_id = 2;
 //        \App::setLocale('ja');
@@ -24,6 +24,7 @@ class ExtraEditController extends Controller {
             die('you should belong group at first');
         }
         $now = date('Y-m-d H:i:s');
+
         foreach ($request->extra as $k => $d) {
             if( $d['group_id'] != $group_id) {
                 die('you can not access this');
@@ -38,6 +39,7 @@ class ExtraEditController extends Controller {
             $add[$k]['updated_at'] = $now;
             $target_usr = $d['usr_id'];
         }
+
         $routine = DB::connection('shift')->table('r_routine')
                 ->where('usr_id', $target_usr)
                 ->where('group_id', $group_id)
@@ -54,20 +56,23 @@ class ExtraEditController extends Controller {
                 ->where('usr_id', $add[0]['usr_id'])
                 ->get();
         $del = json_decode($del,true);
-        if ( isset($extra[0]['usr_id']) ) { //update
+        $arr_extra_id = [];
+        if ( isset($del[0]['usr_id']) ) { //update
             foreach ($del as $k => $d) {
                 $del[$k]['action_by'] = $usr_id;
                 $del[$k]['action_at'] = $now;
                 $del[$k]['action_flg'] = 1;
                 $del[$k]['original_by'] = 'ExtraEditController';
+                $arr_extra_id[] = $d['extra_id'];
             }
             $edit = true;
         }
+
         DB::connection('shift')->beginTransaction();
         if($edit){
             DB::connection('shift')->table('h_extra')->insert($del);
             DB::connection('shift')->table('r_extra')
-                    ->whereIn("extra_id", $del['extra_id'])->delete();
+                    ->whereIn("extra_id", $arr_extra_id)->delete();
         }
         DB::connection('shift')->table('r_extra')->insert($add);
         DB::connection('shift')->commit();
