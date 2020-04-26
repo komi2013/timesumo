@@ -35,7 +35,7 @@ class RoutineController extends Controller {
         $arr['approver1'] = 0;
         $arr['approver2'] = 0;
         $arr['compensatory_within'] = 0;
-        $arr['work_time_unit'] = 0;
+        $arr['fix_flg'] = 0;
         $arr['usr_id'] = $target_usr;
         $arr['group_id'] = $group_id;
         $target_data = false;
@@ -62,7 +62,7 @@ class RoutineController extends Controller {
             $arr['approver1'] = $d->approver1;
             $arr['approver2'] = $d->approver2;
             $arr['compensatory_within'] = $d->compensatory_within;
-            $arr['work_time_unit'] = $d->work_time_unit;
+            $arr['fix_flg'] = $d->fix_flg;
             if ($target_usr == $d->usr_id) {
                 $target_data = true;
             }

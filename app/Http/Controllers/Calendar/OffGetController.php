@@ -113,7 +113,7 @@ class OffGetController extends Controller {
             $arr['leave_id'] = 'schedule_'.$d->schedule_id;
             if ( ('schedule_'.$d->schedule_id == $leave_id
                     OR $d->compensatory_days > 0 OR $d->compensatory_hours > 0 )
-                    AND $routine->work_time_unit > 0) {
+                    AND $routine->fix_flg == 0) {
                 $arr['available'] = 1;
             } else {
                 $arr['available'] = 0;

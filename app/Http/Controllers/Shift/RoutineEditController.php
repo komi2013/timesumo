@@ -36,7 +36,7 @@ class RoutineEditController extends Controller {
         $add['approver1'] = $r['approver1'];
         $add['approver2'] = $r['approver2'];
         $add['compensatory_within'] = $r['compensatory_within'];
-        $add['work_time_unit'] = $r['work_time_unit'];
+        $add['fix_flg'] = $r['fix_flg'];
         $add['usr_id'] = $r['usr_id'];
         $add['group_id'] = $r['group_id'];
         $edit = false;
@@ -58,7 +58,7 @@ class RoutineEditController extends Controller {
             $del['approver1'] = $routine->approver1;
             $del['approver2'] = $routine->approver2;
             $del['compensatory_within'] = $routine->compensatory_within;
-            $del['work_time_unit'] = $routine->work_time_unit;
+            $del['fix_flg'] = $routine->fix_flg;
             $del['usr_id'] = $routine->usr_id;
             $del['group_id'] = $routine->group_id;
             $add['routine_id'] = $routine->routine_id;

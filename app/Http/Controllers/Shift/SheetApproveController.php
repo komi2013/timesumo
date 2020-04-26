@@ -8,14 +8,14 @@ use Carbon\Carbon;
 
 class SheetApproveController extends Controller {
 
-    public function index(Request $request, $directory=null, $controller=null,$action=null) {
+    public function lessuri(Request $request, $directory=null, $controller=null,$action=null) {
+
         $usr_id = $request->session()->get('usr_id');
         $usr_id = 2;
         $group_id = $request->session()->get('group_id');
         $group_id = 2;
         \App::setLocale('ja');
 
-//        \App::setLocale('ja');
         $r_group = DB::table('r_group_relate')
                 ->where('usr_id', $usr_id)
                 ->where('group_id', $group_id)
@@ -23,131 +23,88 @@ class SheetApproveController extends Controller {
         if (!isset($r_group->usr_id)) {
             die('you should belong group at first');
         }
-        $routine = DB::connection('shift')->table('r_routine')
+        $rule = DB::connection('shift')->table('r_rule')
                 ->where('usr_id', $usr_id)
                 ->where('group_id', $group_id)
                 ->first();
-        if (!isset($routine->usr_id)) {
-            die('you should go to routine page');
+        if (!isset($rule->usr_id)) {
+            die('you should go to rule page');
         }
-        if ($r_group->owner_flg == 0 AND $routine->approver1 == 0 AND $routine->approver2 == 0) {
+        if ($r_group->owner_flg == 0 AND $rule->approver1 == 0 AND $rule->approver2 == 0 AND $usr_id != $target_usr) {
             die('you have no access right');
         }
-
-        $month = $request->month;
-        $thisMonth = new Carbon($month);
-        $thisMonth = new Carbon($thisMonth->format('Y-m-01 00:00:00'));
-        $begin = $thisMonth->format('Y-m-d H:i:s');
-
-        $i = 0;
-        $monthly = [];
-        $endOfMonth = $thisMonth->daysInMonth;
-        while ($i < $endOfMonth) {
+        $begin = session('begin');
+        $end = session('end');
+        $monthly = json_decode( session('monthly'),true );
+        $approved_id = DB::connection('shift')->select("select nextval('h_approved_approved_id_seq')")[0]->nextval;
+        $now = date('Y-m-d H:i:s');
+        $timestamp = [];
+//        var_dump($monthly); die;
+        foreach ($monthly as $date => $d) {
+            $arr['usr_id'] = session('target_usr');
+            $arr['group_id'] = $group_id;
+            $arr['time_in'] = $date.' '.$d['time_in'];
+            $arr['time_out'] = $date.' '.$d['time_out'];
+            $arr['break_amount'] = $d['break'];
+            $arr['longitude'] = $d['longitude'] ?: 0;
+            $arr['latitude'] = $d['latitude'] ?: 0;
+            $arr['private_ip'] = $d['private_ip'] ?: '0.0.0.0';
+            $arr['public_ip'] = $d['public_ip'] ?: '0.0.0.0';
+            $arr['manual_flg'] = $d['manual_flg'];
+            $arr['offday'] = $d['offday'];
+            $arr['overwork'] = $d['overwork'];
+            $arr['offmin'] = $d['offmin'];
+            $arr['overtime'] = json_encode($d['overtime']);
+            $arr['routine_start'] = $d['routine_start'] ? $d['routine_start'].':00' : '00:00:00';
+            $arr['routine_end'] = $d['routine_end'] ? $d['routine_end'].':00' : '00:00:00';
+            $arr['schedules'] = json_encode($d['schedules'] ?? null);
+            $arr['action_by'] = $usr_id;
+            $arr['action_at'] = $now;
+            $arr['action_flg'] = 1;
+            $arr['approved_id'] = $approved_id;
+            $timestamp[] = $arr;
+        }
+//        var_dump($timestamp); die;
+        $worked = json_decode( session('worked_wage'),true );
+        $worked_wage = [];
+        foreach ($worked as $k => $d) {
             $arr = [];
-            $arr['time_in'] = '';
-            $arr['time_out'] = '';
-            $arr['break'] = 0;
-            $arr['longitude'] = '';
-            $arr['latitude'] = '';
-            $arr['private_ip'] = '';
-            $arr['public_ip'] = '';
-            $arr['schedule_id'] = 0;
-            $date = str_pad($i + 1, 2, 0, STR_PAD_LEFT);
-            $arr['day'] = __('calendar.day'.$thisMonth->format('w'));
-            $arr['date'] = $date;
-            $monthly[$date] = $arr;
-            $thisMonth->addDay();
-            ++$i;
+            $arr['overtime'] = $d['time'];
+            $arr['extra_ratio'] = $d['ratio'];
+            $arr['overtime_wage'] = $d['money'];
+            $arr['overtime_title'] = $d['title'];
+            $arr['extra_id'] = $d['extra_id'];
+            $arr['basic'] = session('basic');
+            $arr['total_overtime'] = session('ot_wage');
+            $arr['total'] = session('wage');
+            $arr['approved_id'] = $approved_id;
+            $arr['action_at'] = $now;
+            $arr['action_by'] = $usr_id;
+            $worked_wage[] = $arr;
         }
-
-        $thisMonth->addDay();
-        $obj = DB::connection('shift')->table('t_timestamp')
-                ->where('usr_id', $target_usr)
+//        var_dump($timestamp);
+        DB::connection('shift')->beginTransaction();
+        DB::beginTransaction();
+        DB::connection('shift')->table('h_timestamp')->insert($timestamp);
+        DB::connection('shift')->table('h_worked_wage')->insert($worked_wage);
+        DB::table('t_schedule')
+            ->whereIn("schedule_id", json_decode(session('schedules'),true))
+            ->update([
+                'access_right' => '440'
+                ,'updated_at' => $now
+                ]);
+        DB::connection('shift')->table('t_timestamp')
+                ->where('usr_id', session('target_usr'))
                 ->where('group_id', $group_id)
-                ->where('time_in','>', $begin)
-                ->where('time_in','<', $thisMonth->format('Y-m-01 00:00:00'))
-                ->orderBy('time_in','ASC')
-                ->get();
+                ->where('time_in','>=', $begin)
+                ->where('time_in','<', $end)
+//                ->where('approved_id','=', 0)
+                ->update(['approved_id' => $approved_id]);
+        DB::commit();
+        DB::connection('shift')->commit();
 
-        $pre_time_out = null; // null will be 19700101 
-        foreach ($obj as $d) {
-            $date = date('d',strtotime($d->time_in));
-            $monthly[$date]['time_out'] = substr($d->time_out,11,5);
-            $monthly[$date]['longitude'] = $d->longitude;
-            $monthly[$date]['latitude'] = $d->latitude;
-            $monthly[$date]['private_ip'] = $d->private_ip;
-            $monthly[$date]['public_ip'] = $d->public_ip;
-            $pre = new Carbon($pre_time_out);
-            $thisIn = new Carbon($d->time_in);
-            if ($pre->format('d') == $thisIn->format('d')) {
-                $breakMin = $breakMin + $pre->diffInMinutes($thisIn);
-            } else {
-                $breakMin = 0;
-                $monthly[$date]['time_in'] = substr($d->time_in, 11,5);
-            }
-            $monthly[$date]['break'] = $breakMin;
-            $pre_time_out = $d->time_out;
-        }
-        $obj = DB::table('t_schedule')
-                ->where('usr_id', $target_usr)
-                ->where('group_id', $group_id)
-                ->where('time_start','>', $begin)
-                ->where('time_end','<', $thisMonth->format('Y-m-01 00:00:00'))
-                ->orderBy('time_start','ASC')
-                ->get();
-        $arr_schedule_id = [];
-        $todos = [];
-        $leaves = [];
-        foreach ($obj as $d) {
-            if ($d->tag == 2) {
-                $date = date('d',strtotime($d->time_start));
-                $start = new Carbon($d->time_start);
-                $end = new Carbon($d->time_end);
-                $breakMin = $start->diffInMinutes($end);
-                $monthly[$date]['break'] = $monthly[$date]['break'] + $breakMin;
-                $monthly[$date]['todo_'.$d->schedule_id] = $d->title;
-                $monthly[$date]['leave_'.$d->schedule_id] = 0;
-                $monthly[$date]['schedule_id'] = $d->schedule_id;
-                $todos[$d->schedule_id] = $date;
-                $leaves[$d->schedule_id] = $date;
-                $arr_schedule_id[] = $d->schedule_id;   
-            }
-        }
-        
-//        $obj = DB::table('t_todo')
-//                ->whereIn('schedule_id', $arr_schedule_id)
-//                ->orderBy('updated_at','ASC')
-//                ->get();
-//        foreach ($obj as $d) {
-//            $paths = json_decode($d->file_paths,true) ?? [];
-//            $attachs = "";
-//            foreach ($paths as $d) {
-//                $attachs .= "\r\n".$d;
-//            }
-//            $date = $todos[$d->schedule_id];
-//            $monthly[$date]['todo_'.$d->schedule_id] = "\r\n".$d->todo.$attachs."\r\n";
-//        }
-        
-//        $obj = DB::table('t_variation')
-//                ->whereIn('schedule_id', $arr_schedule_id)
-//                ->where('variation_name', 'leave_id')
-//                ->orderBy('updated_at','ASC')
-//                ->get();
-//        foreach ($obj as $d) {
-//            $date = $leaves[$d->schedule_id];
-//            $monthly[$date]['leave_'.$d->schedule_id] = $d->variation_value;
-//        }
-
-        foreach ($monthly as $k => $d) {
-            $arr = $d;
-            
-            $arr['break'] = str_pad(floor($d['break'] / 60), 2, 0, STR_PAD_LEFT).':'.
-                    str_pad(($d['break'] % 60), 2, 0, STR_PAD_LEFT);
-            $days[] = $arr;
-        }
-
-        $month = new Carbon($month);
-        return view('shift.sheet_detail', compact('days','month','target_usr'));
+        $res[0] = 1;
+        return json_encode($res);
     }
 }
 

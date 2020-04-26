@@ -33,7 +33,7 @@ class OffAddController extends Controller {
                 ->where('schedule_id', $leave_schedule_id)
                 ->first();
             if ( ( $compensatory->compensatory_days == 0 AND $compensatory->compensatory_hours == 0 )
-                    OR $routine->work_time_unit == 0) {
+                    OR $routine->fix_flg == 0) {
                 $res[0] = 2;
                 $res[1] = 'this compensatory leave is not available';
                 die(json_encode($res));

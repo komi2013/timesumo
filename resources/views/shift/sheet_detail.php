@@ -21,7 +21,15 @@
     .shift th {
        border: solid 1px;
     }
-
+    .offday {
+        background-color: silver;
+    }
+    .bad_time {
+        color : red;
+    }
+    .manual_flg {
+        background-color: orange;
+    }
 </style>
 <body>
 
@@ -51,19 +59,21 @@
         <tr>                     <th colspan="4">備考</th></tr>
         <tr v-if="geo">    <th>経度</th><th>緯度</th><th>private ip</th><th>public ip</th></tr>
         <template v-for="(d,k) in days">
-        <tr>
+        <tr v-bind:class="{offday:d['offday']}">
             <td v-bind:rowspan="row">{{d['date']}} {{d['day']}}</td>
-            <td>{{d['time_in']}}</td>
-            <td>{{d['time_out']}}</td>
-            <td>{{d['break']}}</td>
-            <td></td>
+            <td v-bind:class="{bad_time:d['routine_start'] < d['time_in'],manual_flg:d['manual_flg']}">{{d['time_in']}}</td>
+            <td v-bind:class="{bad_time:d['time_out'] < d['routine_end'],manual_flg:d['manual_flg']}">{{d['time_out']}}</td>
+            <td v-bind:class="{manual_flg:d['manual_flg']}">{{d['break']}}</td>
+            <td>{{d['overwork']}}</td>
         </tr>
-        <tr>
+        <tr v-bind:class="{offday:d['offday']}">
             <td colspan="4" style="font-size: 12px;">
-                <a target="_blank" v-bind:href="'/Calendar/Schedule/edit/'+d['schedule_id']+'/'" >{{d['todo_'+d['schedule_id']]}}</a>
+                <template v-for="(d2,k2) in d['schedules']">
+                <a target="_blank" v-bind:href="'/Calendar/Schedule/edit/'+k2+'/'" >{{d2}}</a>
+                </template>
             </td>
         </tr>
-        <tr v-if="geo">
+        <tr v-if="geo" v-bind:class="{offday:d['offday']}">
             <td>{{d['longitude']}}</td>
             <td>{{d['latitude']}}</td>
             <td>{{d['private_ip']}}</td>
@@ -74,7 +84,21 @@
         </tr>
         </template>
     </table>
-    <div style="width:100%;text-align:center;">
+    <template v-for="(d,k) in total_wage">
+    <br>
+    <div>基本給 : {{d['basic']}}</div>
+    <table style="width:100%;">
+        <tr>
+            <td colspan="2"></td><td>残業時間</td><td>割合</td><td>残業代</td>
+        </tr>
+        <tr v-for="(d2,k2) in d['worked_wage']">
+            <td colspan="2">{{d2['title']}}</td><td>{{d2['time']}}</td><td>{{d2['ratio']}}</td><td>{{d2['money']}}</td>
+        </tr>
+        <tr><th></th><th colspan="3">残業合計</th><th>{{d['ot_wage']}}</th></tr>
+    </table>
+    <div>合計 : {{d['wage']}}</div>
+    </template>
+    <div style="width:100%;text-align:center;" v-if="approveButton">
         <input type="submit" value="承認" style="padding:10px;" v-on:click="update">
     </div>
     <br>
@@ -86,20 +110,19 @@
 <div id="ad_right"><iframe src="/htm/ad_right/" width="160" height="600" frameborder="0" scrolling="no"></iframe></div>
 
 <script>
-var month = '<?=$month->format('Y-m')?>';
+
 var content = new Vue({
   el: '#content',
   data: {
-      days:eval(<?=json_encode($days)?>),
       geo : false,
-//      rowspan: 2,
+      days:eval(<?=$days?>),
+      total_wage : eval(<?=$total_wage?>),
+      approveButton : eval(<?=$approveButton?>),
   },
   methods: {
     update: function (e) {
         var param = {
             _token : $('[name="csrf-token"]').attr('content')
-            ,month: month
-            ,target_usr:'<?=$target_usr?>'
         }
         $.post('/Shift/SheetApprove/',param,function(){},"json")
         .always(function(res){
