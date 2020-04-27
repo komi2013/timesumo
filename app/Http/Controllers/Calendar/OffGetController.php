@@ -17,7 +17,7 @@ class OffGetController extends Controller {
         $timestamp = DB::connection('shift')->table('t_timestamp')
                 ->where('usr_id', $usr_id)
                 ->where('group_id', $group_id)
-                ->where('fix_flg', 1)
+                ->where('approved_id','>', 0)
                 ->orderBy('time_in','DESC')
                 ->first();
         $begin = $timestamp->time_out ?? '2000-01-01 00:00:00';
@@ -149,7 +149,12 @@ class OffGetController extends Controller {
             }
             $thisDay->addDay();
         }
-        if ($routine->holiday_flg == 1) {
+        $rule = DB::connection('shift')->table('r_rule')
+                ->where('usr_id', $usr_id)
+                ->where('group_id', $group_id)
+                ->first();
+
+        if ($rule->holiday_flg == 1) {
             $obj = DB::table('c_holiday')->select('holiday_date')
                     ->where('country', 'jp')
                     ->where('holiday_date','>', $begin)

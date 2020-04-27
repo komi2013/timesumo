@@ -11,6 +11,8 @@ class ScheduleEditController extends Controller {
     public function lessuri(Request $request, $directory=null, $controller=null, $action=null) {
 
         $usr_id = 2;
+        $group_id = 2;
+        $mystaff = session('mystaff');
         $arr3 = [];
         $usrs = $request->input('usrs');
         $schedule_id = $request->input('schedule_id');
@@ -20,7 +22,13 @@ class ScheduleEditController extends Controller {
         $overwrite = false;
         foreach ($obj as $d) {
             if ($d->usr_id == $usr_id) {
-                $mydata = true;
+                $access_right = substr($d->access_right,0,1);
+            } else if($mystaff == $usr_id) {
+                $access_right = substr($d->access_right,1,1);
+            } else if ($group_id == $d->group_id) {
+                $access_right = substr($d->access_right,2,1);
+            } else {
+                die('you are not part of this group');
             }
             $lastUpdate = new Carbon($d->updated_at);
             $viewTime = new Carbon($request->session()->get('view_time'));
@@ -36,19 +44,15 @@ class ScheduleEditController extends Controller {
             $time_end = $d->time_end;
             $title = $d->title;
             $tag = $d->tag;
-            $access_right = $d->access_right;
             $group_id = $d->group_id;
             $updated_at = $d->updated_at;
             $arr = [];
             $arr['public_title'] = $public_title = $d->public_title;
             $db[$d->usr_id] = $arr;
-
             $usr_ids[] = $d->usr_id;
         }
-        if (!$mydata AND $access_right == 0) {
-            $res[0] = 2;
-            $res[1] = 'you can not update because you can not change others schedule';
-            die(json_encode($res));
+        if ($access_right < 6) {
+            die('you can not update because you can not change others schedule');
         }
         $is = DB::table('r_group_relate')
                 ->where("group_id", $group_id)

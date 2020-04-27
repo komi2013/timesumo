@@ -13,9 +13,11 @@ class ScheduleController extends Controller {
         $usr_id = $request->session()->get('usr_id');
         $lang = 'ja';
         \App::setLocale('ja');
-        $usr_id = 2;
+        $usr_id = 3;
         $group_id = $request->session()->get('group_id');
         $group_id = 2;
+        $mystaff = session('mystaff');
+        $mystaff = 2;
         $schedule_id = null;
         $minutes = ['00','15','30','45'];
         for ($i=0; $i<24; $i++) {
@@ -65,10 +67,11 @@ class ScheduleController extends Controller {
                 $arr['usr_name'] = $d->usr_name;
                 $arr_usr[$d->usr_id] = $arr;
             }
+            $access_right = 7;
         } else {  //edit
             $schedule_id = $id_date;
             $obj = DB::table('t_schedule')->where("schedule_id", $schedule_id)->get();
-
+            $access_right = 0;
             foreach ($obj as $d) {
                 $hourStart = date('H', strtotime($d->time_start));
                 $minuteStart = date('i', strtotime($d->time_start));
@@ -85,6 +88,16 @@ class ScheduleController extends Controller {
                 $date = date('Y-m-d', strtotime($d->time_start));
                 $date_end = date('Y-m-d',strtotime($d->time_end));
                 $usr_ids[] = $d->usr_id;
+                if ($d->usr_id == $usr_id AND $access_right < substr($d->access_right,0,1)) {
+                    $access_right = substr($d->access_right,0,1);
+                } else if($mystaff == $d->usr_id AND $access_right < substr($d->access_right,1,1)) {
+                    $access_right = substr($d->access_right,1,1);
+                } else {
+                    $access_right = substr($d->access_right,2,1);
+                }
+            }
+            if ($access_right == 0) {
+                die('no access right');
             }
             $is = DB::table('r_group_relate')
                     ->where("group_id", $group_id)
@@ -110,14 +123,10 @@ class ScheduleController extends Controller {
                 }   
             }
         }
-        // join_usrs:[{0:2,1:"test2usesr",2:0,3:4}]
         foreach ($arr_usr as $k => $d) {
             $arr = [];
-//            $arr["2"] =  $d['owner_flg'];
-//            $arr["3"] =  $d['group_id'];
             $arr[0] =  $k;
             $arr[1] =  $d['usr_name'];
-
             $join_usrs[] = $arr;
         }
         $request->session()->put('view_time', date('Y-m-d H:i:s'));
@@ -131,9 +140,10 @@ class ScheduleController extends Controller {
             $dt->addDay();
             ++ $i;
         }
+//        dd($next);
         return view('calendar.schedule', compact('date','date_end','arr_group','group_ids','schedule_id',
                 'hours','hourStart','hourEnd','minutes','tags','tag','usr_id',
-                'group_id','join_usrs','todo','title','public_title','next'));
+                'group_id','join_usrs','todo','title','public_title','next','access_right'));
     }
 }
 

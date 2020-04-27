@@ -61,18 +61,22 @@
 </style>
 <div id="content">
     <div class="centerize">
+        <template v-if="access_right==7">
         <select style="width:80%;" v-model="tag" @change="copy">
-            <option v-for="(d,k) in tags" v-bind:value="k" 
+            <option v-for="(d,k) in tags" v-bind:value="k"
                     v-bind:style="'background-color:' + d[1]">{{d[0]}}</option>
         </select>
         <template v-if="tag==2">
         <select style="width:80%;" v-model="leave_id" @change="copy">
             <option v-for="(d,k) in off_tags" v-bind:value="d['leave_id']">{{d['leave_name']}}</option>
         </select>
-        </template>
-        <template v-else>
+        </template><template v-else>
             <input type="text" placeholder="タイトル" style="height:50px;width:80%;" v-bind:value="title" v-model="title" @blur="copy" >
             <div style="color:red;" v-if="titleErr">1文字以上10文字以内でお願いします</div>
+        </template>
+        </template><template v-else>
+            <div>{{tags[tag][0]}}</div>
+            <div>{{title}}</div>
         </template>
     </div>
     <br>
@@ -101,32 +105,24 @@
         <option v-for="d in minutes" v-bind:value="d">{{d}}</option>
         </select>
         </template>
-        <table style="width:100%;" v-if="tag == 999"><tr><!--not now implementation-->
-            <td style="width:49%;">
-                <input type="radio" id="day" value="day" v-model="off_base">
-                <label for="day"><?=__('calendar.day')?></label></td>
-            <td style="width:49%;">
-                <input type="radio" id="hour" value="hour" v-model="off_base">
-                <label for="hour"><?=__('calendar.hour')?></label></td>
-        </tr></table>
     </div>
     <br>
     <div class="centerize">
-    <template v-if="schedule_id && tag == 2">
+    <template v-if="schedule_id && tag == 2 && access_right == 7">
         <input type="button" value="削除" style="height:30px;width:80%;" onclick="del()">
-    </template>
-    <template v-else-if="schedule_id">
+    </template><template v-else-if="schedule_id && access_right == 7">
         <input type="button" value="更新" style="height:30px;width:40%;" onclick="update()">
         <input type="button" value="削除" style="height:30px;width:40%;" onclick="del()">
-    </template>
-    <template v-else>
+    </template><template v-else-if="schedule_id && access_right == 6">
+        <input type="button" value="更新" style="height:30px;width:40%;" onclick="update()">
+    </template><template v-else-if="!schedule_id">
         <input type="button" value="登録" style="height:30px;width:80%;" onclick="update()">
     </template>
     </div>
     <br>
     <div style="width:97%;padding-left:2%;">
     <div style="width:97%;text-align:right;">
-      <img src="/img/icon/pencil.png" style="max-height:20px;" v-if="!todoEdit" @click="editTodo" >
+      <img src="/img/icon/pencil.png" style="max-height:20px;" v-if="!todoEdit && access_right >= 6" @click="editTodo" >
       <img src="/img/icon/list.png" style="max-height:20px;" v-if="todoEdit" @click="editTodo" >
     </div>
     <div style="font-size: 12px;"
@@ -135,8 +131,9 @@
               placeholder="内容"　wrap="off" v-if="todoEdit" v-model="todo" v-html="todo"></textarea>
     </div>
     <br>
-    <template v-if="tag!=2">
+    
     <div class="centerize">
+    <template v-if="tag!=2 && access_right==7">
         <select style="height:30px;width:80%;" v-model="group_id" @change="groupChange(group_id)">
             <option disabled>所属グループ</option>
             <template v-for="(d,k) in arr_group">
@@ -159,12 +156,12 @@
     </div>
     <div class="centerize">↓</div>
     <div class="joining">
+        <div>参加者</div>
     <template v-for="(d,k) in reverseUsrs">
         <template v-for="(d2,k2) in d">
         <div v-if="k2 == 1">{{d2}}</div>
         </template>
     </template>
-        <div>参加者</div>
     </div>
     </div>
     <div class="centerize">
@@ -190,8 +187,23 @@
         <div>使用施設</div>
     </div><br>
     <a target="_blank" v-bind:href="'/Calendar/Space/hours12/<?=$date?>/'+checkSchedule+'/'">空き時間を確認</a>
-    </div>
+    </template><template v-else-if="tag!=2 && access_right < 7">
+        <div class="joining">
+            <div>参加者</div>
+        <template v-for="(d,k) in reverseUsrs">
+            <template v-for="(d2,k2) in d">
+            <div v-if="k2 == 1">{{d2}}</div>
+            </template>
+        </template>
+        </div>
+        <div class="joining">
+        <template v-for="(d,k) in reverseFacility">
+            <div>{{d[1]}}</div>
+        </template>
+            <div>使用施設</div>
+        </div>
     </template>
+    </div>
     <div class="centerize">
         <input type="text" placeholder="公開タイトル" style="height:50px;width:80%;"
                v-model="public_title" v-bind:value="public_title" >
@@ -233,6 +245,7 @@ var app = new Vue({
       ,schedule_id:'<?=$schedule_id?>'
       ,group_id: <?=$group_id?>
       ,public_title : <?=json_encode($public_title)?>
+      ,access_right : eval(<?=$access_right?>)
   },
   computed: {
     reverseUsrs() {
@@ -362,7 +375,9 @@ function update(){
         ,leave_id : app.leave_id
     }
     var post_url = '/Calendar/ScheduleAdd/';
-    if(app.tag == 2 && app.schedule_id){
+    if(app.access_right == 6){
+        post_url = '/Calendar/TodoEdit/';
+    }else if(app.tag == 2 && app.schedule_id){
         post_url = '/Calendar/OffEdit/';
     }else if(app.tag == 2){
         post_url = '/Calendar/OffAdd/';
