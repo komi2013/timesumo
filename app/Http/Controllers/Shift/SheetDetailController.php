@@ -8,7 +8,6 @@ use Carbon\Carbon;
 
 class SheetDetailController extends Controller {
 
-    public $schedules = [];
     public $wage = [];
     public function index(Request $request, $directory=null, $controller=null,$action=null,
             $month=null,$target_usr=0) {
@@ -96,6 +95,8 @@ class SheetDetailController extends Controller {
                 ->where('time_in','<', $thisMonth->format('Y-m-01 00:00:00'))
                 ->orderBy('time_in','ASC')
                 ->get();
+        $start_begin = $begin;
+        $update_end = $end;
         $approved_id = 0;
         foreach ($obj as $d) {
             $date = date('Y-m-d',strtotime($d->time_in));
@@ -107,36 +108,37 @@ class SheetDetailController extends Controller {
             $monthly[$date]['public_ip'] = $d->public_ip;
             $monthly[$date]['manual_flg'] = $d->manual_flg;
             $monthly[$date]['break'] = $d->break_amount;
-//            if ($d->approved_id) {
-//                $approved_id = $d->approved_id;
-//                $begin = $date.' 23:59:59';
-//                $date_begin = $date;
-//            }
+            if ($d->approved_id) {
+                $approved_id = $d->approved_id;
+                $begin = $date.' 23:59:59';
+                $date_begin = $date;
+            }
+            $update_end = $date.' 23:59:59';
         }
-//        if ($approved_id) {
-//            $monthly = $this->approved($approved_id,$monthly);
-//            $total_wage[] = $this->wage;
-//        }
+        $end = new Carbon($thisMonth->format('Y-m-01 00:00:00'));
+        if ($approved_id > 0) {
+            $monthly = $this->approved($monthly,$start_begin,$end,$target_usr,$group_id);
+            $total_wage = $this->wage;
+        }
         $approveButton = 1;
         $start = new Carbon($begin);
-        $end = new Carbon($thisMonth->format('Y-m-01 00:00:00'));
+        
         if ( $start->diffInHours($end) > 24 ) {
             $schedule = DB::table('t_schedule')
                     ->where('usr_id', $target_usr)
                     ->where('group_id', $group_id)
                     ->where('time_start','>', $begin)
-                    ->where('time_end','<', $thisMonth->format('Y-m-01 00:00:00'))
+                    ->where('time_end','<', $end)
                     ->orderBy('time_start','ASC')
                     ->get();
         } else {
             $schedule = [];
-            $approveButton = 2;
+            $approveButton = 0;
         }
         $extra = DB::connection('shift')->table('r_extra')
                 ->where('usr_id', $target_usr)
                 ->where('group_id', $group_id)
                 ->get();
-        $overhour = [[1000,0],[1000,0],[1000,0],[1000,0]];
         foreach ($schedule as $d) {
             $date = date('Y-m-d',strtotime($d->time_start));
             $start = new Carbon($d->time_start);
@@ -145,22 +147,20 @@ class SheetDetailController extends Controller {
             if ($d->tag == 2) {
                 $offmin = $start->diffInMinutes($end);
                 $monthly[$date]['offmin'] += $offmin;
-//                $monthly[$date]['todo_'.$d->schedule_id] = $d->title;
                 $arr[$d->schedule_id] = $d->title;
                 $monthly[$date]['schedules'][$d->schedule_id] =  $d->title;
-                $this->schedules[$d->schedule_id] = 1;
             } else if ($d->tag != 6 OR $d->tag != 3) { //6 = service, 3 = out
                 foreach ($extra as $d2) {
                     $extra_start = new Carbon(date('Y-m-d ',strtotime($d->time_start)).$d2->extra_start);
                     $extra_end = new Carbon(date('Y-m-d ',strtotime($d->time_start)).$d2->extra_end);
                     if ($extra_end->format('H:i:s') == '23:59:59') {
-                         $extra_end->addMinute();
+                         $extra_end->addSeconds();
                     }
                     if ($date != date('Y-m-d',strtotime($d->time_end))) {
                         $next_start = new Carbon(date('Y-m-d ',strtotime($d->time_end)).$d2->extra_start);
                         $next_end = new Carbon(date('Y-m-d ',strtotime($d->time_end)).$d2->extra_end);
                     }
-                    if (isset($next_end) AND $d2->over_flg == 0) {
+                    if (isset($next_end) AND $d2->over_flg == 0 AND $d2->dayoff_flg == 0) {
                         $monthly = $this->punctuate($start,$end,$next_start,$next_end,$monthly,$date,$d,$d2);
                     }
                     if ($monthly[$date]['offday'] AND $d2->dayoff_flg) {
@@ -174,7 +174,6 @@ class SheetDetailController extends Controller {
                         $arr['hour_start'] = $d2->hour_start;
                         $arr['extra_id'] = $d2->extra_id;
                         $overhour[$d2->over_flg] = $arr;
-//                        $overhour[$d2->over_flg] = [$d2->hour_start,$d2->extra_ratio];
                     } else {
                         $arr['ratio'] = $d2->extra_ratio;
                         $arr['extra_start'] = $d2->extra_start;
@@ -191,29 +190,20 @@ class SheetDetailController extends Controller {
         $monthMin = 0;
 
         foreach ($monthly as $date => $d) {
-
             $arr = $d;
             $in = new Carbon($d['time_in']);
             $out = new Carbon($d['time_out']);
             $min = $in->diffInMinutes($out);
             $workMin = $min - $d['break'];
-
             if ($date_begin < $date) {
-//                var_dump($date);
-//                var_dump($d);
-//                var_dump($overhour[3][0]);
-//                var_dump(floor($workMin/60));
                 if (isset($overhour[3][0]) AND $overhour[3]['hour_start'] * 60 < $workMin) {
                     $minute = $workMin - $overhour[3]['hour_start'];
                     if (isset($worked_wage['day']['time'])) {
                         $worked_wage['day']['time'] += $minute;
                     } else {
                         $worked_wage['day'] = $minute;
-//                        $worked_wage['day'] = [$overhour[3][1],$minute];
                     }
                 }
-//                var_dump($date);
-//                var_dump($d['overtime']);
                 foreach ($d['overtime'] as $extra_id => $extra_time) {
                     if (isset($rangeFee[$extra_id])) {
                         $rangeFee[$extra_id] += $extra_time;
@@ -221,9 +211,7 @@ class SheetDetailController extends Controller {
                         $rangeFee[$extra_id] = $extra_time;
                     }
                 }
-
                 $monthMin += $workMin;
-
             }
             $arr['overwork'] = $arr['overwork'] ? $this->min2time($arr['overwork']) : '' ;
             if ( ($rule->minimum_break * 60) < $workMin AND $rule->break_minute > $d['break']) {
@@ -233,7 +221,6 @@ class SheetDetailController extends Controller {
             } else if ($workMin == 0) {
                 $arr['break'] = '';
             }
-
             $days[$date] = $arr;
         }
         
@@ -246,8 +233,6 @@ class SheetDetailController extends Controller {
                     $arr['time'] = $this->min2time($extra_time);
                     $arr['ratio'] = $range[$extra_id]['ratio'];
                     $arr['money'] = round($extra_time / 60 * $arr['ratio'] * $rule->wage);
-//                    $arr['extra_start'] = $range[$extra_id]['extra_start'];
-//                    $arr['extra_end'] = $range[$extra_id]['extra_end'];
                     $arr['title'] = substr($range[$extra_id]['extra_start'],0,5).'~'.substr($range[$extra_id]['extra_end'],0,5);
                     $arr['extra_id'] = $extra_id;
                     $worked_wage[$extra_id] = $arr;
@@ -269,12 +254,11 @@ class SheetDetailController extends Controller {
             $worked_wage['month']['title'] = __('calendar.month');
             $worked_wage['month']['extra_id'] = $overhour[1]['extra_id'];
         }
-
         $ot_wage = 0;
         foreach ($worked_wage as $k => $d) {
             $ot_wage += $d['money'];
         }
-        var_dump($ot_wage);
+
         $basic = round($monthMin /60 * $rule->wage);
         $wage = $basic + $ot_wage;
         $arr = [];
@@ -282,22 +266,17 @@ class SheetDetailController extends Controller {
         $arr['worked_wage'] = $worked_wage;
         $arr['ot_wage'] = $ot_wage;
         $arr['wage'] = $wage;
-        $total_wage[] = $arr;
-//        $request->session()->flash('month', $month->format('Y-m'));
+        if ($approveButton) {
+            $total_wage[] = $arr;
+        }
         $request->session()->flash('begin', $begin);
-        $request->session()->flash('end', $thisMonth->format('Y-m-01 00:00:00'));
+        $request->session()->flash('update_end', $update_end);
         $request->session()->flash('target_usr', $target_usr);
         $worked_wage = json_encode($worked_wage);
         $request->session()->flash('worked_wage', $worked_wage);
         $request->session()->flash('basic', $basic);
         $request->session()->flash('ot_wage', $ot_wage);
         $request->session()->flash('wage', $wage);
-        $schedules = json_encode(array_flip($this->schedules));
-        $request->session()->flash('schedules', $schedules);
-
-//        }
-
-//        dd($total_wage);
         $days = json_encode($days);
         $total_wage = json_encode($total_wage);
         return view('shift.sheet_detail', compact('month','days','total_wage','approveButton'));
@@ -313,6 +292,13 @@ class SheetDetailController extends Controller {
         } else if ($start <= $extra_start AND $extra_start <= $end AND $end <= $extra_end) {
             $time = $extra_start->diffInMinutes($end);
         }
+//        if ($date == '2020-04-20') {
+//            echo '<pre>';
+//            var_dump($start,$end,$extra_start,$extra_end,$d2,$time);
+//            
+//            echo '</pre>';
+//            echo '<br><br><br><br>';
+//        }        
         if ($time) {
             $monthly[$date]['overwork'] += $time;
             if (isset($monthly[$date]['overtime'][$d2->extra_id])) {
@@ -321,7 +307,6 @@ class SheetDetailController extends Controller {
                 $monthly[$date]['overtime'][$d2->extra_id] = $time;
             }
             $monthly[$date]['schedules'][$d->schedule_id] = $d->title;
-            $this->schedules[$d->schedule_id] = 1;
         }
         
         return $monthly;
@@ -331,21 +316,56 @@ class SheetDetailController extends Controller {
                 str_pad(($minutes % 60), 2, 0, STR_PAD_LEFT);
         return $time;
     }
-    public function approved ($approved_id,$monthly) {
-        $approved = DB::connection('shift')->table('h_approved')
-                ->where('approved_id', $approved_id)
-                ->orderBy('approved_id','DESC')
-                ->first();
-        $monthly_db = json_decode($approved->monthly,true);
-        foreach ($monthly_db as $date => $d) {
-            $monthly[$date] = $d;
+    public function approved ($monthly,$begin,$end,$target_usr,$group_id) {
+        $obj = DB::connection('shift')->table('h_timestamp')
+                ->where('usr_id', $target_usr)
+                ->where('group_id', $group_id)
+                ->where('time_in','>', $begin)
+                ->where('time_in','<', $end)
+                ->get();
+        $approveds = [];
+        foreach ($obj as $d) {
+            $date = date('Y-m-d',strtotime($d->time_in));
+            $monthly[$date]['time_in'] = substr($d->time_in,11,5);
+            $monthly[$date]['time_out'] = substr($d->time_out,11,5);
+            $monthly[$date]['longitude'] = $d->longitude;
+            $monthly[$date]['latitude'] = $d->latitude;
+            $monthly[$date]['private_ip'] = $d->private_ip;
+            $monthly[$date]['public_ip'] = $d->public_ip;
+            $monthly[$date]['manual_flg'] = $d->manual_flg;
+            $monthly[$date]['break'] = $d->break_amount;
+            $monthly[$date]['offday'] = $d->offday;
+            $monthly[$date]['overwork'] = $d->overwork;
+            $monthly[$date]['offmin'] = $d->offmin;
+            $monthly[$date]['overtime'] = json_decode($d->overtime,true);
+            $monthly[$date]['routine_start'] = substr($d->routine_start,0,5);
+            $monthly[$date]['routine_end'] = substr($d->routine_end,0,5);
+            $monthly[$date]['schedules'] = json_decode($d->schedules,true);
+            $approveds[] = $d->approved_id;
         }
-        $arr = [];
-        $arr['basic'] = json_decode($approved->basic,true);
-        $arr['worked_wage'] = json_decode($approved->worked_wage,true);
-        $arr['ot_wage'] = json_decode($approved->ot_wage,true);
-        $arr['wage'] = json_decode($approved->wage,true);
-        $this->wage = $arr;
+        $approveds = array_unique($approveds);
+
+        $worked_wage = DB::connection('shift')->table('h_worked_wage')
+                ->whereIn('approved_id', $approveds)
+                ->get();
+        $approved_id = 0;
+        foreach ($worked_wage as $d) {
+            if ($approved_id != $d->approved_id) {
+                $wage = [];
+            }
+            $arr = [];
+            $arr['ratio'] = $d->extra_ratio;
+            $arr['money'] = $d->overtime_wage;
+            $arr['title'] = $d->overtime_title;
+            $arr['time'] = $d->overtime;
+            $wage['worked_wage'][] = $arr;
+            $wage['ot_wage'] = $d->total_overtime;
+            $wage['wage'] = $d->total;
+            $wage['basic'] = $d->basic;
+            $approved_id = $d->approved_id;
+            $this->wage[$d->approved_id] = $wage;
+            $approved_id = $d->approved_id;
+        }
         return $monthly;
     }
 }

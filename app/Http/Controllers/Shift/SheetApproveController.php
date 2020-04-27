@@ -33,38 +33,47 @@ class SheetApproveController extends Controller {
         if ($r_group->owner_flg == 0 AND $rule->approver1 == 0 AND $rule->approver2 == 0 AND $usr_id != $target_usr) {
             die('you have no access right');
         }
-        $begin = session('begin');
-        $end = session('end');
+        $begin = new Carbon(session('begin'));
+        $begin->addSeconds();
+        $end = new Carbon(session('update_end'));
+        $end->addSeconds();
         $monthly = json_decode( session('monthly'),true );
-        $approved_id = DB::connection('shift')->select("select nextval('h_approved_approved_id_seq')")[0]->nextval;
+        $approved_id = DB::connection('shift')->select("select nextval('approved_id_seq')")[0]->nextval;
         $now = date('Y-m-d H:i:s');
         $timestamp = [];
-//        var_dump($monthly); die;
+        $schedules = [];
         foreach ($monthly as $date => $d) {
-            $arr['usr_id'] = session('target_usr');
-            $arr['group_id'] = $group_id;
-            $arr['time_in'] = $date.' '.$d['time_in'];
-            $arr['time_out'] = $date.' '.$d['time_out'];
-            $arr['break_amount'] = $d['break'];
-            $arr['longitude'] = $d['longitude'] ?: 0;
-            $arr['latitude'] = $d['latitude'] ?: 0;
-            $arr['private_ip'] = $d['private_ip'] ?: '0.0.0.0';
-            $arr['public_ip'] = $d['public_ip'] ?: '0.0.0.0';
-            $arr['manual_flg'] = $d['manual_flg'];
-            $arr['offday'] = $d['offday'];
-            $arr['overwork'] = $d['overwork'];
-            $arr['offmin'] = $d['offmin'];
-            $arr['overtime'] = json_encode($d['overtime']);
-            $arr['routine_start'] = $d['routine_start'] ? $d['routine_start'].':00' : '00:00:00';
-            $arr['routine_end'] = $d['routine_end'] ? $d['routine_end'].':00' : '00:00:00';
-            $arr['schedules'] = json_encode($d['schedules'] ?? null);
-            $arr['action_by'] = $usr_id;
-            $arr['action_at'] = $now;
-            $arr['action_flg'] = 1;
-            $arr['approved_id'] = $approved_id;
-            $timestamp[] = $arr;
+            $dt = new Carbon($date); 
+            if ($begin <= $dt AND $dt <= $end) {
+                $arr['usr_id'] = session('target_usr');
+                $arr['group_id'] = $group_id;
+                $arr['time_in'] = $date.' '.$d['time_in'];
+                $arr['time_out'] = $date.' '.$d['time_out'];
+                $arr['break_amount'] = $d['break'];
+                $arr['longitude'] = $d['longitude'] ?: 0;
+                $arr['latitude'] = $d['latitude'] ?: 0;
+                $arr['private_ip'] = $d['private_ip'] ?: '0.0.0.0';
+                $arr['public_ip'] = $d['public_ip'] ?: '0.0.0.0';
+                $arr['manual_flg'] = $d['manual_flg'];
+                $arr['offday'] = $d['offday'];
+                $arr['overwork'] = $d['overwork'];
+                $arr['offmin'] = $d['offmin'];
+                $arr['overtime'] = json_encode($d['overtime']);
+                $arr['routine_start'] = $d['routine_start'] ? $d['routine_start'].':00' : '00:00:00';
+                $arr['routine_end'] = $d['routine_end'] ? $d['routine_end'].':00' : '00:00:00';
+                $arr['schedules'] = json_encode($d['schedules'] ?? null);
+                $arr['action_by'] = $usr_id;
+                $arr['action_at'] = $now;
+                $arr['action_flg'] = 1;
+                $arr['approved_id'] = $approved_id;
+                $timestamp[] = $arr;
+                if (isset($d['schedules'])) {
+                    foreach ($d['schedules'] as $schedule_id => $d) {
+                        $schedules[] = $schedule_id;
+                    }
+                }
+            }
         }
-//        var_dump($timestamp); die;
         $worked = json_decode( session('worked_wage'),true );
         $worked_wage = [];
         foreach ($worked as $k => $d) {
@@ -82,17 +91,19 @@ class SheetApproveController extends Controller {
             $arr['action_by'] = $usr_id;
             $worked_wage[] = $arr;
         }
-//        var_dump($timestamp);
+
         DB::connection('shift')->beginTransaction();
         DB::beginTransaction();
         DB::connection('shift')->table('h_timestamp')->insert($timestamp);
         DB::connection('shift')->table('h_worked_wage')->insert($worked_wage);
         DB::table('t_schedule')
-            ->whereIn("schedule_id", json_decode(session('schedules'),true))
+            ->whereIn("schedule_id", $schedules)
             ->update([
                 'access_right' => '440'
                 ,'updated_at' => $now
                 ]);
+        $begin = $begin->format('Y-m-d H:i:s');
+        $end = $end->format('Y-m-d H:i:s');
         DB::connection('shift')->table('t_timestamp')
                 ->where('usr_id', session('target_usr'))
                 ->where('group_id', $group_id)
