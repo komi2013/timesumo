@@ -143,6 +143,7 @@ class OffAddController extends Controller {
         $schedule[0]['group_id'] = $group_id;
         $schedule[0]['public_title'] = $request->input('public_title') ?? '';
         $schedule[0]['updated_at'] = $now;
+        $schedule[0]['access_right'] = 770;
         DB::table('t_schedule')->insert($schedule);
         $variation[0]['schedule_id'] = $schedule_id;
         $variation[0]['variation_name'] = 'leave_id';

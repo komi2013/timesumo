@@ -93,6 +93,7 @@ class OffGetController extends Controller {
                 $arr['available'] = 0;
                 $arr['enable_end'] = '2000-01-01';
             }
+            $arr['leave_amount_flg'] = $d->leave_amount_flg;
             $arr['leave_id'] = $d->leave_id;
             $arr['leave_name'] = $d->leave_name;
             $arr['prove_flg'] = $d->prove_flg;

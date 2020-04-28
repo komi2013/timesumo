@@ -56,7 +56,13 @@
         padding-top: 2px;
     }
     select {
-       height: 30px; 
+       height: 30px;
+    }
+    .no_arrow {
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        appearance: none;
+        min-width: 30px;
     }
 </style>
 <div id="content">
@@ -81,29 +87,27 @@
     </div>
     <br>
     <div class="centerize">
-        <?=date(__('calendar.date'),strtotime($date))?>&nbsp;
-        <template v-if="tag == 2 && off_base == 'day'">
-            <template v-if="nextDay.length > 0 && off_base == 'day'">
-                ~
-            <select  v-model="date_end">
-            <option v-for="d in nextDay" v-bind:value="d[0]">{{d[1]}}</option>
-            </select>
-            </template>
+        <?=date(__('calendar.date'),strtotime($date))?>
+        <template v-if="displayTime">
+        <select class="no_arrow" v-model="hourStart" >
+        <option v-for="d in hours" v-bind:value="d">{{d}}</option>
+        </select>
+        <select class="no_arrow" v-model="minuteStart" >
+        <option v-for="d in minutes" v-bind:value="d">{{d}}</option>
+        </select>
         </template>
-        <template v-else>
-        <select v-model="hourStart">
-        <option v-for="d in hours" v-bind:value="d">{{d}}</option>
-        </select>
-        <select v-model="minuteStart">
-        <option v-for="d in minutes" v-bind:value="d">{{d}}</option>
-        </select>
         <span>~</span>
-        <select v-model="hourEnd">
+        <select class="no_arrow" v-model="date_end" >
+            <option v-for="d in nextDay" v-bind:value="d[0]">{{d[1]}}</option>
+        </select>
+        <template v-if="displayTime">
+        <select class="no_arrow" v-model="hourEnd" >
         <option v-for="d in hours" v-bind:value="d">{{d}}</option>
         </select>
-        <select v-model="minuteEnd">
+        <select class="no_arrow" v-model="minuteEnd" >
         <option v-for="d in minutes" v-bind:value="d">{{d}}</option>
         </select>
+        </template>
         </template>
     </div>
     <br>
@@ -224,7 +228,9 @@ var app = new Vue({
       ,titleErr:false
       ,off_tags:[]
       ,leave_id:null
+      ,displayTime:true
       ,next:[]
+      ,next_date:eval(<?=json_encode($next)?>)
       ,date_end:'<?=$date_end?>'
       ,hours:eval(<?=json_encode($hours)?>)
       ,minutes:['00','15','30','45']
@@ -273,30 +279,28 @@ var app = new Vue({
         return encodeURIComponent(JSON.stringify(arr));
     },
     nextDay: function () {
-        for (var i = 0; i < this.off_tags.length; i++) {
-            if(this.off_tags[i]['leave_id'] == this.leave_id){
-                var available = this.off_tags[i]['available'] -1;
+        var next = this.next_date;
+        var available = 30;
+        this.displayTime = true;
+        
+        if(this.tag == 2){
+            for (var i = 0; i < this.off_tags.length; i++) {
+                if(this.off_tags[i]['leave_id'] == this.leave_id && this.off_tags[i]['leave_amount_flg']){
+                    available = this.off_tags[i]['available'] -1;
+                }
+                console.log(this.off_tags[i]['leave_id'],this.leave_id);
+                if(this.off_tags[i]['leave_id'] == this.leave_id && !this.off_tags[i]['leave_amount_flg']){
+                    this.displayTime = false;
+                    this.hourStart = '00';
+                    this.minuteStart = '00';
+                    this.hourEnd = '23';
+                    this.minuteEnd = '59';
+                    
+                }
             }
+            var next = this.next.slice(0,available);
         }
-        return this.next.slice(0,available);
-    },
-    time_start: function () {
-        var hourStart = '00';
-        var minuteStart = '00';
-        if(this.tag != 2 || this.off_base == 'hour'){
-            hourStart = this.hourStart;
-            minuteStart = this.minuteStart;
-        }
-        return date +' '+ hourStart + ':' + minuteStart + ':00';
-    },
-    time_end: function () {
-        var hourEnd = '23';
-        var minuteEnd = '59';
-        if(this.tag != 2 || this.off_base == 'hour'){
-            hourEnd = this.hourEnd;
-            minuteEnd = this.minuteEnd;
-        }
-        return this.date_end +' '+ hourEnd + ':' + minuteEnd + ':00';
+        return next;
     },
   },
   methods: {
@@ -365,8 +369,8 @@ function update(){
         _token : $('[name="csrf-token"]').attr('content')
         ,tag : app.tag
         ,title : app.title
-        ,time_start : app.time_start
-        ,time_end : app.time_end
+        ,time_start : date +' '+ app.hourStart+':'+app.minuteStart+':00'
+        ,time_end : app.date_end +' '+ app.hourEnd+':'+app.minuteEnd+':59'
         ,todo : app.todo
         ,usrs : arr
         ,group_id : app.group_id

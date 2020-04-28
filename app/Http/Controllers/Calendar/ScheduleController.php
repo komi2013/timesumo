@@ -13,7 +13,7 @@ class ScheduleController extends Controller {
         $usr_id = $request->session()->get('usr_id');
         $lang = 'ja';
         \App::setLocale('ja');
-        $usr_id = 3;
+        $usr_id = 2;
         $group_id = $request->session()->get('group_id');
         $group_id = 2;
         $mystaff = session('mystaff');
@@ -55,8 +55,8 @@ class ScheduleController extends Controller {
         $todo = '';
         $public_title = '';
         $leave_id = null;
-        if ( strpos($id_date,"-") ) { //new
-            $date = $id_date;
+        if ( strpos($id_date,"-") OR !$id_date ) { //new
+            $date = $id_date ?: date('Y-m-d');
             $date_end = date('Y-m-d',strtotime($date));
             $dt = new Carbon();
             $hourStart = $dt->addHour()->format('H');
@@ -136,9 +136,9 @@ class ScheduleController extends Controller {
         $dt = new Carbon($date);
         $i = 0;
         while ($i < 30) {
-            $next[] = $dt->format(__('calendar.date'));
+            $next[] = [$dt->format('Y-m-d'),$dt->format(__('calendar.date'))];
             $dt->addDay();
-            ++ $i;
+            ++$i;
         }
 //        dd($next);
         return view('calendar.schedule', compact('date','date_end','arr_group','group_ids','schedule_id',
