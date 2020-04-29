@@ -89,22 +89,22 @@
     <div class="centerize">
         <?=date(__('calendar.date'),strtotime($date))?>
         <template v-if="displayTime">
-        <select class="no_arrow" v-model="hourStart" >
+        <select class="no_arrow" v-model="hourStart" :disabled="access_right < 7">
         <option v-for="d in hours" v-bind:value="d">{{d}}</option>
         </select>
-        <select class="no_arrow" v-model="minuteStart" >
+        <select class="no_arrow" v-model="minuteStart" :disabled="access_right < 7">
         <option v-for="d in minutes" v-bind:value="d">{{d}}</option>
         </select>
         </template>
         <span>~</span>
-        <select class="no_arrow" v-model="date_end" >
+        <select class="no_arrow" v-model="date_end" :disabled="access_right < 7">
             <option v-for="d in nextDay" v-bind:value="d[0]">{{d[1]}}</option>
         </select>
         <template v-if="displayTime">
-        <select class="no_arrow" v-model="hourEnd" >
+        <select class="no_arrow" v-model="hourEnd" :disabled="access_right < 7">
         <option v-for="d in hours" v-bind:value="d">{{d}}</option>
         </select>
-        <select class="no_arrow" v-model="minuteEnd" >
+        <select class="no_arrow" v-model="minuteEnd" :disabled="access_right < 7">
         <option v-for="d in minutes" v-bind:value="d">{{d}}</option>
         </select>
         </template>
@@ -133,6 +133,11 @@
          v-if="!todoEdit" v-html="AutoLink(nl2br(todo))"></div>
     <textarea style="width:95%;height:120px;font-size:12px;position:relative;background-color: white;"
               placeholder="内容"　wrap="off" v-if="todoEdit" v-model="todo" v-html="todo"></textarea>
+    <div v-for="(d,k) in file_paths">
+        <a v-bind:href="d[0]">{{d[1]}}</a>
+        <input type="checkbox" v-model="d[2]">
+    </div>
+    <form id="form"><input name="files[]" type="file" id="file" multiple="multiple"></form>
     </div>
     <br>
     
@@ -241,6 +246,7 @@ var app = new Vue({
       ,off_base : 'day'
       ,todo : <?=json_encode($todo)?>
       ,todoEdit : <?=json_encode($todo)?> ? false : true
+      ,file_paths: eval(<?=$file_paths?>)
       ,join_usrs:eval(<?=$join_usrs?>)
 //      ,group_usrs:[[1,'hi'],[2,'ddkk']]
       ,group_usrs:[]
@@ -282,20 +288,17 @@ var app = new Vue({
         var next = this.next_date;
         var available = 30;
         this.displayTime = true;
-        
         if(this.tag == 2){
             for (var i = 0; i < this.off_tags.length; i++) {
                 if(this.off_tags[i]['leave_id'] == this.leave_id && this.off_tags[i]['leave_amount_flg']){
                     available = this.off_tags[i]['available'] -1;
                 }
-                console.log(this.off_tags[i]['leave_id'],this.leave_id);
                 if(this.off_tags[i]['leave_id'] == this.leave_id && !this.off_tags[i]['leave_amount_flg']){
                     this.displayTime = false;
                     this.hourStart = '00';
                     this.minuteStart = '00';
                     this.hourEnd = '23';
                     this.minuteEnd = '59';
-                    
                 }
             }
             var next = this.next.slice(0,available);
@@ -346,10 +349,8 @@ var app = new Vue({
 app.groupChange(app.group_id);
 
 function update(){
-
     var validate = 1;
-    if( (app.title.length < 1 || app.title.length > 10) & 
-            app.tag != 2 ){
+    if( (app.title.length < 1 || app.title.length > 10) && app.tag != 2 ){
         app.titleErr = true;
         validate=2;
     }else{
@@ -365,19 +366,6 @@ function update(){
     for (var i = 0; i < app.join_facility.length; i++) {
         arr.push(app.join_facility[i][0]);
     }
-    var param = {
-        _token : $('[name="csrf-token"]').attr('content')
-        ,tag : app.tag
-        ,title : app.title
-        ,time_start : date +' '+ app.hourStart+':'+app.minuteStart+':00'
-        ,time_end : app.date_end +' '+ app.hourEnd+':'+app.minuteEnd+':59'
-        ,todo : app.todo
-        ,usrs : arr
-        ,group_id : app.group_id
-        ,schedule_id : app.schedule_id
-        ,public_title : app.public_title
-        ,leave_id : app.leave_id
-    }
     var post_url = '/Calendar/ScheduleAdd/';
     if(app.access_right == 6){
         post_url = '/Calendar/TodoEdit/';
@@ -388,8 +376,28 @@ function update(){
     }else if(app.schedule_id){
         post_url = '/Calendar/ScheduleEdit/';
     }
-    $.post(post_url,param,function(){},"json")
+    console.log($('#file').prop('files')[0]);
+    if($('#file').prop('files')[0]){
+        var fd = new FormData($('#form')[0]);
+    }else{
+        var fd = new FormData();
+    }
+    fd.append("_token", $('[name="csrf-token"]').attr('content'));
+    fd.append("tag", app.tag);
+    fd.append("title", app.title);
+    fd.append("time_start", date +' '+ app.hourStart+':'+app.minuteStart+':00');
+    fd.append("time_end", app.date_end +' '+ app.hourEnd+':'+app.minuteEnd+':59');
+    fd.append("todo", app.todo);
+    fd.append("usrs", JSON.stringify(arr));
+    fd.append("group_id", app.group_id);
+    fd.append("schedule_id", app.schedule_id);
+    fd.append("public_title", app.public_title);
+    fd.append("leave_id", app.leave_id);
+    fd.append("file_paths", JSON.stringify(app.file_paths));
+    $.ajax({url:post_url,type:'post',data:fd,processData:false,contentType:false,cache:false,})
     .always(function(res){
+        console.log(eval(res));
+        res = eval(res);
         if(res[0] == 1){
             location.href = '/Calendar/Top/index/'+date.substr(0,7)+'/';
         }else{

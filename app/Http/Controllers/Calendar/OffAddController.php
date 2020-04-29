@@ -10,6 +10,11 @@ class OffAddController extends Controller {
 
     public function lessuri(Request $request, $directory=null, $controller=null, $action=null) {
 
+var_dump($_FILES['files']['name']);
+var_dump($_FILES['files']['tmp_name']);
+var_dump(json_decode($request->input('usrs'),true));
+die;
+dd($request->all());
         $usr_id = 2;
         $group_id = 2;
         \App::setLocale('ja');
@@ -18,6 +23,8 @@ class OffAddController extends Controller {
             $res[1] = 'you are not this user or group is different';
             die(json_encode($res));
         }
+        
+        die();
         $now = date('Y-m-d H:i:s');
         $routine = DB::connection('shift')->table('r_routine')
                 ->where('usr_id', $usr_id)

@@ -108,6 +108,14 @@ class ScheduleController extends Controller {
             }
             $obj = DB::table('t_todo')->where("schedule_id", $schedule_id)->first();
             $todo = $obj->todo ?? '';
+            $file_paths = json_decode($obj->file_paths,true) ?? [];
+//            dd($file_paths);
+            foreach ($file_paths as $k => $d) {
+                $name = explode("/",$d);
+                $file_paths[$k] = [$d,end($name),true];
+//                $file_paths[$k][2] = true;
+            }
+            $file_paths = json_encode($file_paths);
             $obj = DB::table('t_usr')->whereIn("usr_id", $usr_ids)->get();
             foreach ($obj as $d) {
                 $arr['usr_name'] = $d->usr_name;
@@ -142,8 +150,8 @@ class ScheduleController extends Controller {
         }
 //        dd($next);
         return view('calendar.schedule', compact('date','date_end','arr_group','group_ids','schedule_id',
-                'hours','hourStart','hourEnd','minutes','tags','tag','usr_id',
-                'group_id','join_usrs','todo','title','public_title','next','access_right'));
+                'hours','hourStart','hourEnd','minutes','tags','tag','usr_id','group_id','join_usrs',
+                'todo','file_paths','title','public_title','next','access_right'));
     }
 }
 
