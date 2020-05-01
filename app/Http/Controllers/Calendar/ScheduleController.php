@@ -14,10 +14,9 @@ class ScheduleController extends Controller {
         $lang = 'ja';
         \App::setLocale('ja');
         $usr_id = 2;
-        $group_id = $request->session()->get('group_id');
-        $group_id = 2;
-        $mystaff = session('mystaff');
-        $mystaff = 2;
+        $group_id = session('group_id') ?: 0;
+        $mystaff = session('mystaff') ?: 0;
+
         $schedule_id = null;
         $minutes = ['00','15','30','45'];
         for ($i=0; $i<24; $i++) {
@@ -30,27 +29,6 @@ class ScheduleController extends Controller {
         $bind = [
             'usr_id' => $usr_id
         ];
-        $obj = DB::select("SELECT * FROM r_group_relate WHERE usr_id = :usr_id ", $bind);
-        $arr_group = [];
-        $group_ids = [];
-        foreach ($obj as $d) {
-           $group_ids[] = $d->group_id;
-           $arr['group_id'] = $d->group_id;
-           $arr['owner_flg'] = $d->owner_flg;
-           $arr['priority'] = $d->priority;
-           $arr_group[$d->group_id] = $arr;
-        }
-        $obj = DB::table('m_group')->whereIn("group_id", $group_ids)->get();
-        foreach ($obj as $d) {
-           $arr_group[$d->group_id]['group_name'] = $d->group_name;
-           $arr_group[$d->group_id]['selected'] = '';
-           if (!$group_id) {
-               $group_id = $d->group_id;
-           }
-        }
-        $group_ids = json_encode($group_ids);
-        $request->session()->put('group_ids', $group_ids);
-        
         $title = '';
         $todo = '';
         $public_title = '';
@@ -110,11 +88,9 @@ class ScheduleController extends Controller {
             $obj = DB::table('t_todo')->where("schedule_id", $schedule_id)->first();
             $todo = $obj->todo ?? '';
             $file_paths = json_decode($obj->file_paths,true) ?? [];
-//            dd($file_paths);
             foreach ($file_paths as $k => $d) {
                 $name = explode("/",$d);
                 $file_paths[$k] = [$d,end($name),true];
-//                $file_paths[$k][2] = true;
             }
             $file_paths = json_encode($file_paths);
             $obj = DB::table('t_usr')->whereIn("usr_id", $usr_ids)->get();
@@ -139,10 +115,9 @@ class ScheduleController extends Controller {
             $arr[1] =  $d['usr_name'];
             $join_usrs[] = $arr;
         }
-        $request->session()->put('view_time', date('Y-m-d H:i:s'));
+        $request->session()->flash('view_time', date('Y-m-d H:i:s'));
         $join_usrs = json_encode($join_usrs);
         
-        $arr_group = json_encode($arr_group);
         $dt = new Carbon($date);
         $i = 0;
         while ($i < 30) {
@@ -150,8 +125,7 @@ class ScheduleController extends Controller {
             $dt->addDay();
             ++$i;
         }
-//        dd($next);
-        return view('calendar.schedule', compact('date','date_end','arr_group','group_ids','schedule_id',
+        return view('calendar.schedule', compact('date','date_end','schedule_id',
                 'hours','hourStart','hourEnd','minutes','tags','tag','usr_id','group_id','join_usrs',
                 'todo','file_paths','title','public_title','next','access_right'));
     }

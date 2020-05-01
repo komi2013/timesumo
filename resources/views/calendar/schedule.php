@@ -251,12 +251,11 @@ var app = new Vue({
       ,todoEdit : <?=json_encode($todo)?> ? false : true
       ,file_paths: eval(<?=$file_paths?>)
       ,join_usrs:eval(<?=$join_usrs?>)
-//      ,group_usrs:[[1,'hi'],[2,'ddkk']]
       ,group_usrs:[]
       ,join_facility:[]
       ,group_facility:[]
-      ,group_ids: eval(<?=$group_ids?>)
-      ,arr_group:eval(<?=$arr_group?>)
+      ,group_ids: []
+      ,arr_group:[]
       ,schedule_id:'<?=$schedule_id?>'
       ,group_id: <?=$group_id?>
       ,public_title : <?=json_encode($public_title)?>
@@ -316,7 +315,10 @@ var app = new Vue({
         .always(function(res){
             if(res[0] == 1){
                 app.group_usrs = res[1];
-                app.group_facility = res[2];   
+                app.group_facility = res[2];
+                app.group_ids = res[3];
+                app.arr_group = res[4];
+                app.group_id = res[5];
             }else{
                 alert('system error');
             }
