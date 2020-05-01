@@ -12,6 +12,7 @@ class TodoEditController extends Controller {
 
 
         $usr_id = 2;
+        $res[0] = 1;
 
         $paths = json_decode($request->input('file_paths'),true);
         $file_paths = [];
@@ -19,17 +20,18 @@ class TodoEditController extends Controller {
             if ($d[2]) {
                 $file_paths[] = $d[0];
             } else {
-                Storage::delete(substr($d[0], 4));
+                Storage::deleteDirectory("public/".substr($d[0],5,strrpos($d[0], "/")-5));
             }
         }
         $schedule_id = $request->schedule_id;
         if ( isset($_FILES['files']['tmp_name']) ) {
             foreach ($_FILES['files']['tmp_name'] as $k => $d) {
                 $name = $_FILES['files']['name'][$k];
-                $path = '/todo/'.date('Ymd').'/'.$schedule_id;
-                $file_paths[] = 'file'.$path.'/'.$name;
-                Storage::putFileAs($path, $d, $name);
-            }            
+                $path = '/todo/'.date('Ymd').'/'.$schedule_id.'/'.
+                    substr(base_convert(md5(uniqid()), 16, 36), 0, 3);
+                $file_paths[] = '/File'.$path.'/'.$name;
+                Storage::putFileAs('/public'.$path, $d, $name);
+            }
         }
         $todo = DB::table('t_todo')->where("schedule_id", $schedule_id)->first();
         if (isset($todo->schedule_id)) {
@@ -58,15 +60,6 @@ class TodoEditController extends Controller {
             ]);
         }
 
-
-//        if ($request->input('todo')) {
-//            DB::table('t_todo')->insert([
-//                'todo' => $request->input('todo'),
-//                'schedule_id' => $schedule_id,
-//                'file_paths' => $file_paths,
-//                'updated_at' => now()
-//            ]);
-//        }
         $res[0] = 1;
         echo json_encode($res);
     }

@@ -68,6 +68,7 @@ class ScheduleController extends Controller {
                 $arr_usr[$d->usr_id] = $arr;
             }
             $access_right = 7;
+            $file_paths = json_encode([]);
         } else {  //edit
             $schedule_id = $id_date;
             $obj = DB::table('t_schedule')->where("schedule_id", $schedule_id)->get();
@@ -130,6 +131,7 @@ class ScheduleController extends Controller {
                     $tags[$k] = $d;
                 }   
             }
+            $request->session()->flash('schedule_id', $schedule_id);
         }
         foreach ($arr_usr as $k => $d) {
             $arr = [];

@@ -5,6 +5,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Storage;
 
 class ScheduleEditController extends Controller {
 
@@ -12,20 +13,20 @@ class ScheduleEditController extends Controller {
 
         $usr_id = 2;
         $group_id = 2;
-        $mystaff = session('mystaff');
         $arr3 = [];
-        $usrs = $request->input('usrs');
+        $usrs = json_decode($request->input('usrs'),true);
         $schedule_id = $request->input('schedule_id');
 
         $obj = DB::table('t_schedule')->where("schedule_id", $schedule_id)->get();
         $mydata = false;
         $overwrite = false;
+        $access_right = 0;
         foreach ($obj as $d) {
-            if ($d->usr_id == $usr_id) {
+            if ($d->usr_id == $usr_id AND $access_right < substr($d->access_right,0,1)) {
                 $access_right = substr($d->access_right,0,1);
-            } else if($mystaff == $usr_id) {
+            } else if(session('mystaff') == $usr_id AND $access_right < substr($d->access_right,1,1)) {
                 $access_right = substr($d->access_right,1,1);
-            } else if ($group_id == $d->group_id) {
+            } else if ($group_id == $d->group_id AND $access_right < substr($d->access_right,2,1)) {
                 $access_right = substr($d->access_right,2,1);
             } else {
                 die('you are not part of this group');
@@ -50,6 +51,7 @@ class ScheduleEditController extends Controller {
             $arr['public_title'] = $public_title = $d->public_title;
             $db[$d->usr_id] = $arr;
             $usr_ids[] = $d->usr_id;
+            $accessRight = $d->access_right;
         }
         if ($access_right < 6) {
             die('you can not update because you can not change others schedule');
@@ -64,8 +66,24 @@ class ScheduleEditController extends Controller {
             die(json_encode($res));
         }
         $todo = DB::table('t_todo')->where("schedule_id", $schedule_id)->first();
-        if (isset($todo->schedule_id) AND $request->input('todo') == $todo->todo) {
-            $same = true;
+
+        $paths = json_decode($request->input('file_paths'),true) ?: [];
+        $file_paths = [];
+        foreach ($paths as $d) {
+            if ($d[2]) {
+                $file_paths[] = $d[0];
+            } else {
+                Storage::deleteDirectory("public/".substr($d[0],5,strrpos($d[0], "/")-5));
+            }
+        }
+        if ( isset($_FILES['files']['tmp_name']) ) {
+            foreach ($_FILES['files']['tmp_name'] as $k => $d) {
+                $name = $_FILES['files']['name'][$k];
+                $path = '/todo/'.date('Ymd').'/'.$schedule_id.'/'.
+                    substr(base_convert(md5(uniqid()), 16, 36), 0, 3);
+                $file_paths[] = '/File'.$path.'/'.$name;
+                Storage::putFileAs('/public'.$path, $d, $name);
+            }
         }
         foreach ($usrs as $d) {
             $schedule[$d]['time_start'] = $request->input('time_start');
@@ -81,6 +99,7 @@ class ScheduleEditController extends Controller {
                 $schedule[$d]['public_title'] = $request->input('public_title') ?? '';
             }
             $schedule[$d]['updated_at'] = now();
+            $schedule[$d]['access_right'] = $accessRight;
         }
         DB::beginTransaction();
         DB::connection('shift')->beginTransaction();
@@ -93,7 +112,7 @@ class ScheduleEditController extends Controller {
                 ,"tag" => $tag
                 ,"group_id" => $group_id
                 ,"updated_at" => $updated_at
-                ,"access_right" => $access_right
+                ,"access_right" => $accessRight
                 ,"action_by" => $usr_id
                 ,"action_at" => date('Y-m-d H:i:s')
                 ,"action_flg" => 1
@@ -102,26 +121,26 @@ class ScheduleEditController extends Controller {
             ]);
         DB::table('t_schedule')->where('schedule_id', $request->input('schedule_id'))->delete();
         DB::table('t_schedule')->insert($schedule);
-        if(!isset($same)){
-            if(isset($todo->updated_at)){
-                DB::connection('shift')->table('h_todo')->insert([
-                        'todo' => $todo->todo
-                        ,'schedule_id' => $schedule_id
-                        ,'updated_at' => $todo->updated_at
-                        ,"action_by" => $usr_id
-                        ,"action_at" => date('Y-m-d H:i:s')
-                        ,"action_flg" => 1
-                    ]);
-            }
-            DB::table('t_todo')->where("schedule_id", $schedule_id)->delete();
-            if ($request->input('todo')) {
-                DB::table('t_todo')->insert([
-                    'todo' => $request->input('todo'),
-                    'schedule_id' => $schedule_id,
-                    'updated_at' => now()
+
+        if(isset($todo->updated_at)){
+            DB::connection('shift')->table('h_todo')->insert([
+                    'todo' => $todo->todo
+                    ,'schedule_id' => $schedule_id
+                    ,'updated_at' => $todo->updated_at
+                    ,'file_paths' => $todo->file_paths
+                    ,"action_by" => $usr_id
+                    ,"action_at" => date('Y-m-d H:i:s')
+                    ,"action_flg" => 1
                 ]);
-            }   
         }
+        DB::table('t_todo')->where("schedule_id", $schedule_id)->delete();
+        DB::table('t_todo')->insert([
+            'todo' => $request->input('todo') ?: '',
+            'schedule_id' => $schedule_id,
+            'file_paths' => json_encode($file_paths),
+            'updated_at' => now()
+        ]);
+
         DB::connection('shift')->commit();
         DB::commit();
         $res[0] = 1;

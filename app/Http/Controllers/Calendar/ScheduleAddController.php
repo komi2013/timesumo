@@ -10,14 +10,6 @@ class ScheduleAddController extends Controller {
 
     public function lessuri(Request $request, $directory=null, $controller=null, $action=null) {
 
-//var_dump($_FILES['files']['name']);
-//var_dump($_FILES['files']['tmp_name']);
-////var_dump(json_decode($request->input('usrs'),true));
-//
-//
-//die;
-//dd($request->all());        
-
         $usr_id = 2;
         $usrs = json_decode($request->input('usrs'),true) ?? [];
         $group_ids = json_decode($request->session()->get('group_ids'),true);
@@ -38,15 +30,15 @@ class ScheduleAddController extends Controller {
         }
         $schedule_id = DB::select("select nextval('t_schedule_schedule_id_seq')")[0]->nextval;
         $file_paths = [];
-        foreach ($_FILES['files']['tmp_name'] as $k => $d) {
-            
-//            $file = substr(base_convert(md5(uniqid()), 16, 36), 0, 20);
-            $name = $_FILES['files']['name'][$k];
-            $path = '/todo/'.date('Ymd').'/'.$schedule_id;
-            $file_paths[] = ['storage'.$path, $name];
-            Storage::putFileAs($path, $d, $name);    
+        if ( isset($_FILES['files']['tmp_name']) ) {
+            foreach ($_FILES['files']['tmp_name'] as $k => $d) {
+                $name = $_FILES['files']['name'][$k];
+                $path = '/todo/'.date('Ymd').'/'.$schedule_id.'/'.
+                    substr(base_convert(md5(uniqid()), 16, 36), 0, 3);
+                $file_paths[] = '/File'.$path.'/'.$name;
+                Storage::putFileAs('/public'.$path, $d, $name);
+            }
         }
-        $file_paths = json_encode($file_paths);
 
         $group_id = $request->input('group_id');
         $public_title = $request->input('public_title') ?? '';
@@ -63,11 +55,11 @@ class ScheduleAddController extends Controller {
             $schedule[$d]['access_right'] = 777;
         }
         DB::table('t_schedule')->insert($schedule);
-        if ($request->input('todo')) {
+        if ($request->input('todo') OR isset($file_paths[0])) {
             DB::table('t_todo')->insert([
-                'todo' => $request->input('todo'),
+                'todo' => $request->input('todo') ?: '',
                 'schedule_id' => $schedule_id,
-                'file_paths' => $file_paths,
+                'file_paths' => json_encode($file_paths),
                 'updated_at' => now()
             ]);
         }

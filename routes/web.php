@@ -14,6 +14,7 @@
 Route::get('/{month?}', 'Calendar\TopController@index');
 
 Route::get('/htm/{page}', 'HtmController@index');
+Route::get('/File/{a}/{b}/{c?}/{d?}/{e?}/{f?}/{g?}/{h?}/{i?}/{j?}/{k?}/', 'FileController@index');
 
 $paths = explode('/', Request::path());
 $paths[0] = isset($paths[0]) ? ucfirst($paths[0]) : '';

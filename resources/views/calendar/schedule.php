@@ -134,10 +134,13 @@
     <textarea style="width:95%;height:120px;font-size:12px;position:relative;background-color: white;"
               placeholder="内容"　wrap="off" v-if="todoEdit" v-model="todo" v-html="todo"></textarea>
     <div v-for="(d,k) in file_paths">
-        <a v-bind:href="d[0]">{{d[1]}}</a>
+        <a target="_blank" v-bind:href="d[0]">{{d[1]}}</a>
         <input type="checkbox" v-model="d[2]">
     </div>
-    <form id="form"><input name="files[]" type="file" id="file" multiple="multiple"></form>
+    <form id="form">
+        <input name="files[]" type="file" id="file" multiple="multiple">
+        <div style="color:red;" v-if="fileErr">ファイルが２MB以上です</div>
+    </form>
     </div>
     <br>
     
@@ -258,6 +261,7 @@ var app = new Vue({
       ,group_id: <?=$group_id?>
       ,public_title : <?=json_encode($public_title)?>
       ,access_right : eval(<?=$access_right?>)
+      ,fileErr:false
   },
   computed: {
     reverseUsrs() {
@@ -356,6 +360,12 @@ function update(){
     }else{
         app.titleErr = false;
     }
+    if($('#file').prop('files')[0] && $('#file').prop('files')[0].size > 2000000){
+        app.fileErr = true;
+        validate=2;
+    }else{
+        app.fileErr = false;
+    }
     if(validate==2){
       return;
     }
@@ -376,7 +386,6 @@ function update(){
     }else if(app.schedule_id){
         post_url = '/Calendar/ScheduleEdit/';
     }
-    console.log($('#file').prop('files')[0]);
     if($('#file').prop('files')[0]){
         var fd = new FormData($('#form')[0]);
     }else{
@@ -394,10 +403,8 @@ function update(){
     fd.append("public_title", app.public_title);
     fd.append("leave_id", app.leave_id);
     fd.append("file_paths", JSON.stringify(app.file_paths));
-    $.ajax({url:post_url,type:'post',data:fd,processData:false,contentType:false,cache:false,})
+    $.ajax({url:post_url,type:'post',data:fd,processData:false,contentType:false,cache:false,dataType:"json",})
     .always(function(res){
-        console.log(eval(res));
-        res = eval(res);
         if(res[0] == 1){
             location.href = '/Calendar/Top/index/'+date.substr(0,7)+'/';
         }else{
