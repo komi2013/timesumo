@@ -51,6 +51,7 @@ class ScheduleDeleteController extends Controller {
             Storage::deleteDirectory("public/".substr($d[0],5,strrpos($d[0], "/")-5));
         }
         $todo = DB::table('t_todo')->where("schedule_id", $schedule_id)->first();
+        $now = date('Y-m-d H:i:s');
         DB::beginTransaction();
         DB::connection('shift')->beginTransaction();
         DB::connection('shift')->table('h_schedule')->insert([
@@ -64,7 +65,7 @@ class ScheduleDeleteController extends Controller {
                 ,"updated_at" => $updated_at
                 ,"access_right" => $accessRight
                 ,"action_by" => $usr_id
-                ,"action_at" => date('Y-m-d H:i:s')
+                ,"action_at" => $now
                 ,"action_flg" => 0
                 ,"original_by" => 'ScheduleDelete'
                 ,"usr_id_json" => json_encode($usr_ids)
@@ -76,7 +77,7 @@ class ScheduleDeleteController extends Controller {
                     ,'schedule_id' => $schedule_id
                     ,'updated_at' => $todo->updated_at
                     ,"action_by" => $usr_id
-                    ,"action_at" => date('Y-m-d H:i:s')
+                    ,"action_at" => $now
                     ,"action_flg" => 1
                 ]);
         }

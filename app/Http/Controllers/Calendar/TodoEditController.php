@@ -34,6 +34,7 @@ class TodoEditController extends Controller {
             }
         }
         $todo = DB::table('t_todo')->where("schedule_id", $schedule_id)->first();
+        $now = date('Y-m-d H:i:s');
         if (isset($todo->schedule_id)) {
             DB::connection('shift')->table('h_todo')->insert([
                     'todo' => $todo->todo
@@ -41,7 +42,7 @@ class TodoEditController extends Controller {
                     ,'file_paths' => json_encode($file_paths)
                     ,'updated_at' => $todo->updated_at
                     ,"action_by" => $usr_id
-                    ,"action_at" => date('Y-m-d H:i:s')
+                    ,"action_at" => $now
                     ,"action_flg" => 1
                 ]);            
             DB::table('t_todo')
@@ -49,14 +50,14 @@ class TodoEditController extends Controller {
                 ->update([
                     'todo' => $request->todo ?: '',
                     'file_paths' => json_encode($file_paths),
-                    'updated_at' => now()
+                    'updated_at' => $now
                 ]);
         } else {
             DB::table('t_todo')->insert([
                 'todo' => $request->todo ?: '',
                 'schedule_id' => $schedule_id,
                 'file_paths' => json_encode($file_paths),
-                'updated_at' => now()
+                'updated_at' => $now
             ]);
         }
 

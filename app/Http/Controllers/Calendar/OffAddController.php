@@ -23,8 +23,7 @@ dd($request->all());
             $res[1] = 'you are not this user or group is different';
             die(json_encode($res));
         }
-        
-        die();
+
         $now = date('Y-m-d H:i:s');
         $routine = DB::connection('shift')->table('r_routine')
                 ->where('usr_id', $usr_id)

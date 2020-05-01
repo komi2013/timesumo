@@ -85,6 +85,7 @@ class ScheduleEditController extends Controller {
                 Storage::putFileAs('/public'.$path, $d, $name);
             }
         }
+        $now = date('Y-m-d H:i:s');
         foreach ($usrs as $d) {
             $schedule[$d]['time_start'] = $request->input('time_start');
             $schedule[$d]['time_end'] = $request->input('time_end');
@@ -98,7 +99,7 @@ class ScheduleEditController extends Controller {
             } else {
                 $schedule[$d]['public_title'] = $request->input('public_title') ?? '';
             }
-            $schedule[$d]['updated_at'] = now();
+            $schedule[$d]['updated_at'] = $now;
             $schedule[$d]['access_right'] = $accessRight;
         }
         DB::beginTransaction();
@@ -114,7 +115,7 @@ class ScheduleEditController extends Controller {
                 ,"updated_at" => $updated_at
                 ,"access_right" => $accessRight
                 ,"action_by" => $usr_id
-                ,"action_at" => date('Y-m-d H:i:s')
+                ,"action_at" => $now
                 ,"action_flg" => 1
                 ,"original_by" => 'ScheduleEdit'
                 ,"usr_id_json" => json_encode($usr_ids)
@@ -129,7 +130,7 @@ class ScheduleEditController extends Controller {
                     ,'updated_at' => $todo->updated_at
                     ,'file_paths' => $todo->file_paths
                     ,"action_by" => $usr_id
-                    ,"action_at" => date('Y-m-d H:i:s')
+                    ,"action_at" => $now
                     ,"action_flg" => 1
                 ]);
         }
@@ -138,7 +139,7 @@ class ScheduleEditController extends Controller {
             'todo' => $request->input('todo') ?: '',
             'schedule_id' => $schedule_id,
             'file_paths' => json_encode($file_paths),
-            'updated_at' => now()
+            'updated_at' => $now
         ]);
 
         DB::connection('shift')->commit();
