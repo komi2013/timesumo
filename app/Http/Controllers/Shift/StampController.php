@@ -14,7 +14,7 @@ class StampController extends Controller {
         $usr_id = 4;
         $group_id = $request->session()->get('group_id');
         $group_id = 2;
-        $stamp = DB::connection('shift')->table('t_timestamp')
+        $stamp = DB::table('t_timestamp')
                 ->where('usr_id', $usr_id)
                 ->where('group_id', $group_id)
 //                ->where('time_in', $group_id)

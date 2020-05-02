@@ -16,8 +16,8 @@ class MenuEditController extends Controller {
         $usr_id = 1;
 //        \Cookie::queue('lang', $lang);
 //        \App::setLocale($lang);
-        $menu = DB::connection('salon')->table('t_menu')->where('menu_id',$menu_id)->first();
-        $shop_group = DB::connection('salon')->table('t_shop_group')
+        $menu = DB::table('t_menu')->where('menu_id',$menu_id)->first();
+        $shop_group = DB::table('t_shop_group')
                 ->where('group_id',$menu->group_id)
                 ->where('usr_id',$usr_id)
                 ->first();
@@ -26,7 +26,7 @@ class MenuEditController extends Controller {
             die("which menu are you ?");
             return redirect('/Auth/Sign/in/0/');
         }
-        $obj = DB::connection('salon')->table('t_menu_necessary')->where('menu_id', $menu_id)->get();
+        $obj = DB::table('t_menu_necessary')->where('menu_id', $menu_id)->get();
         $arr_facility_id = [0];
         $final_end_min = 0;
         foreach ($obj as $d) {
@@ -45,7 +45,7 @@ class MenuEditController extends Controller {
         foreach ($obj as $d) {
             $facilitys[$d->facility_id] = $d->facility_name;
         }
-        $obj = DB::connection('salon')->table('m_service')->get();
+        $obj = DB::table('m_service')->get();
         $services = [];
         foreach ($obj as $d) {
             $services[$d->service_id] = $d->service_name;

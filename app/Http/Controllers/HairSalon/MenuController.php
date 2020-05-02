@@ -29,7 +29,7 @@ class MenuController extends Controller {
             $group_id = $group_id ?: $d->group_id;
         }
 
-        $obj = DB::connection('salon')->table('t_menu')->where('group_id',$group_id)->get();
+        $obj = DB::table('t_menu')->where('group_id',$group_id)->get();
         $menu = [];
         $arr_menu_id = [0];
         foreach ($obj as $d) {
@@ -40,7 +40,7 @@ class MenuController extends Controller {
             $menu[$d->menu_id] = $arr;
         }
 
-        $obj = DB::connection('salon')->table('t_menu_necessary')->whereIn('menu_id', $arr_menu_id)->get();
+        $obj = DB::table('t_menu_necessary')->whereIn('menu_id', $arr_menu_id)->get();
         $arr_facility_id = [];
 
         foreach ($obj as $d) {
@@ -57,7 +57,7 @@ class MenuController extends Controller {
         foreach ($obj as $d) {
             $facilitys[$d->facility_id] = $d->facility_name;
         }
-        $obj = DB::connection('salon')->table('m_service')->get();
+        $obj = DB::table('m_service')->get();
         $services = [];
         foreach ($obj as $d) {
             $services[$d->service_id] = $d->service_name;

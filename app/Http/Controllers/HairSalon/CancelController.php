@@ -21,7 +21,7 @@ class CancelController extends Controller {
         Carbon::setWeekEndsAt(Carbon::SATURDAY);
         $today = Carbon::today();
         $frameDate = Carbon::createFromDate($today->year, $today->month, $today->startOfWeek()->format('d'));
-        $shop = DB::connection('salon')->table('t_shop')->where('group_id', $group_id)->first();
+        $shop = DB::table('t_shop')->where('group_id', $group_id)->first();
         $openHour = substr($shop->open_time,0,2);
         $openMinute = substr($shop->open_time,3,2);
         $frameDate->setTime($openHour, $openMinute, 0);

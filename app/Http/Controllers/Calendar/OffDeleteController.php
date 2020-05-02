@@ -35,16 +35,16 @@ class OffDeleteController extends Controller {
         }
         $now = date('Y-m-d H:i:s');
         DB::beginTransaction();
-        DB::connection('shift')->beginTransaction();
+        DB::beginTransaction();
         
         if (strpos($leave_id,'schedule') > -1) { // compensatory leave
             $leave_schedule_id = str_replace("schedule_", "", $leave_id);
-            $compensatory = DB::connection('shift')->table('t_compensatory')
+            $compensatory = DB::table('t_compensatory')
                     ->where('usr_id', $usr_id)
                     ->where('group_id', $group_id)
                     ->where('schedule_id', $leave_schedule_id)
                     ->first();
-            DB::connection('shift')->table('h_compensatory')->insert([
+            DB::table('h_compensatory')->insert([
                     "compensatory_id" => $compensatory->compensatory_id
                     ,"compensatory_start" => $compensatory->compensatory_start
                     ,"compensatory_end" => $compensatory->compensatory_end
@@ -59,7 +59,7 @@ class OffDeleteController extends Controller {
                     ,"compensatory_hours" => $compensatory->compensatory_hours
                     ,"compensatory_days" => $compensatory->compensatory_days
                     ]);
-            DB::connection('shift')->table('t_compensatory')
+            DB::table('t_compensatory')
                     ->where('usr_id', $usr_id)
                     ->where('group_id', $group_id)
                     ->where('schedule_id', $leave_schedule_id)
@@ -68,18 +68,18 @@ class OffDeleteController extends Controller {
                         ,"updated_at" => $now
                     ]);
         }else{ // paid leave
-            $m_leave = DB::connection('shift')->table('m_leave')->where("leave_id", $leave_id)->first();
+            $m_leave = DB::table('m_leave')->where("leave_id", $leave_id)->first();
             if ($m_leave->leave_amount_flg == 1) {
-                $leave_amount = DB::connection('shift')->table('t_leave_amount')
+                $leave_amount = DB::table('t_leave_amount')
                         ->where('usr_id', $usr_id)
                         ->where('group_id', $group_id)
                         ->where('leave_id', $leave_id)
                         ->first();
-                $pre_leave_amount = DB::connection('shift')->table('h_leave_amount')
+                $pre_leave_amount = DB::table('h_leave_amount')
                         ->where('schedule_id', $schedule_id)
                         ->orderBy('action_at','DESC')
                         ->first();
-                DB::connection('shift')->table('h_leave_amount')->insert([
+                DB::table('h_leave_amount')->insert([
                         "leave_amount_id" => $leave_amount->leave_amount_id
                         ,"usr_id" => $leave_amount->usr_id
                         ,"enable_start" => $leave_amount->enable_start
@@ -95,7 +95,7 @@ class OffDeleteController extends Controller {
                         ,"action_flg" => 0
                         ,"original_by" => 'OffDelete'
                     ]);
-                DB::connection('shift')->table('t_leave_amount')
+                DB::table('t_leave_amount')
                     ->where('usr_id', $usr_id)
                     ->where('group_id', $group_id)
                     ->where('leave_id', $leave_id)
@@ -105,7 +105,7 @@ class OffDeleteController extends Controller {
                     ]);
             }
         }
-        DB::connection('h_calendar')->table('h_variation')->insert([
+        DB::table('h_variation')->insert([
                 "variation_id" => $variation_id
                 ,"variation_name" => 'leave_id'
                 ,"variation_value" => $leave_id
@@ -117,8 +117,8 @@ class OffDeleteController extends Controller {
                 ,"action_flg" => 0
                 ,"original_by" => 'OffDelete'
             ]);
-        DB::connection('h_calendar')->table('h_variation')->where('variation_id', $variation_id)->delete();
-        DB::connection('shift')->table('h_schedule')->insert([
+        DB::table('h_variation')->where('variation_id', $variation_id)->delete();
+        DB::table('h_schedule')->insert([
                 "schedule_id" => $schedule_id
                 ,"title" => $schedule->title
                 ,"usr_id" => $schedule->usr_id
@@ -136,7 +136,7 @@ class OffDeleteController extends Controller {
             ]);
         DB::table('t_schedule')->where('schedule_id', $schedule_id)->delete();
         if(isset($todo->updated_at)){
-            DB::connection('shift')->table('h_todo')->insert([
+            DB::table('h_todo')->insert([
                     'todo' => $todo->todo
                     ,'schedule_id' => $schedule_id
                     ,'updated_at' => $todo->updated_at
@@ -146,7 +146,7 @@ class OffDeleteController extends Controller {
                 ]);
         }
         DB::table('t_todo')->where("schedule_id", $schedule_id)->delete();
-        DB::connection('shift')->commit();
+        DB::commit();
         DB::commit();
         $res[0] = 1;
         echo json_encode($res);

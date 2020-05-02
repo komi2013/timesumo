@@ -24,7 +24,7 @@ class SheetDetailController extends Controller {
         if (!isset($r_group->usr_id)) {
             die('you should belong group at first');
         }
-        $rule = DB::connection('shift')->table('r_rule')
+        $rule = DB::table('r_rule')
                 ->where('usr_id', $usr_id)
                 ->where('group_id', $group_id)
                 ->first();
@@ -66,7 +66,7 @@ class SheetDetailController extends Controller {
         }
         $thisMonth->addDay();
         
-        $routine = DB::connection('shift')->table('r_routine')
+        $routine = DB::table('r_routine')
                 ->where('usr_id', $target_usr)
                 ->where('group_id', $group_id)
                 ->first();
@@ -88,7 +88,7 @@ class SheetDetailController extends Controller {
             $monthly[$dt->format('Y-m-d')]['offday'] = 1;
         }
 
-        $obj = DB::connection('shift')->table('t_timestamp')
+        $obj = DB::table('t_timestamp')
                 ->where('usr_id', $target_usr)
                 ->where('group_id', $group_id)
                 ->where('time_in','>', $begin)
@@ -135,7 +135,7 @@ class SheetDetailController extends Controller {
             $schedule = [];
             $approveButton = 0;
         }
-        $extra = DB::connection('shift')->table('r_extra')
+        $extra = DB::table('r_extra')
                 ->where('usr_id', $target_usr)
                 ->where('group_id', $group_id)
                 ->get();
@@ -317,7 +317,7 @@ class SheetDetailController extends Controller {
         return $time;
     }
     public function approved ($monthly,$begin,$end,$target_usr,$group_id) {
-        $obj = DB::connection('shift')->table('h_timestamp')
+        $obj = DB::table('h_timestamp')
                 ->where('usr_id', $target_usr)
                 ->where('group_id', $group_id)
                 ->where('time_in','>', $begin)
@@ -345,7 +345,7 @@ class SheetDetailController extends Controller {
         }
         $approveds = array_unique($approveds);
 
-        $worked_wage = DB::connection('shift')->table('h_worked_wage')
+        $worked_wage = DB::table('h_worked_wage')
                 ->whereIn('approved_id', $approveds)
                 ->get();
         $approved_id = 0;

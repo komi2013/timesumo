@@ -40,7 +40,7 @@ class RoutineEditController extends Controller {
         $add['usr_id'] = $r['usr_id'];
         $add['group_id'] = $r['group_id'];
         $edit = false;
-        $routine = DB::connection('shift')->table('r_routine')
+        $routine = DB::table('r_routine')
                 ->where('group_id', $group_id)
                 ->where('usr_id', $r['usr_id'])
                 ->first();
@@ -71,14 +71,14 @@ class RoutineEditController extends Controller {
         if (!$group_owner AND !$edit) {
             die('not owner approver either');
         }
-        DB::connection('shift')->beginTransaction();
+        DB::beginTransaction();
         if($edit){
-            DB::connection('shift')->table('h_routine')->insert($del);
-            DB::connection('shift')->table('r_routine')
+            DB::table('h_routine')->insert($del);
+            DB::table('r_routine')
                     ->where("routine_id", $del['routine_id'])->delete();
         }
-        DB::connection('shift')->commit();
-        DB::connection('shift')->table('r_routine')->insert($add);
+        DB::commit();
+        DB::table('r_routine')->insert($add);
         $res[0] = 1;
         echo json_encode($res);
 //        return view('shift.timesheet', compact('days','month'));

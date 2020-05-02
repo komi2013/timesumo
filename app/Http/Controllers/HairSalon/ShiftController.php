@@ -37,7 +37,7 @@ class ShiftController extends Controller {
             $Mend = $arr['Mend_'.$i];
             ++$i;
         }
-        $obj = DB::connection('shift')->table('r_routine')
+        $obj = DB::table('r_routine')
                 ->where('usr_id',$usr_id)
                 ->where('group_id',$group_id)
                 ->get();

@@ -21,13 +21,13 @@ class MenuUpdateController extends Controller {
         
         if ($request->menu_id > 0) {
             // nessary security menu_id and menu_necessary_id should be session
-            DB::connection('salon')->beginTransaction();
-            DB::connection('salon')->table('t_menu')
+            DB::beginTransaction();
+            DB::table('t_menu')
                 ->where("menu_id",$request->menu_id)
                 ->update([
                     "menu_name" => $request->menu_name
                 ]);
-            DB::connection('salon')->table('t_menu_necessary')
+            DB::table('t_menu_necessary')
                 ->where("menu_id",$request->menu_id)
                 ->delete();
             $menu_id = $request->menu_id;
@@ -38,16 +38,16 @@ class MenuUpdateController extends Controller {
             foreach ($obj as $d) {
                 $arr_usr_id[] = $d->usr_id;
             }
-            $menu_id = DB::connection('salon')->select("select nextval('t_menu_menu_id_seq')")[0]->nextval;
-            DB::connection('salon')->beginTransaction();
-            DB::connection('salon')->table('t_menu')->insert([
+            $menu_id = DB::select("select nextval('t_menu_menu_id_seq')")[0]->nextval;
+            DB::beginTransaction();
+            DB::table('t_menu')->insert([
                 "menu_id" => $menu_id
                 ,"menu_name" => $request->menu_name
                 ,"group_id" => $group_id
             ]);
         }
         foreach ($request->necessary as $d) {
-            DB::connection('salon')->table('t_menu_necessary')->insert([
+            DB::table('t_menu_necessary')->insert([
                 "menu_id" => $menu_id
                 ,"service_id" => $d['service_id']
                 ,"facility_id" => $d['facility_id']
@@ -55,7 +55,7 @@ class MenuUpdateController extends Controller {
                 ,"end_minute" => $d['end_minute']
             ]);
         }
-        DB::connection('salon')->commit();
+        DB::commit();
         $res[0] = 1;
         $res[1] = $menu_id;
         die( json_encode($res) );

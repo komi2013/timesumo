@@ -18,8 +18,8 @@ class DresserController extends Controller {
         \Cookie::queue('lang', $lang);
         \App::setLocale($lang);
         $usr = DB::table('t_usr')->where('usr_id',$usr_id)->first();
-        $usr_salon = DB::connection('salon')->table('t_my_style')->where('usr_id',$usr_id)->first();
-        $hair_style = DB::connection('salon')->table('m_hair_style')->get();
+        $usr_salon = DB::table('t_my_style')->where('usr_id',$usr_id)->first();
+        $hair_style = DB::table('m_hair_style')->get();
         
         return view('hair_salon.dresser', compact('fb_url','gp_url'));
     }

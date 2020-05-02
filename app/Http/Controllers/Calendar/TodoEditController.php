@@ -36,7 +36,7 @@ class TodoEditController extends Controller {
         $todo = DB::table('t_todo')->where("schedule_id", $schedule_id)->first();
         $now = date('Y-m-d H:i:s');
         if (isset($todo->schedule_id)) {
-            DB::connection('shift')->table('h_todo')->insert([
+            DB::table('h_todo')->insert([
                     'todo' => $todo->todo
                     ,'schedule_id' => $schedule_id
                     ,'file_paths' => json_encode($file_paths)

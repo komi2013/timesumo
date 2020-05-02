@@ -14,7 +14,7 @@ class OffGetController extends Controller {
         $group_id = 2;
         \App::setLocale('ja');
         
-        $timestamp = DB::connection('shift')->table('t_timestamp')
+        $timestamp = DB::table('t_timestamp')
                 ->where('usr_id', $usr_id)
                 ->where('group_id', $group_id)
                 ->where('approved_id','>', 0)
@@ -58,7 +58,7 @@ class OffGetController extends Controller {
             }
         }
 
-        $obj = DB::connection('shift')->table('t_leave_amount')
+        $obj = DB::table('t_leave_amount')
                 ->where("usr_id", $usr_id)
                 ->where("group_id", $group_id)
                 ->get();
@@ -77,7 +77,7 @@ class OffGetController extends Controller {
             }
         }
         
-        $obj = DB::connection('shift')->table('m_leave')
+        $obj = DB::table('m_leave')
                 ->where("group_id", $group_id)
                 ->get();
 
@@ -99,11 +99,11 @@ class OffGetController extends Controller {
             $arr['prove_flg'] = $d->prove_flg;
             $leave[$d->leave_id] = $arr;
         }
-        $routine = DB::connection('shift')->table('r_routine')
+        $routine = DB::table('r_routine')
                 ->where('usr_id', $usr_id)
                 ->where('group_id', $group_id)
                 ->first();
-        $obj = DB::connection('shift')->table('t_compensatory')
+        $obj = DB::table('t_compensatory')
             ->where('usr_id', $usr_id)
             ->where('group_id', $group_id)
             ->where('compensatory_start', '<', $request->date)
@@ -150,7 +150,7 @@ class OffGetController extends Controller {
             }
             $thisDay->addDay();
         }
-        $rule = DB::connection('shift')->table('r_rule')
+        $rule = DB::table('r_rule')
                 ->where('usr_id', $usr_id)
                 ->where('group_id', $group_id)
                 ->first();

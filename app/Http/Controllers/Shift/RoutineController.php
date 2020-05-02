@@ -16,7 +16,7 @@ class RoutineController extends Controller {
         $group_id = 2;
 //        \App::setLocale('ja');
 
-        $obj = DB::connection('shift')->table('r_routine')
+        $obj = DB::table('r_routine')
                 ->where('group_id', $group_id)
                 ->orderBy('updated_at','ASC')
                 ->get();

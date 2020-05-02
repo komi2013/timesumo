@@ -35,7 +35,7 @@ class TimeSheetController extends Controller {
             ++$i;
         }
         $thisMonth->addDay();
-        $obj = DB::connection('shift')->table('t_timestamp')
+        $obj = DB::table('t_timestamp')
                 ->where('usr_id', $usr_id)
                 ->where('group_id', $group_id)
                 ->where('time_in','>', $begin)

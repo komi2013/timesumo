@@ -40,7 +40,7 @@ class ExtraEditController extends Controller {
             $target_usr = $d['usr_id'];
         }
 
-        $routine = DB::connection('shift')->table('r_routine')
+        $routine = DB::table('r_routine')
                 ->where('usr_id', $target_usr)
                 ->where('group_id', $group_id)
                 ->first();
@@ -51,7 +51,7 @@ class ExtraEditController extends Controller {
             die('you have no access right');
         }
         $edit = false;
-        $del = DB::connection('shift')->table('r_extra')
+        $del = DB::table('r_extra')
                 ->where('group_id', $group_id)
                 ->where('usr_id', $add[0]['usr_id'])
                 ->get();
@@ -68,14 +68,14 @@ class ExtraEditController extends Controller {
             $edit = true;
         }
 
-        DB::connection('shift')->beginTransaction();
+        DB::beginTransaction();
         if($edit){
-            DB::connection('shift')->table('h_extra')->insert($del);
-            DB::connection('shift')->table('r_extra')
+            DB::table('h_extra')->insert($del);
+            DB::table('r_extra')
                     ->whereIn("extra_id", $arr_extra_id)->delete();
         }
-        DB::connection('shift')->table('r_extra')->insert($add);
-        DB::connection('shift')->commit();
+        DB::table('r_extra')->insert($add);
+        DB::commit();
         
         $res[0] = 1;
         echo json_encode($res);

@@ -23,7 +23,7 @@ class SheetApproveController extends Controller {
         if (!isset($r_group->usr_id)) {
             die('you should belong group at first');
         }
-        $rule = DB::connection('shift')->table('r_rule')
+        $rule = DB::table('r_rule')
                 ->where('usr_id', $usr_id)
                 ->where('group_id', $group_id)
                 ->first();
@@ -38,7 +38,7 @@ class SheetApproveController extends Controller {
         $end = new Carbon(session('update_end'));
         $end->addSeconds();
         $monthly = json_decode( session('monthly'),true );
-        $approved_id = DB::connection('shift')->select("select nextval('approved_id_seq')")[0]->nextval;
+        $approved_id = DB::select("select nextval('approved_id_seq')")[0]->nextval;
         $now = date('Y-m-d H:i:s');
         $timestamp = [];
         $schedules = [];
@@ -92,10 +92,10 @@ class SheetApproveController extends Controller {
             $worked_wage[] = $arr;
         }
 
-        DB::connection('shift')->beginTransaction();
         DB::beginTransaction();
-        DB::connection('shift')->table('h_timestamp')->insert($timestamp);
-        DB::connection('shift')->table('h_worked_wage')->insert($worked_wage);
+        DB::beginTransaction();
+        DB::table('h_timestamp')->insert($timestamp);
+        DB::table('h_worked_wage')->insert($worked_wage);
         DB::table('t_schedule')
             ->whereIn("schedule_id", $schedules)
             ->update([
@@ -104,7 +104,7 @@ class SheetApproveController extends Controller {
                 ]);
         $begin = $begin->format('Y-m-d H:i:s');
         $end = $end->format('Y-m-d H:i:s');
-        DB::connection('shift')->table('t_timestamp')
+        DB::table('t_timestamp')
                 ->where('usr_id', session('target_usr'))
                 ->where('group_id', $group_id)
                 ->where('time_in','>=', $begin)
@@ -112,7 +112,7 @@ class SheetApproveController extends Controller {
 //                ->where('approved_id','=', 0)
                 ->update(['approved_id' => $approved_id]);
         DB::commit();
-        DB::connection('shift')->commit();
+        DB::commit();
 
         $res[0] = 1;
         return json_encode($res);

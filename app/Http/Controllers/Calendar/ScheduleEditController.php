@@ -103,8 +103,8 @@ class ScheduleEditController extends Controller {
             $schedule[$d]['access_right'] = $accessRight;
         }
         DB::beginTransaction();
-        DB::connection('shift')->beginTransaction();
-        DB::connection('shift')->table('h_schedule')->insert([
+        DB::beginTransaction();
+        DB::table('h_schedule')->insert([
                 "schedule_id" => $schedule_id
                 ,"title" => $title
                 ,"usr_id" => $usr_id
@@ -124,7 +124,7 @@ class ScheduleEditController extends Controller {
         DB::table('t_schedule')->insert($schedule);
 
         if(isset($todo->updated_at)){
-            DB::connection('shift')->table('h_todo')->insert([
+            DB::table('h_todo')->insert([
                     'todo' => $todo->todo
                     ,'schedule_id' => $schedule_id
                     ,'updated_at' => $todo->updated_at
@@ -142,7 +142,7 @@ class ScheduleEditController extends Controller {
             'updated_at' => $now
         ]);
 
-        DB::connection('shift')->commit();
+        DB::commit();
         DB::commit();
         $res[0] = 1;
         echo json_encode($res);

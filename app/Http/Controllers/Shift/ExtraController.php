@@ -22,7 +22,7 @@ class ExtraController extends Controller {
         if (!isset($r_group->usr_id)) {
             die('you should belong group at first');
         }
-        $routine = DB::connection('shift')->table('r_routine')
+        $routine = DB::table('r_routine')
                 ->where('usr_id', $usr_id)
                 ->where('group_id', $group_id)
                 ->first();
@@ -32,7 +32,7 @@ class ExtraController extends Controller {
         if ($r_group->owner_flg == 0 AND $routine->approver1 == 0 AND $routine->approver2 == 0) {
             die('you have no access right');
         }
-        $obj = DB::connection('shift')->table('r_extra')
+        $obj = DB::table('r_extra')
                 ->where('group_id', $group_id)
                 ->get();
         $arr['Hstart'] = '08';

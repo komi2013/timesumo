@@ -16,7 +16,7 @@ class BookUpdateController extends Controller {
         $usr_id = 1;
         \App::setLocale('ja');
         
-        $menu = DB::connection('salon')->table('t_menu')->where('menu_id', $request->menu_id)->first();
+        $menu = DB::table('t_menu')->where('menu_id', $request->menu_id)->first();
         if ($request->staff > 0) {
             
             if ($menu->group_id != $request->session()->get('group_id')) {
@@ -27,7 +27,7 @@ class BookUpdateController extends Controller {
             $customer = \Cookie::get('usr_name');
         }
         $group_id = $menu->group_id;
-        $obj = DB::connection('salon')->table('t_menu_necessary')->where('menu_id', $menu->menu_id)->get();
+        $obj = DB::table('t_menu_necessary')->where('menu_id', $menu->menu_id)->get();
         $end = 0;
         foreach ($obj as $d) {
             $arr_service_id[] = $d->service_id;
@@ -43,7 +43,7 @@ class BookUpdateController extends Controller {
             $necessary[$d->menu_necessary_id] = $arr;
             $insertFacilities[$d->facility_id] = [0,0];
         }
-        $obj = DB::connection('salon')->table('t_ability')
+        $obj = DB::table('t_ability')
                 ->whereIn('service_id', $arr_service_id)
                 ->get();
         foreach ($obj as $d) {

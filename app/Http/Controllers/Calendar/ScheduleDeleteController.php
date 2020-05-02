@@ -53,8 +53,8 @@ class ScheduleDeleteController extends Controller {
         $todo = DB::table('t_todo')->where("schedule_id", $schedule_id)->first();
         $now = date('Y-m-d H:i:s');
         DB::beginTransaction();
-        DB::connection('shift')->beginTransaction();
-        DB::connection('shift')->table('h_schedule')->insert([
+        DB::beginTransaction();
+        DB::table('h_schedule')->insert([
                 "schedule_id" => $schedule_id
                 ,"title" => $title
                 ,"usr_id" => $usr_id
@@ -72,7 +72,7 @@ class ScheduleDeleteController extends Controller {
             ]);
         DB::table('t_schedule')->where('schedule_id', $request->input('schedule_id'))->delete();
         if(isset($todo->updated_at)){
-            DB::connection('shift')->table('h_todo')->insert([
+            DB::table('h_todo')->insert([
                     'todo' => $todo->todo
                     ,'schedule_id' => $schedule_id
                     ,'updated_at' => $todo->updated_at
@@ -82,7 +82,7 @@ class ScheduleDeleteController extends Controller {
                 ]);
         }
         DB::table('t_todo')->where("schedule_id", $schedule_id)->delete();
-        DB::connection('shift')->commit();
+        DB::commit();
         DB::commit();
         $res[0] = 1;
         echo json_encode($res);

@@ -33,7 +33,7 @@ class TimeSheetEditController extends Controller {
             ++$i;
         }
         $thisMonth->addDay();
-        $obj = DB::connection('shift')->table('t_timestamp')
+        $obj = DB::table('t_timestamp')
                 ->where('usr_id', $usr_id)
                 ->where('group_id', $group_id)
                 ->where('time_in','>', $begin)
@@ -83,14 +83,14 @@ class TimeSheetEditController extends Controller {
                 }
             }
         }
-        DB::connection('shift')->beginTransaction();
+        DB::beginTransaction();
         if(count($ids)){
-            DB::connection('shift')->table('h_timestamp')->insert($del);
-            DB::connection('shift')->table('t_timestamp')
+            DB::table('h_timestamp')->insert($del);
+            DB::table('t_timestamp')
                     ->whereIn("timestamp_id", $ids)->delete();
         }
-        DB::connection('shift')->table('t_timestamp')->insert($add);
-        DB::connection('shift')->commit();
+        DB::table('t_timestamp')->insert($add);
+        DB::commit();
         $res[0] = 1;
         echo json_encode($res);
 //        return view('shift.timesheet', compact('days','month'));

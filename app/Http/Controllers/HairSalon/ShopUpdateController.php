@@ -23,7 +23,7 @@ class ShopUpdateController extends Controller {
 //            $usr_id = DB::select("select nextval('t_usr_usr_id_seq')")[0]->nextval;
             $arr_group_id = json_decode( $request->session()->get('group_ids'),true );
             if(in_array($request->group_id, $arr_group_id)){
-                DB::connection('salon')->beginTransaction();
+                DB::beginTransaction();
                 DB::table('m_group')
                     ->where("group_id",$request->group_id)
                     ->update([
@@ -59,13 +59,13 @@ class ShopUpdateController extends Controller {
                             ]);
                     }
                 }
-                DB::connection('salon')->commit();
+                DB::commit();
             } else {
                 //wow this guy try to do something
             }
         } else {
             $group_id = DB::select("select nextval('m_group_group_id_seq')")[0]->nextval;
-            DB::connection('salon')->beginTransaction();
+            DB::beginTransaction();
             DB::table('m_group')->insert([
                 "group_id" => $group_id
                 ,"group_name" => $request->shop_name
@@ -99,7 +99,7 @@ class ShopUpdateController extends Controller {
                     ,"amount" => $request->digital_perm_amount
                 ]);
             }
-            DB::connection('salon')->commit();
+            DB::commit();
         }
         $res[0] = 1;
         die( json_encode($res) );

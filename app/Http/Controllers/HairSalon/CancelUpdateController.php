@@ -27,8 +27,8 @@ class CancelUpdateController extends Controller {
             $todo[$k]['action_at'] = date('Y-m-d H:i:s');
             $todo[$k]['action_flg'] = 0;
         }
-        DB::connection('shift')->beginTransaction();
-        DB::connection('shift')->table('h_schedule')->insert([
+        DB::beginTransaction();
+        DB::table('h_schedule')->insert([
                 "schedule_id" => $schedule_id
                 ,"title" => $schedule['title']
                 ,"usr_id" => $schedule['usr_id']
@@ -43,7 +43,7 @@ class CancelUpdateController extends Controller {
                 ,"action_flg" => 0
                 ,"original_by" => $schedule['title']
             ]);
-        DB::connection('shift')->table('h_todo')->insert($todo);
+        DB::table('h_todo')->insert($todo);
         DB::beginTransaction();
         DB::table('t_schedule')
                 ->where('schedule_id',$schedule_id)
@@ -52,7 +52,7 @@ class CancelUpdateController extends Controller {
                 ->where("schedule_id",$schedule_id)
                 ->delete();
         DB::commit();
-        DB::connection('shift')->commit();
+        DB::commit();
 
         $res[0] = 1;
         die( json_encode($res) );

@@ -17,7 +17,7 @@ class ShiftAddController extends Controller {
         $group_id = $request->session()->get('group_id');
         $group_id = 1;
 
-        $routine = DB::connection('shift')->table('r_routine')
+        $routine = DB::table('r_routine')
             ->where('usr_id',$usr_id)
             ->where('group_id',$group_id)
             ->first();

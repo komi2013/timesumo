@@ -18,7 +18,7 @@ class BookController extends Controller {
 //        \Cookie::queue('lang', $lang);
         $request->session()->put('group_id',6);
         \App::setLocale('ja');
-        $menu = DB::connection('salon')->table('t_menu')->where('menu_id', $menu_id)->first();
+        $menu = DB::table('t_menu')->where('menu_id', $menu_id)->first();
         if ($staff > 0) {
             if ($menu->group_id != $request->session()->get('group_id')) {
                 die('you are not staff');
@@ -29,7 +29,7 @@ class BookController extends Controller {
         }
         $group_id = $menu->group_id;
 
-        $shop = DB::connection('salon')->table('t_shop')->where('group_id', $group_id)->first();
+        $shop = DB::table('t_shop')->where('group_id', $group_id)->first();
         
         $today = Carbon::today();
         Carbon::setWeekStartsAt(Carbon::SUNDAY);
@@ -38,7 +38,7 @@ class BookController extends Controller {
         $openHour = substr($shop->open_time,0,2);
         $frameDate->setTime($openHour, 0, 0);
         $begin = $frameDate->format('Y-m-d H:00:00');
-        $obj = DB::connection('salon')->table('t_menu_necessary')->where('menu_id', $menu_id)->get();
+        $obj = DB::table('t_menu_necessary')->where('menu_id', $menu_id)->get();
         foreach ($obj as $d) {
             $required['service_'.$d->service_id] = 0;
             $required['facility_'.$d->facility_id] = 1;
@@ -50,7 +50,7 @@ class BookController extends Controller {
         foreach ($obj as $d) {
             $required['facility_'.$d->facility_id] = $d->amount;
         }
-        $obj = DB::connection('salon')->table('t_ability')->whereIn('service_id', $arr_service_id)->get();
+        $obj = DB::table('t_ability')->whereIn('service_id', $arr_service_id)->get();
         foreach ($obj as $d) {
             $arr[] = $d->service_id;
             $ability[$d->usr_id] = $arr;

@@ -25,15 +25,15 @@ dd($request->all());
         }
 
         $now = date('Y-m-d H:i:s');
-        $routine = DB::connection('shift')->table('r_routine')
+        $routine = DB::table('r_routine')
                 ->where('usr_id', $usr_id)
                 ->where('group_id', $group_id)
                 ->first();
         DB::beginTransaction();
-        DB::connection('shift')->beginTransaction();
+        DB::beginTransaction();
         if (strpos($request->input('leave_id'),'schedule') > -1) { // compensatory leave
             $leave_schedule_id = str_replace("schedule_", "", $request->input('leave_id'));
-            $compensatory = DB::connection('shift')->table('t_compensatory')
+            $compensatory = DB::table('t_compensatory')
                 ->where('usr_id', $usr_id)
                 ->where('group_id', $group_id)
                 ->where('schedule_id', $leave_schedule_id)
@@ -44,7 +44,7 @@ dd($request->all());
                 $res[1] = 'this compensatory leave is not available';
                 die(json_encode($res));
             }
-            DB::connection('shift')->table('h_compensatory')->insert([
+            DB::table('h_compensatory')->insert([
                     "compensatory_id" => $compensatory->compensatory_id
                     ,"compensatory_start" => $compensatory->compensatory_start
                     ,"compensatory_end" => $compensatory->compensatory_end
@@ -59,7 +59,7 @@ dd($request->all());
                     ,"compensatory_hours" => $compensatory->compensatory_hours
                     ,"compensatory_days" => $compensatory->compensatory_days
                 ]);
-            DB::connection('shift')->table('t_compensatory')
+            DB::table('t_compensatory')
                 ->where('usr_id', $usr_id)
                 ->where('group_id', $group_id)
                 ->where('schedule_id', $leave_schedule_id)
@@ -69,10 +69,10 @@ dd($request->all());
                 ]);
         } else { //paid leave
             $leave_id = $request->input('leave_id');
-            $m_leave = DB::connection('shift')->table('m_leave')->where("leave_id", $leave_id)->first();
+            $m_leave = DB::table('m_leave')->where("leave_id", $leave_id)->first();
             if ($m_leave->leave_amount_flg == 1) {
 
-                $leave_amount = DB::connection('shift')->table('t_leave_amount')
+                $leave_amount = DB::table('t_leave_amount')
                         ->where("usr_id", $usr_id)
                         ->where("group_id", $group_id)
                         ->where("leave_id", $leave_id)
@@ -109,7 +109,7 @@ dd($request->all());
                 if ($leave_amount->grant_days < $leave_amount->used_days + $use_days) {
                     die('you try to take more than you can');
                 }
-                DB::connection('shift')->table('t_leave_amount')
+                DB::table('t_leave_amount')
                     ->where('usr_id', $usr_id)
                     ->where('group_id', $group_id)
                     ->where('leave_id', $leave_id)
@@ -121,7 +121,7 @@ dd($request->all());
         }
         $schedule_id = DB::select("select nextval('t_schedule_schedule_id_seq')")[0]->nextval;
         if ( !isset($leave_schedule_id) AND isset($leave_amount->usr_id) ) {
-            DB::connection('shift')->table('h_leave_amount')->insert([
+            DB::table('h_leave_amount')->insert([
                     "leave_amount_id" => $leave_amount->leave_amount_id
                     ,"usr_id" => $leave_amount->usr_id
                     ,"enable_start" => $leave_amount->enable_start
@@ -165,7 +165,7 @@ dd($request->all());
             ]);
         }
 
-        DB::connection('shift')->commit();
+        DB::commit();
         DB::commit();
         $res[0] = 1;
         echo json_encode($res);

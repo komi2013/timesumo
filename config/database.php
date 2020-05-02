@@ -15,7 +15,7 @@ return [
     |
     */
 
-    'default' => 'timesumo',
+    'default' => 'shift',
 
     /*
     |--------------------------------------------------------------------------
@@ -49,22 +49,6 @@ return [
             'database' => env('DB_DATABASE_SHIFT', 'forge'),
             'username' => env('DB_USERNAME_SHIFT', 'forge'),
             'password' => env('DB_PASSWORD_SHIFT', ''),
-            'charset' => 'utf8',
-        ],
-        'salon' => [
-            'driver' => 'pgsql',
-            'host' => env('DB_HOST_SALON', '127.0.0.1'),
-            'database' => env('DB_DATABASE_SALON', 'forge'),
-            'username' => env('DB_USERNAME_SALON', 'forge'),
-            'password' => env('DB_PASSWORD_SALON', ''),
-            'charset' => 'utf8',
-        ],
-        'h_calendar' => [
-            'driver' => 'pgsql',
-            'host' => env('DB_HOST_H_CALENDAR', '127.0.0.1'),
-            'database' => env('DB_DATABASE_H_CALENDAR', 'forge'),
-            'username' => env('DB_USERNAME_H_CALENDAR', 'forge'),
-            'password' => env('DB_PASSWORD_H_CALENDAR', ''),
             'charset' => 'utf8',
         ],
     ],
