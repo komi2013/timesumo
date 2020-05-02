@@ -31,3 +31,7 @@ body {
 .pc_disp_none{
   display: none;
 }
+.right_ad{
+    position:absolute;
+    left:1000px;
+}

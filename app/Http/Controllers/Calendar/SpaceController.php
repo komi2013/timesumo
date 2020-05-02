@@ -8,70 +8,71 @@ use Carbon\Carbon;
 
 class SpaceController extends Controller {
 
-    public function hours12(Request $request, $directory=null, $controller=null, 
-            $action=null, $date=null, $json=null) {
-        $arr_usr = json_decode($json);
+    public function index(Request $request,$directory=null,$controller=null,$action=null,
+            $date=null,$usrs=null) {
+        $usr_id = 2;
+        $group_id = 2;
+        $arr_usr = json_decode($usrs);
         $usr_ids = [];
         foreach ($arr_usr as $d) {
-            $usr_ids[] = $d[0];
+            $usr_ids[] = $d;
         }
+//        echo '<pre>';
+        $routine = DB::table('r_routine')
+                ->where("usr_id", $usr_id)
+                ->where("group_id", $group_id)
+                ->first();
+        $thisDay = new Carbon($date);
+        $start = 'start_'.$thisDay->format('w');
+        $end = 'end_'.$thisDay->format('w');
+        if ($routine->$start > $routine->$end) {
+            $thisDay->addDay();
+        }
+//        var_dump($routine->$start,$routine->$end);
+        $begin = $date.' '.$routine->$start;
+        $final = $thisDay->format('Y-m-d').' '.$routine->$end;
+        $endRange = new Carbon($final);
+        $range = new Carbon($begin);
+//        $range->subHour();
 
-        $obj = DB::table('t_schedule')->whereIn("usr_id", $usr_ids)
-                ->whereDate('time_start', '=', $date)
-                ->orWhereDate('time_end', '=', $date)
-                ->orderBy('schedule_id','desc')
+//        var_dump($range);
+//        var_dump($endRange);
+//        echo '</pre>';
+        $axis = [];
+        $left = 0;
+        while ($range < $endRange) {
+            $axis[] = [$range->format('H'),$left];
+            $left += 30; // 1 hour 30px
+            $range->addHour();
+        }
+//        dd($usr_ids);
+        $obj = DB::table('t_usr')
+            ->whereIn("usr_id", $usr_ids)
+            ->get();
+        $space = [];
+        $top = 20;
+        foreach ($obj as $d) {
+            $arr['name'] = $d->usr_name;
+            $arr['top'] = $top;
+            $arr['schedules'] = [];
+            $space[$d->usr_id] = $arr;
+            $top += 30; 
+        }
+        $obj = DB::table('t_schedule')
+                ->whereIn("usr_id", $usr_ids)
+                ->where('time_start', '>=',$begin)
+                ->where('time_end', '<=', $final)
                 ->get();
-//        $schedule = [];
-//        // 08:00 ~ 20:00 12 hours 
-//        foreach ($obj as $d) {
-//           $arr['time_start'] = $d->time_start;
-//           $arr['time_end'] = $d->time_end;
-//           $arr['tag'] = $d->tag;
-//           $arr['usr_id'] = $d->usr_id;
-//           $schedule[$d->usr_id][] = $arr;
-//
-//                    
-//                    
-//                    dd($start->diffInMinutes($end));
-//        }
-//        dd($schedule);
-        $arr = [];
-//        for ($i1 = 0; $i1 < 24; $i1++) {
-//            for ($i2 = 0; $i2 < 60; $i2 += 15) {
-//                $arr[] = str_pad($i1, 2, "0", STR_PAD_LEFT).':'.str_pad($i2, 2, "0", STR_PAD_LEFT);
-//            }
-//        }
-        $s = [];
-        foreach ($arr_usr as $d1) {
-            foreach ($obj as $d2) {
-//                echo $d1 .' == '. $d2->usr_id.'<br>';
-                if ($d1[0] == $d2->usr_id){
-                    $daystart = Carbon::parse($d2->time_start)->startOfDay();
-                    $daystart->addHour(8);
-                    $start = Carbon::parse($d2->time_start);
-                    $end = Carbon::parse($d2->time_end);
-                    $arr = [];
-                    $arr['left'] = $daystart->diffInMinutes($start) / 2;
-                    $arr['width'] = $start->diffInMinutes($end) / 2; // 1440px
-                    $arr['tag'] = $d2->tag;
-//                    $arr['usr_name'] = $d1[1];
-                    $s[$d1[0]][] = $arr;
-//                    $s[$d1[0]]['usr_name'] = $d1[1];
-                }
-            }
-            
+        $begin = new Carbon($begin);
+        foreach ($obj as $d) {
+            $start = new Carbon($d->time_start);
+            $end = new Carbon($d->time_end);
+            $arr['left'] = round($begin->diffInMinutes($start) /2);
+            $arr['width'] = round($start->diffInMinutes($end) /2);
+            $space[$d->usr_id]['schedules'][] = $arr;
         }
-        
-        
-//        $arr_usr = array_merge($arr_usr, $arr_usr);
-//        $arr_usr = array_merge($arr_usr, $arr_usr);
-//        $arr_usr = array_merge($arr_usr, $arr_usr);
-//        $arr_usr = array_merge($arr_usr, $arr_usr);
-//        $arr_usr = array_merge($arr_usr, $arr_usr);
-
-        $u_num = (int) floor(count($arr_usr)/20) + 1;
-
-        return view('calendar.hours12', compact('s','arr_usr','u_num'));
+//        dd($space);
+        return view('calendar.space', compact('space','axis'));
     }
 }
 

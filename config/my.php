@@ -3,6 +3,6 @@
 return [
 
     'domain' => env('MY_DOMAIN'),
-    'cache_v' => '?hamee',
+    'cache_v' => '?sonnnani',
 
 ];
