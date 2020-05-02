@@ -23,15 +23,7 @@
     border-left: 1px solid rgba(0, 128, 0, 0.2);
     margin-top: 0px;
 }
-/*.axis {
-    position: absolute;
-    display: inline-block;
-    width: 30px;
-    height: 630px;
-    margin-left: 30px;
-    border-left: 1px solid rgba(0, 128, 0, 0.2);
-    margin-top: 0px;        
-}*/
+
 </style>
 <table id="head_menu" style="width: 100%;">
 <tr>
@@ -67,33 +59,7 @@
 <div id="ad_right" class="right_ad"><iframe src="/htm/ad_right/" width="160" height="600" frameborder="0" scrolling="no"></iframe></div>
 
 <script>
-var arr_usr = [];
-//var s = JSON.parse('');
-//var u_num = JSON.parse('');
-//var tag_color = ['','rgba(0,0,255,0.2)','rgba(0,128,0,0.2)','rgba(255,255,0,0.2)','rgba(255,0,0,0.2)','rgba(128,0,128,0.2)'];
-////1=meeting, 2=off, 3=out, 4=task, 5=shift
-//var content = new Vue({
-//  el: '#content',
-//  data: {
-//      arr_usr:arr_usr
-//      ,s:s
-//  },
-//  computed: {
-//  }
-//});
-//
-//$('#checkArr').click(function(){
-//    var arr = [];
-//    for (var i = 0; i < content.join_usrs.length; i++) {
-//        arr.push(content.join_usrs[i]);
-//    }
-//    for (var i = 0; i < content.join_facility.length; i++) {
-//        arr.push(content.join_facility[i]);
-//    }
-//    console.log(encodeURIComponent(arr));
-//    console.log(JSON.stringify(arr));
-//});
-//$(function(){ ga('send', 'pageview'); });
+
 </script>
 <script defer src="https://www.googletagmanager.com/gtag/js?id=UA-57298122-1"></script>
 <script defer src="/js/common.js<?=config('my.cache_v')?>"></script>
