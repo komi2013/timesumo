@@ -1,4 +1,4 @@
-<?php sleep(2); ?>
+
 <!DOCTYPE html>
 <html>
   <head>

@@ -10,6 +10,7 @@ class GroupGetController extends Controller {
 
     public function get(Request $request, $directory=null, $controller=null, 
             $action=null, $group_id=0, $oauth_type=null) {
+        $request->session()->reflash();
         $usr_id = 2;
         $obj = DB::table('r_group_relate')->where("usr_id", $usr_id)->get();
         $arr_group = [];
@@ -30,6 +31,8 @@ class GroupGetController extends Controller {
            }
         }
         $group_ids = json_encode($group_ids);
+        $request->session()->flash('group_ids', $group_ids);
+
         $obj = DB::table('r_group_relate')->where("group_id", $group_id)->get();
         $arr_usr = [];
         $usr_ids = [];

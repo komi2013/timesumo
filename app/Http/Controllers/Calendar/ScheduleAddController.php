@@ -17,13 +17,13 @@ class ScheduleAddController extends Controller {
         foreach ($obj as $d) {
             $db_usr_ids[] = $d->usr_id;
         }
-        $no_group = false;
+        $group = false;
         foreach ($usrs as $d) {
-            if (!in_array($d,$db_usr_ids)) {
-                $no_group = true;
+            if (in_array($d,$db_usr_ids)) {
+                $group = true;
             }
         }
-        if ($no_group) {
+        if (!$group) {
             $res[0] = 2;
             $res[1] = 'you can not insert because you are not part of this group';
             die(json_encode($res));

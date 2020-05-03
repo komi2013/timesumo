@@ -13,6 +13,7 @@ class OffGetController extends Controller {
         $usr_id = 2;
         $group_id = 2;
         \App::setLocale('ja');
+        $request->session()->reflash();
         
         $timestamp = DB::table('t_timestamp')
                 ->where('usr_id', $usr_id)

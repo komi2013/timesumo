@@ -8,12 +8,14 @@ use Carbon\Carbon;
 
 class GroupUsrController extends Controller {
 
-    public function lessuri(Request $request, $directory=null, $controller=null, 
-            $action=null, $word=null, $oauth_type=null) {
+    public function get(Request $request,$directory=null,$controller=null,$action=null,
+            $word=null) {
+        $request->session()->reflash();
+        $group_ids = json_decode(session('group_ids'),true) ?: [];
         $obj = DB::table('r_group_relate')->select('usr_id')
-            ->whereIn("group_id", $_GET['group_ids'])->get();
+            ->whereIn("group_id", $group_ids)->get();
         $i = 1;
-        $com_usr_id = '';
+        $com_usr_id = '0';
         $usr_ids = [];
         foreach ($obj as $d) {
             if (!in_array($d->usr_id, $usr_ids)) {
@@ -29,23 +31,15 @@ class GroupUsrController extends Controller {
         $bind = [
             'word' => '%'.$word.'%'
         ];
-        if(strlen($word) == mb_strlen($word,'utf8')) {
-            $sql = "SELECT * FROM t_usr WHERE usr_name like :word AND usr_id in (".$com_usr_id.")";
-        }else{
-            $sql = "SELECT * FROM t_usr WHERE usr_name_mb like :word AND usr_id in (".$com_usr_id.")";
-        }
-        if ($oauth_type == 'facility') {
-            $oauth_type_and = ' AND oauth_type = 5';
-        } else {
-            $oauth_type_and = ' AND oauth_type <> 5';
-        }
-        $obj = DB::select($sql.$oauth_type_and, $bind);
+        $sql = "SELECT * FROM t_usr WHERE usr_name like :word AND usr_id in (".$com_usr_id.")";
+
+        $obj = DB::select($sql, $bind);
         $arr_usr = [];
         foreach ($obj as $d) {
-            $arr = [$d->usr_id,$d->usr_name_mb];
+            $arr = [$d->usr_id,$d->usr_name];
             $arr_usr[$d->usr_id] = $arr;
         }
-        die(json_encode($arr_usr));
+        echo json_encode($arr_usr);
     }
 }
 

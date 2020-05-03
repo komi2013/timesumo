@@ -153,8 +153,8 @@
             </template>
         </select>
     <div style="width:100%;display:inline-block;">
-        <input type="text" placeholder="ユーザー検索" style="height:40px;">
-        <img src="/img/icon/magnifier.png" @click="search" class="icon">
+        <input type="text" placeholder="ユーザー検索" id="searchUsr" style="height:40px;">
+        <img src="/img/icon/magnifier.png" @click="searchUsr" class="icon">
     </div>
     <div class="joining">
         <div>候補者</div>
@@ -175,12 +175,6 @@
         </template>
     </template>
     </div>
-    </div>
-    <div class="centerize">
-    <div style="width:100%;display:inline-block;">
-        <input type="text" placeholder="施設検索" style="height:40px;">
-        <img src="/img/icon/magnifier.png" fac_usr="facility" class="icon">
-    </div>
     <div class="joining">
         <div>候補施設</div>
     <template v-for="(d,k) in group_facility">
@@ -198,7 +192,7 @@
     </template>
         <div>使用施設</div>
     </div><br>
-    <a target="_blank" v-bind:href="'/Calendar/Space/hours12/<?=$date?>/'+checkSchedule+'/'">空き時間を確認</a>
+    <a target="_blank" v-bind:href="'/Calendar/Space/index/<?=$date?>/'+checkSchedule+'/'">空き時間を確認</a>
     </template><template v-else-if="tag!=2 && access_right < 7">
         <div class="joining">
             <div>参加者</div>
@@ -220,6 +214,7 @@
         <input type="text" placeholder="公開タイトル" style="height:50px;width:80%;"
                v-model="public_title" v-bind:value="public_title" >
     </div>
+    <br><br><br>
 </div>
 <br>
 <div id="ad_right"><iframe src="/htm/ad_right/" width="160" height="600" frameborder="0" scrolling="no"></iframe></div>
@@ -324,11 +319,10 @@ var app = new Vue({
             }
         });
     },
-    search: function (group_id) {
-        var param = {group_ids:this.group_ids};
-        $.get('/Calendar/Get/searchUsr/'+$('#searchUsr').val() +'/'+$('#search').attr('fac_usr')+'/',param,function(){},"json")
+    searchUsr: function () {
+        $.get('/Calendar/GroupUsr/get/'+$('#searchUsr').val() +'/',{},function(){},"json")
         .always(function(res){
-            this.group_usrs = res;
+            app.group_usrs = res;
         });
     },
     editTodo: function () {
@@ -351,8 +345,10 @@ var app = new Vue({
     },
   }
 });
+setTimeout(function(){
+  app.groupChange(app.group_id);
+},1000);
 
-app.groupChange(app.group_id);
 
 function update(){
     var validate = 1;

@@ -87,7 +87,7 @@ class ScheduleController extends Controller {
             }
             $obj = DB::table('t_todo')->where("schedule_id", $schedule_id)->first();
             $todo = $obj->todo ?? '';
-            $file_paths = json_decode($obj->file_paths,true) ?? [];
+            $file_paths = json_decode($obj->file_paths ?? null,true) ?: [];
             foreach ($file_paths as $k => $d) {
                 $name = explode("/",$d);
                 $file_paths[$k] = [$d,end($name),true];
