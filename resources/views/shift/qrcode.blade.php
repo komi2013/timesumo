@@ -41,20 +41,11 @@
 </table>
 
 <div id="content" style="text-align: center;">
-    <?php if($time_out || !$is){?>
-    <input type="button" value="開始" onclick="stamp('add');">
-    <?php }else if($pause){?>
-    <input type="button" value="休憩終了" onclick="stamp('breakEnd');">
-    <?php }else{?>
-    <input type="button" value="終了" onclick="stamp('edit');">
+    <?=$qr?>
     <br><br>
-    <input type="button" value="休憩" onclick="stamp('breakStart');">
-    <?php } ?>
-    <br><br>
-    <a target="_blank" href="/Shift/TimeSheet/index/">勤怠表</a>
-    <br>
+    <a target="_blank" href="<?=$url?>"><?=$url?></a>
 </div>
-<br>
+
 <div id="ad_right"><iframe src="/htm/ad_right/" width="160" height="600" frameborder="0" scrolling="no"></iframe></div>
 
 <script>
@@ -63,18 +54,23 @@ var latitude;
 var longitude;
 navigator.geolocation.getCurrentPosition(
   function(position) {
+      console.log("緯度:"+position.coords.latitude+",経度"+position.coords.longitude);
       latitude = position.coords.latitude;
       longitude = position.coords.longitude;
   },
   function(error) {
     switch(error.code) {
       case 1: //PERMISSION_DENIED
+        console.log("位置情報の利用が許可されていません");
         break;
       case 2: //POSITION_UNAVAILABLE
+        console.log("現在位置が取得できませんでした");
         break;
       case 3: //TIMEOUT
+        console.log("タイムアウトになりました");
         break;
       default:
+        console.log("その他のエラー(エラーコード:"+error.code+")");
         break;
     }
   }
@@ -86,7 +82,6 @@ function stamp(action){
         ,action: action
         ,latitude : latitude
         ,longitude : longitude
-        ,password : '<?=$password?>'
     }
     $.post('/Shift/Stamping/',param,function(){},"json")
     .always(function(res){

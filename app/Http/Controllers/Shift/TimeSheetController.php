@@ -43,21 +43,13 @@ class TimeSheetController extends Controller {
                 ->orderBy('time_in','ASC')
                 ->get();
 
-        $pre_time_out = null; // null will be 19700101 
         foreach ($obj as $d) {
             $date = date('d',strtotime($d->time_in));
-            $monthly[$date]['time_out'] = substr($d->time_out,11,5);
-            $pre = new Carbon($pre_time_out);
-            $thisIn = new Carbon($d->time_in);
-            if ($pre->format('d') == $thisIn->format('d')) {
-                $breakMin = $breakMin + $pre->diffInMinutes($thisIn);
-            } else {
-                $breakMin = 0;
-                $monthly[$date]['time_in'] = substr($d->time_in, 11,5);
-            }
-            $monthly[$date]['break'] = $breakMin;
-            $pre_time_out = $d->time_out;
+            $monthly[$date]['time_in'] = substr($d->time_in, 11,5) ?: '';
+            $monthly[$date]['time_out'] = substr($d->time_out, 11,5) ?: '';
+            $monthly[$date]['break'] = $d->break_amount;
         }
+
         $obj = DB::table('t_schedule')
                 ->where('usr_id', $usr_id)
                 ->where('group_id', $group_id)
@@ -85,6 +77,7 @@ class TimeSheetController extends Controller {
             }
             $days[] = $arr;
         }
+//        dd($days);
         // r_routine, t_leave_amount, m_leave, r_extra
         $month = new Carbon($month);
         return view('shift.timesheet', compact('days','month'));

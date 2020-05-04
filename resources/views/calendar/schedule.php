@@ -12,24 +12,6 @@
     <meta name="csrf-token" content="<?=csrf_token()?>" />
   </head>
 <body>
-
-<table id="head_menu" style="width: 100%;">
-<tr>
-  <td id="menu_td">
-    <img src="/img/icon/menu.png" class="icon" id="menu_button">
-  </td>
-  <td style="text-align: center;">
-    
-  </td>
-  <td style="text-align:center;width:25%;">
-    <a href="/"><img src="/img/icon/home.png" class="icon"></a>
-  </td>
-  </tr>
-</table>
-
-<table id="drawer">
-  <tr><td id="ad_menu"><iframe src="/htm/ad_menu/" width="300" height="250" frameborder="0" scrolling="no"></iframe></td></tr>
-</table>
 <style>
     .joining {
         width: 80%;
@@ -65,7 +47,26 @@
         min-width: 30px;
     }
 </style>
+<table id="head_menu" style="width: 100%;">
+<tr>
+  <td id="menu_td">
+    <img src="/img/icon/menu.png" class="icon" id="menu_button">
+  </td>
+  <td style="text-align: center;">
+    
+  </td>
+  <td style="text-align:center;width:25%;">
+    <a href="/"><img src="/img/icon/home.png" class="icon"></a>
+  </td>
+  </tr>
+</table>
+
+<table id="drawer">
+  <tr><td id="ad_menu"><iframe src="/htm/ad_menu/" width="300" height="250" frameborder="0" scrolling="no"></iframe></td></tr>
+</table>
+
 <div id="content">
+<div id="ad" class="pc_disp_none"><iframe src="/htm/ad/" width="320" height="50" frameborder="0" scrolling="no"></iframe></div>
     <div class="centerize">
         <template v-if="access_right==7">
         <select style="width:80%;" v-model="tag" @change="copy">
