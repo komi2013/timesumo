@@ -4,7 +4,7 @@ namespace App\Exceptions;
 
 use Exception;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
-
+use Log;
 class Handler extends ExceptionHandler
 {
     /**
@@ -34,7 +34,15 @@ class Handler extends ExceptionHandler
      */
     public function report(Exception $exception)
     {
-        parent::report($exception);
+//        parent::report($exception);
+        $file = str_replace(base_path(), "", $exception->getFile());
+        Log::error(
+            ($_SERVER['REQUEST_URI'] ?? "")
+                .' '. json_encode($_POST)
+                .' ['.$exception->getCode().'] '.$exception->getMessage()
+                .' on line '.$exception->getLine()
+                .' of file '.$file
+            );
     }
 
     /**

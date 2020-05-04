@@ -21,7 +21,9 @@ class BookController extends Controller {
         $menu = DB::table('t_menu')->where('menu_id', $menu_id)->first();
         if ($staff > 0) {
             if ($menu->group_id != $request->session()->get('group_id')) {
-                die('you are not staff');
+                \Config::set('logging.channels.daily.path',storage_path('logs/warning.log'));
+                \Log::warning('you are not staff:'.$_SERVER['REQUEST_URI'] ?? "".' '. json_encode($_POST));
+                return view('404');
             }
             $customer = '';
         } else {
@@ -29,7 +31,7 @@ class BookController extends Controller {
         }
         $group_id = $menu->group_id;
 
-        $shop = DB::table('t_shop')->where('group_id', $group_id)->first();
+        $shop = DB::table('m_group')->where('group_id', $group_id)->first();
         
         $today = Carbon::today();
         Carbon::setWeekStartsAt(Carbon::SUNDAY);

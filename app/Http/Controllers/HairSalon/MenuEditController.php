@@ -17,7 +17,7 @@ class MenuEditController extends Controller {
 //        \Cookie::queue('lang', $lang);
 //        \App::setLocale($lang);
         $menu = DB::table('t_menu')->where('menu_id',$menu_id)->first();
-        $shop_group = DB::table('t_shop_group')
+        $shop_group = DB::table('r_group_relate')
                 ->where('group_id',$menu->group_id)
                 ->where('usr_id',$usr_id)
                 ->first();
