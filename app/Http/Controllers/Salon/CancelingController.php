@@ -1,5 +1,5 @@
 <?php
-namespace App\Http\Controllers\HairSalon;
+namespace App\Http\Controllers\Salon;
 
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;

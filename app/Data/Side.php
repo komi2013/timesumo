@@ -1,23 +1,27 @@
 <?php
 namespace App\Data;
+use Illuminate\Support\Facades\DB;
 
 class Side
 {
-    public $link_en = [
-        1 => 'meeting',
-        2 => ['off','rgba(0,0,255,0.2)'],
-        3 => ['out','rgba(0,128,0,0.2)'],
-        4 => ['task','rgba(255,255,0,0.2)'],
-        5 => ['shift','rgba(255,0,0,0.2)'],
-        6 => ['service','rgba(128,0,128,0.2)'],
-    ];
-    public $link_ja = [
-        1 => ['会議',''],
-        2 => ['休み','rgba(0,0,255,0.2)'],
-        3 => ['外出','rgba(0,128,0,0.2)'],
-        4 => ['タスク','rgba(255,255,0,0.2)'],
-        5 => ['シフト','rgba(255,0,0,0.2)'],
-        6 => ['サービス','rgba(128,0,128,0.2)'],
-    ];
-    //1=meeting, 2=off, 3=out, 4=task, 5=shift, 6=service
+    public function gets(){
+        $obj = DB::table('c_link')
+                ->where("group_owner",'<=', session('group_owner') ?: 0)
+                ->where("approver",'<=', session('approver') ?: 0)
+                ->get();
+        $arr_uri = explode("/", $_SERVER["REQUEST_URI"]);
+        $link = [];
+        foreach ($obj as $d) {
+            $arr['url'] = $d->url;
+            $arr['name'] = $d->ja;
+            $db_uri = explode("/", $d->url);
+            if ($arr_uri[0] == $db_uri[0] AND $arr_uri[1] == $db_uri[1]) {
+                $arr['thisPage'] = 'style="background-color: #FCFCFC;"';
+            } else {
+                $arr['thisPage'] = '';
+            }
+            $link[] = $arr;
+        }
+        return $link;
+    }
 }

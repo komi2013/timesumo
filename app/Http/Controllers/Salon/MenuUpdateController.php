@@ -1,5 +1,5 @@
 <?php
-namespace App\Http\Controllers\HairSalon;
+namespace App\Http\Controllers\Salon;
 
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -58,7 +58,7 @@ class MenuUpdateController extends Controller {
         DB::commit();
         $res[0] = 1;
         $res[1] = $menu_id;
-        die( json_encode($res) );
+        echo json_encode($res);
     }
 }
 

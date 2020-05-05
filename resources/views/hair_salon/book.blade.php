@@ -13,40 +13,40 @@
     
   </head>
 <body>
-    <style>
-        table {
-            border-collapse: collapse;
-        }
-        .day_td {
-            width : 14%;
-        }
-        .sunday_td {
-            width : 14%;
-        }
-        .min10 {
-            width: 100%;
-            height: 30px;
-            border-right-style: solid;
-            border-width: thin;
-            line-height: 12px;
-            margin-left: -2px;
-        }
-        .hour {
-            border-bottom-style: dotted;
-            border-bottom-color: silver;
-        }
-        .closeTime {
-            border-bottom-style: solid;
-        }
-        .day {
-            border-bottom-style: solid;
-            border-right-style: solid;
-            border-width: thin;
-        }
-        .unavailable {
-            background: gray;
-        }
-    </style>
+<style>
+    table {
+        border-collapse: collapse;
+    }
+    .day_td {
+        width : 14%;
+    }
+    .sunday_td {
+        width : 14%;
+    }
+    .min10 {
+        width: 100%;
+        height: 30px;
+        border-right-style: solid;
+        border-width: thin;
+        line-height: 12px;
+        margin-left: -2px;
+    }
+    .hour {
+        border-bottom-style: dotted;
+        border-bottom-color: silver;
+    }
+    .closeTime {
+        border-bottom-style: solid;
+    }
+    .day {
+        border-bottom-style: solid;
+        border-right-style: solid;
+        border-width: thin;
+    }
+    .unavailable {
+        background: gray;
+    }
+</style>
 <table id="head_menu" style="width: 100%;">
 <tr>
   <td id="menu_td">
@@ -60,10 +60,14 @@
   </td>
   </tr>
 </table>
-<?php $salon_facility = new \App\Data\SalonFacility(); var_dump($salon_facility);?>
+<?php $side = new \App\Data\Side(); ?>
 <table id="drawer">
   <tr><td id="ad_menu"><iframe src="/htm/ad_menu/" width="300" height="250" frameborder="0" scrolling="no"></iframe></td></tr>
+<?php foreach ($side->gets() as $d) {?>
+  <tr><td <?=$d['thisPage']?> ><a href="<?=$d['url']?>" >&nbsp;<?=$d['name']?></a></td></tr>
+<?php }?>
 </table>
+
 <div id="content">
 <p id="menu_name"><?=$menu->menu_name?></p>
 <?php if($staff){ ?><input type="text" value="<?=$customer?>" placeholder="<?=__('hair_salon.customer')?>" id="customer"><?php } ?>
@@ -118,7 +122,7 @@ $('.available').click(function(){
             ,staff : <?=$staff?>
             
         }
-        $.post('/HairSalon/BookUpdate/',param,function(){},"json")
+        $.post('/Salon/BookUpdate/',param,function(){},"json")
         .always(function(res){
             if(res[0] == 1){
                 location.href = '';

@@ -38,10 +38,14 @@
   </td>
   </tr>
 </table>
-
+<?php $side = new \App\Data\Side(); ?>
 <table id="drawer">
   <tr><td id="ad_menu"><iframe src="/htm/ad_menu/" width="300" height="250" frameborder="0" scrolling="no"></iframe></td></tr>
+<?php foreach ($side->gets() as $d) {?>
+  <tr><td <?=$d['thisPage']?> ><a href="<?=$d['url']?>" >&nbsp;<?=$d['name']?></a></td></tr>
+<?php }?>
 </table>
+
 <div id="content">
     <?php foreach($axis as $d){ ?>
         <div class="axis" style="margin-left:<?=$d[1]?>px;" ><?=$d[0]?></div>

@@ -66,11 +66,12 @@
   </td>
   </tr>
 </table>
-
+<?php $side = new \App\Data\Side(); ?>
 <table id="drawer">
   <tr><td id="ad_menu"><iframe src="/htm/ad_menu/" width="300" height="250" frameborder="0" scrolling="no"></iframe></td></tr>
-  <tr><td style="text-align: center;" >
-    <a href="/HairSalon/Ability/"> ability </a></td></tr>
+<?php foreach ($side->gets() as $d) {?>
+  <tr><td <?=$d['thisPage']?> ><a href="<?=$d['url']?>" >&nbsp;<?=$d['name']?></a></td></tr>
+<?php }?>
 </table>
 
 <div id="content">

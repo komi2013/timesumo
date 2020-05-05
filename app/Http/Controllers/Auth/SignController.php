@@ -11,7 +11,7 @@ class SignController extends Controller {
 
     public function in(Request $request, $directory=null, $controller=null,$action=null, 
             $language='') {
-
+//$request->session()->put('usr_id',2);
         $fb_id = '593374818166961';
 
         $fb_url = 'https://www.facebook.com/dialog/oauth'

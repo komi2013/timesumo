@@ -1,5 +1,5 @@
 <?php
-namespace App\Http\Controllers\HairSalon;
+namespace App\Http\Controllers\Salon;
 
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -44,14 +44,12 @@ class CancelUpdateController extends Controller {
                 ,"original_by" => $schedule['title']
             ]);
         DB::table('h_todo')->insert($todo);
-        DB::beginTransaction();
         DB::table('t_schedule')
                 ->where('schedule_id',$schedule_id)
                 ->delete();
         DB::table('t_todo')
                 ->where("schedule_id",$schedule_id)
                 ->delete();
-        DB::commit();
         DB::commit();
 
         $res[0] = 1;

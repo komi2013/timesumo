@@ -2,112 +2,128 @@
 <html>
   <head>
     <meta charset="UTF-8" />
-    <title>shift management</title>
+    <title>Shift Management</title>
     <link rel="shortcut icon" href="" />
-
-    <script src="/plugin/jquery-3.4.0.min.js"></script>
-    <script src="/plugin/jquery.cookie.js"></script>
-    <script src="/plugin/vue.min.js"></script>
-    <link rel="stylesheet" href="/css/basic.css<?=config('my.cache_v')?>" />
+    <script src="/plugin/min.js"></script>
+    <link rel="stylesheet" type="text/css" href="/css/basic.css<?=config('my.cache_v')?>" />
+    <link rel="stylesheet" href="/css/pc.css<?=config('my.cache_v')?>" media="only screen and (min-width : 711px)">
+    <link rel="stylesheet" href="/css/sp.css<?=config('my.cache_v')?>" media="only screen and (max-width : 710px)">
+    <meta name="viewport" content="width=device-width, user-scalable=no" >
     <meta name="csrf-token" content="<?=csrf_token()?>" />
-    
   </head>
 <body>
-    <style>
-        body {
-            width:1180px;
-        }
-        #drawer {
-          position : absolute;
-          float : left;
-          margin-top : -1px;
-          width : 300px;   
-          background-color: white;
-        }
-        #content{
-            margin: 0px 0px 0px 310px;
-            width: 700px;
-            float:left;
-        }
-        #ad_right{
-            margin: 0px 0px 0px 10px;
-            width: 160px;
-            float:left;
-        }
-        table {
-            border-collapse: collapse;
-        }
-        table td {
-            border-width: 0px;
-        }
-        .min10 {
-            width: 100px;
-            height: 30px;
-            border-right-style: solid;
-            border-width: thin;
-            line-height: 12px;
-            margin-left: -2px;
-            text-align: center;
-        }
-        .hour {
-            border-bottom-style: dotted;
-            border-bottom-color: silver;
-        }
-        .closeTime {
-            border-bottom-style: solid;
-        }
-        .day {
-            border-bottom-style: solid;
-            border-right-style: solid;
-            border-width: thin;
-        }
-        .unavailable {
-            background: gray;
-        }
-        .showUsr {
-            position:fixed;
-            background-color:silver;
-            padding:30px;
-            width:220px;
-            height:220px;
-        }
-        .amt_1{
-            background-color: #FFFF00;
-        }
-        .amt_2{
-            background-color: #E5F200;
-        }
-        .amt_3{
-            background-color: #CCE500;
-        }
-        .amt_4{
-            background-color: #B2D800;
-        }
-        .amt_5{
-            background-color: #99CC00;
-        }
-        .amt_6{
-            background-color: #7FBF00;
-        }
-        .amt_7{
-            background-color: #66B200;
-        }
-        .amt_8{
-            background-color: #4CA600;
-        }
-        .amt_9{
-            background-color: #339900;
-        }
-        .amt_10{
-            background-color: #198C00;
-        }
-        .hour {
-            border-bottom-style: dotted;
-            border-bottom-color: silver;
-        }
-    </style>
+<style>
+    body {
+        width:1180px;
+    }
+    #drawer {
+      position : absolute;
+      float : left;
+      margin-top : -1px;
+      width : 300px;   
+      background-color: white;
+    }
+    #content{
+        margin: 0px 0px 0px 310px;
+        width: 700px;
+        float:left;
+    }
+    #ad_right{
+        margin: 0px 0px 0px 10px;
+        width: 160px;
+        float:left;
+    }
+    table {
+        border-collapse: collapse;
+    }
+    table td {
+        border-width: 0px;
+    }
+    .min10 {
+        width: 100px;
+        height: 30px;
+        border-right-style: solid;
+        border-width: thin;
+        line-height: 12px;
+        margin-left: -2px;
+        text-align: center;
+    }
+    .hour {
+        border-bottom-style: dotted;
+        border-bottom-color: silver;
+    }
+    .closeTime {
+        border-bottom-style: solid;
+    }
+    .day {
+        border-bottom-style: solid;
+        border-right-style: solid;
+        border-width: thin;
+    }
+    .unavailable {
+        background: gray;
+    }
+    .showUsr {
+        position:fixed;
+        background-color:silver;
+        padding:30px;
+        width:220px;
+        height:220px;
+    }
+    .amt_1{
+        background-color: #FFFF00;
+    }
+    .amt_2{
+        background-color: #E5F200;
+    }
+    .amt_3{
+        background-color: #CCE500;
+    }
+    .amt_4{
+        background-color: #B2D800;
+    }
+    .amt_5{
+        background-color: #99CC00;
+    }
+    .amt_6{
+        background-color: #7FBF00;
+    }
+    .amt_7{
+        background-color: #66B200;
+    }
+    .amt_8{
+        background-color: #4CA600;
+    }
+    .amt_9{
+        background-color: #339900;
+    }
+    .amt_10{
+        background-color: #198C00;
+    }
+    .hour {
+        border-bottom-style: dotted;
+        border-bottom-color: silver;
+    }
+</style>
+<table id="head_menu" style="width: 100%;">
+<tr>
+  <td id="menu_td">
+    <img src="/img/icon/menu.png" class="icon" id="menu_button">
+  </td>
+  <td style="text-align: center;">
+    
+  </td>
+  <td style="text-align:center;width:25%;">
+    <a href="/"><img src="/img/icon/home.png" class="icon"></a>
+  </td>
+  </tr>
+</table>
+<?php $side = new \App\Data\Side(); ?>
 <table id="drawer">
   <tr><td id="ad_menu"><iframe src="/htm/ad_menu/" width="300" height="250" frameborder="0" scrolling="no"></iframe></td></tr>
+<?php foreach ($side->gets() as $d) {?>
+  <tr><td <?=$d['thisPage']?> ><a href="<?=$d['url']?>" >&nbsp;<?=$d['name']?></a></td></tr>
+<?php }?>
 </table>
 
 <div id="content">

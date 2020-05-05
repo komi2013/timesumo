@@ -1,5 +1,5 @@
 <?php
-namespace App\Http\Controllers\HairSalon;
+namespace App\Http\Controllers\Salon;
 
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -92,7 +92,7 @@ class ShiftAddController extends Controller {
         DB::table('t_schedule')->insert($arr_sql);
         DB::commit();
         $res[0] = 1;
-        die( json_encode($res) );
+        echo json_encode($res);
     }
 }
 
