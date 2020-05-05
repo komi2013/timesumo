@@ -16,14 +16,15 @@ class BookController extends Controller {
         $usr_id = $request->session()->get('usr_id');
         $usr_id = 1;
 //        \Cookie::queue('lang', $lang);
-        $request->session()->put('group_id',6);
+//        $request->session()->put('group_id',6);
+        $group_id = 2;
         \App::setLocale('ja');
         $menu = DB::table('t_menu')->where('menu_id', $menu_id)->first();
         if ($staff > 0) {
             if ($menu->group_id != $request->session()->get('group_id')) {
                 \Config::set('logging.channels.daily.path',storage_path('logs/warning.log'));
                 \Log::warning('you are not staff:'.$_SERVER['REQUEST_URI'] ?? "".' '. json_encode($_POST));
-                return view('404');
+                return view('errors.404');
             }
             $customer = '';
         } else {
@@ -63,6 +64,7 @@ class BookController extends Controller {
             ++$closeHour;
         }
         $i = 0;
+
         while ($i < 21) {
             $hour = $openHour;
             while ($hour < $closeHour) {

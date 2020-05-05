@@ -38,7 +38,7 @@ class ShopController extends Controller {
         $shop[0]['shampoo_seat_amount'] = 0;
         $shop[0]['digital_perm'] = __('hair_salon.digital_perm');
         $shop[0]['digital_perm_amount'] = 0;
-        $salon_facility = new \App\Models\HairSalon\SalonFacility();
+        $salon_facility = new \App\Data\SalonFacility();
         if ($is_group_relate) {
             $obj = DB::table('m_group')->whereIn('group_id', $arr_group_id)->get();
             foreach ($obj as $d) {

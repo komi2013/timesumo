@@ -23,7 +23,7 @@ class ScheduleController extends Controller {
             $arr[] = str_pad($i,2,0,STR_PAD_LEFT);
         }
         $hours = $arr;
-        $Arr = new \App\Models\Calendar\Arr();
+        $Arr = new \App\Data\Calendar();
         $arr_tags = 'tags_'.$lang;
         $tags = $Arr->$arr_tags;
         $bind = [

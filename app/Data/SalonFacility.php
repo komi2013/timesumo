@@ -1,5 +1,5 @@
 <?php
-namespace App\Models\HairSalon;
+namespace App\Data;
 
 class SalonFacility
 {

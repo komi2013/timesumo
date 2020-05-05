@@ -1,7 +1,7 @@
 <?php
-namespace App\Models\Calendar;
+namespace App\Data;
 
-class Arr
+class Calendar
 {
     public $tags_en = [
         1 => ['meeting',''],

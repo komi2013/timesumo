@@ -60,7 +60,7 @@
   </td>
   </tr>
 </table>
-
+<?php $salon_facility = new \App\Data\SalonFacility(); var_dump($salon_facility);?>
 <table id="drawer">
   <tr><td id="ad_menu"><iframe src="/htm/ad_menu/" width="300" height="250" frameborder="0" scrolling="no"></iframe></td></tr>
 </table>
