@@ -35,7 +35,7 @@ class OffDeleteController extends Controller {
         }
         $now = date('Y-m-d H:i:s');
         DB::beginTransaction();
-        DB::beginTransaction();
+
         
         if (strpos($leave_id,'schedule') > -1) { // compensatory leave
             $leave_schedule_id = str_replace("schedule_", "", $leave_id);
@@ -147,7 +147,7 @@ class OffDeleteController extends Controller {
         }
         DB::table('t_todo')->where("schedule_id", $schedule_id)->delete();
         DB::commit();
-        DB::commit();
+
         $res[0] = 1;
         echo json_encode($res);
     }
