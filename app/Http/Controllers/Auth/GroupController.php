@@ -8,24 +8,28 @@ use Illuminate\Support\Facades\DB;
 class GroupController extends Controller {
 
     public function lessuri(Request $request, $directory=null, $controller=null,$action=null) {
-//        if (!$request->session()->get('usr_id')) {
-//            return redirect('/Auth/Sign/in/0/');
-//        }
-        $usr_id = $request->session()->get('usr_id');
-        $usr_id = 2;
 
+        if (!session('usr_id')) {
+            \Config::set('logging.channels.daily.path',storage_path('logs/warning.log'));
+            \Log::warning('no session usr_id:'.$_SERVER['REQUEST_URI'] ?? "".' '. json_encode($_POST));
+            return json_encode([2,'no session usr_id']);
+        }
+        $usr_id = session('usr_id');
+        $group_id = session('group_id');
 
         $relate = DB::table('r_group_relate')
                 ->where("usr_id", $usr_id)
-                ->where("group_id", session('group_id'))
+                ->where("group_id", $group_id)
                 ->first();
         if ($relate->owner_flg == 0) {
-            die('hey do not change group');
+            \Config::set('logging.channels.daily.path',storage_path('logs/warning.log'));
+            \Log::warning('no owner_flg:'.$_SERVER['REQUEST_URI'] ?? "".' '. json_encode($_POST));
+            return json_encode([2,'no owner_flg']);
         }
         $now = date('Y-m-d H:i:s');
         $obj = DB::table('r_group_relate')
                 ->whereIn("usr_id", $request->removeUsr)
-                ->where("group_id", session('group_id'))
+                ->where("group_id", $group_id)
                 ->get();
         $relate = json_decode($obj,true);
         foreach ($relate as $k => $d) {
@@ -35,7 +39,7 @@ class GroupController extends Controller {
         }
         $obj = DB::table('t_facility')
                 ->whereIn("facility_id", $request->removeUsr)
-                ->where("group_id", session('group_id'))
+                ->where("group_id", $group_id)
                 ->get();
         $facility = json_decode($obj,true);
         foreach ($facility as $k => $d) {
@@ -48,12 +52,12 @@ class GroupController extends Controller {
         DB::table('h_group_relate')->insert($relate);
         DB::table('r_group_relate')
                 ->whereIn("usr_id", $request->removeUsr)
-                ->where("group_id", session('group_id'))
+                ->where("group_id", $group_id)
                 ->delete();
         DB::table('h_facility')->insert($facility);
         DB::table('t_facility')
                 ->whereIn("facility_id", $request->removeUsr)
-                ->where("group_id", session('group_id'))
+                ->where("group_id", $group_id)
                 ->delete();
         DB::commit();
         $res[0] = 1;

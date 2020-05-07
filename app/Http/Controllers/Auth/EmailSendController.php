@@ -31,7 +31,7 @@ class EmailSendController extends Controller {
         $simple->simple_send();
         $res[0] = 1;
 
-        echo json_encode($res);
+        return json_encode($res);
     }
 }
 

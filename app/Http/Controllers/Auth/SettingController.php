@@ -11,6 +11,7 @@ class SettingController extends Controller {
 
     public function index(Request $request, $directory=null, $controller=null,$action=null) {
         if(!session('usr_id')){
+            $request->session()->put('redirect', $_SERVER["REQUEST_URI"]);
             return redirect('/Auth/EmailLogin/index/');
         }
         \App::setLocale(\Cookie::get('lang') ?: 'ja');

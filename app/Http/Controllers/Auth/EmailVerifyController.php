@@ -42,7 +42,9 @@ class EmailVerifyController extends Controller {
             ]);
             $message = __('auth.registered');
         }
-
+        $request->session()->forget('email_auth');
+        $request->session()->forget('email');
+        $request->session()->forget('password');
         $request->session()->put('usr_id', $usr_id);
         $redirect = $request->cookie('redirect') ?? '/';
         return view('auth.email_complete', compact('redirect','message'));
