@@ -31,6 +31,7 @@
 <?php foreach ($side->gets() as $d) {?>
   <tr><td <?=$d['thisPage']?> ><a href="<?=$d['url']?>" >&nbsp;<?=$d['name']?></a></td></tr>
 <?php }?>
+  <tr><td>&nbsp;</td></tr>
 </table>
 
 <div id="content">
@@ -39,15 +40,15 @@
 
 <div style="width:100%;text-align: center;">
     <input type="text" placeholder="email" id="email" v-model="email" v-on:change="checkEmail" class="column1"><br>
-    <div v-if="email_error" style="color: red;"><?=__('email_login.mailError')?></div>
+    <div v-if="email_error" style="color: red;"><?=__('auth.mailError')?></div>
     <input type="password" placeholder="password" id="password" class="column1" v-model="password" v-on:change="checkPassword"><br>
-    <div v-if="password_error1" style="color: red;"><?=__('email_login.passwordError1')?></div>
-    <div v-if="password_error2" style="color: red;"><?=__('email_login.passwordError2')?></div>
-    <input type="submit" value="login" class="column1" v-on:click="login('login')"><br>
-    <div v-if="password_error4" style="color: red;"><?=__('email_login.passwordError4')?></div>
-    <input type="submit" value="register" class="column1" v-on:click="login('reg')"><br>
-    <input type="submit" value="reissue passowrd" class="column1" v-on:click="login('reg')"><br>
-    <div v-if="sent" style="color: green;"><?=__('email_login.sent')?></div>
+    <div v-if="password_error1" style="color: red;"><?=__('auth.passwordError1')?></div>
+    <div v-if="password_error2" style="color: red;"><?=__('auth.passwordError2')?></div>
+    <input type="submit" value="<?=__('auth.signin')?>" class="column1" v-on:click="login('login')"><br>
+    <div v-if="password_error4" style="color: red;"><?=__('auth.passwordError4')?></div>
+    <input type="submit" value="<?=__('auth.register')?>" class="column1" v-on:click="login('reg')"><br>
+    <input type="submit" value="<?=__('auth.reissue_password')?>" class="column1" v-on:click="login('reg')"><br>
+    <div v-if="sent" style="color: green;"><?=__('auth.sent')?></div>
 </div>
 
 </div>
@@ -138,8 +139,8 @@ function MailCheck( mail ) {
     }
 }
 
-setTimeout(function(){ga('send', 'pageview')},2000);
-
 </script>
+<script defer src="https://www.googletagmanager.com/gtag/js?id=UA-57298122-1"></script>
+<script defer src="/js/common.js<?=config('my.cache_v')?>"></script>
 </body>
 </html>

@@ -20,7 +20,7 @@ class EmailSendController extends Controller {
         $simple = new Simple();
         $simple->from_email = 'noreply@'.config('my.domain');
         $simple->from_name = 'Timesumo';
-        $simple->simple_subject = __('email_verify.verify');
+        $simple->simple_subject = __('auth.verify');
         $simple->arr_variable = [
             "url" => "https://".config('my.domain')."/Auth/EmailVerify/code/" . $auth,
             "password" => $request->password

@@ -40,6 +40,7 @@
 <div id="content">
 
 <div id="ad" class="pc_disp_none" style="text-align: center;"><iframe src="/htm/ad/" width="320" height="50" frameborder="0" scrolling="no"></iframe></div>
+<input type="text" class="column1" :value="usr_name" v-model="usr_name" ><br>
 
 <select style="margin:10px;width:60%;height:40px;" v-model="lang" v-on:change="changeLang">
     <option v-for="(d,k) in langs" v-bind:value="d">{{ d }}</option>
@@ -87,6 +88,7 @@
 const app = new Vue({
   el: '#content',
   data: {
+    usr_name: '',
     lang: "<?=\Cookie::get('lang')?>",
     langs: ['ja','en'],
     group_usrs: [],
@@ -153,6 +155,21 @@ const app = new Vue({
         });
     },
     changeName: function () {
+        var param = {
+            _token : $('[name="csrf-token"]').attr('content')
+            ,arr_group : this.arr_group
+            ,group_id : this.group_id
+        }
+        $.post('/Auth/GroupName/',param,function(){},"json")
+        .always(function(res){
+            if(res[0] == 1){
+                location.href = '';
+            }else{
+                alert('system error');
+            }
+        });
+    },
+    updateName: function () {
         var param = {
             _token : $('[name="csrf-token"]').attr('content')
             ,arr_group : this.arr_group

@@ -27,8 +27,10 @@ class EmailVerifyController extends Controller {
                     ,"updated_at" => now()
                 ]);
             $usr_id = $obj->usr_id;
-            $message = __('email_verify.reissued');
+            $message = __('auth.reissued');
         } else {
+            $arr_email = explode("@", session('email'));
+            
             $usr_id = DB::select("select nextval('t_usr_usr_id_seq')")[0]->nextval;
             DB::table('t_usr')->insert([
                 "usr_id" => $usr_id
@@ -36,8 +38,9 @@ class EmailVerifyController extends Controller {
                 ,"updated_at" => now()
                 ,"email" => session('email')
                 ,"password" => Hash::make(session('password'))
+                ,"usr_name" => $arr_email[0]
             ]);
-            $message = __('email_verify.registered');
+            $message = __('auth.registered');
         }
 
         $request->session()->put('usr_id', $usr_id);
