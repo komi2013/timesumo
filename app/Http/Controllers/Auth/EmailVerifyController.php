@@ -27,7 +27,6 @@ class EmailVerifyController extends Controller {
                     ,"updated_at" => now()
                 ]);
             $usr_id = $obj->usr_id;
-            $message = __('auth.reissued');
         } else {
             $arr_email = explode("@", session('email'));
             
@@ -40,14 +39,16 @@ class EmailVerifyController extends Controller {
                 ,"password" => Hash::make(session('password'))
                 ,"usr_name" => $arr_email[0]
             ]);
-            $message = __('auth.registered');
         }
         $request->session()->forget('email_auth');
         $request->session()->forget('email');
         $request->session()->forget('password');
         $request->session()->put('usr_id', $usr_id);
-        $redirect = $request->cookie('redirect') ?? '/';
-        return view('auth.email_complete', compact('redirect','message'));
+        $redirect = session('redirect') ?: '/';
+        $request->session()->forget('redirect');
+        return redirect($redirect);
+        
+//        return view('auth.email_complete', compact('redirect','message'));
     }
 }
 
