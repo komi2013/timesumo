@@ -54,7 +54,7 @@
 </template>
 
 <div style="width:100%;text-align: center;">
-    <input style="margin: 10px;padding:10px;" type="submit" value="<?=__('hair_salon.update')?>" v-on:click="update">
+    <input style="margin: 10px;padding:10px;" type="submit" value="<?=__('salon.update')?>" v-on:click="update">
 </div>
 
 <div style="width:100%;text-align: center;">&nbsp</div>

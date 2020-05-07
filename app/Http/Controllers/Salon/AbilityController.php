@@ -49,7 +49,7 @@ class AbilityController extends Controller {
         }
         $service = json_encode($service);
 //        $ability = json_encode(json_decode($ability,true));
-        return view('hair_salon.ability', compact('service','area'));
+        return view('salon.ability', compact('service','area'));
     }
 }
 

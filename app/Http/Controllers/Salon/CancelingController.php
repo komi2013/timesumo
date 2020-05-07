@@ -58,7 +58,7 @@ class CancelingController extends Controller {
         }
         $todo = DB::table('t_todo')->where('schedule_id',$schedule_id)->orderBy('updated_at','DESC')->get();
         $todo = json_decode($todo,true);
-        return view('hair_salon.canceling', 
+        return view('salon.canceling', 
                 compact('schedule','arr_staff','arr_customer','todo','schedule'));
     }
 }

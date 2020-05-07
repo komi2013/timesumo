@@ -39,8 +39,8 @@
 
 <?php foreach($shop as $group_id => $d) { ?>
 <div style="width:100%;text-align: center;">
-    <input type="text" value="{{$d['shop_name']}}" placeholder="<?=__('hair_salon.shop_name')?>" id="shop_name_<?=$group_id?>" class="column1"><br>
-    <div id="shop_name_error_<?=$group_id?>" style="color: red;display: none;"><?=__('hair_salon.shopNameError')?></div>
+    <input type="text" value="{{$d['shop_name']}}" placeholder="<?=__('salon.shop_name')?>" id="shop_name_<?=$group_id?>" class="column1"><br>
+    <div id="shop_name_error_<?=$group_id?>" style="color: red;display: none;"><?=__('salon.shopNameError')?></div>
 </div>
 
 <table style="width:100%;"><tbody>
@@ -76,7 +76,7 @@
     </tr>
 </tbody></table>
 <div style="width:100%;text-align: center;">
-    <input type="submit" value="<?=__('hair_salon.update')?>" class="submit column1" group="<?=$group_id?>"><br>
+    <input type="submit" value="<?=__('salon.update')?>" class="submit column1" group="<?=$group_id?>"><br>
 </div>
 <br>
 <div style="border-top: solid 1px gray; width:100%;">&nbsp;</div>
@@ -86,7 +86,7 @@
 <div id="ad_right"><iframe src="/htm/ad_right/" width="160" height="600" frameborder="0" scrolling="no"></iframe></div>
 
 <script>
-var updateOk = "<?=__('hair_salon.update_ok')?>";
+var updateOk = "<?=__('salon.update_ok')?>";
 $('.submit').click(function(){
     console.log($(this).attr('group'));
     var g = $(this).attr('group');

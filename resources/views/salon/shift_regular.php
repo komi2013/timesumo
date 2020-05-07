@@ -95,7 +95,7 @@ td {
     </tr>
 </table>
 <table><tr><td>
-    <a style="color: blue;" v-on:click="advanceToggle"> - - <?=__('hair_salon.advance')?> - - </a>
+    <a style="color: blue;" v-on:click="advanceToggle"> - - <?=__('salon.advance')?> - - </a>
 </td></tr></table>
 </div>
 
@@ -104,7 +104,7 @@ td {
     <tr v-bind:class="routine[0]['shift_'+k]">
         <td v-on:click="toggle(k)" v-show="!advance2">{{d}}</td>
         <td rowspan="2" v-on:click="toggle(k)" v-show="advance2">{{d}}</td>
-        <td v-on:click="toggle(k)" v-show="advance2"><?=__('hair_salon.work')?></td>
+        <td v-on:click="toggle(k)" v-show="advance2"><?=__('salon.work')?></td>
         <td>
             <select style="height:30px;" v-model="routine[0]['Hstart_'+k]">
                 <template v-for="i in startOption">
@@ -132,7 +132,7 @@ td {
         </td>
     </tr>
     <tr v-bind:class="routine[0]['shift_'+k]" v-show="advance2">
-        <td v-on:click="toggle(k)"><?=__('hair_salon.break')?></td>
+        <td v-on:click="toggle(k)"><?=__('salon.break')?></td>
         <td>
             <select style="height:30px;">
                 <template v-for="i in startOption">
@@ -163,18 +163,18 @@ td {
 </table>
 
 <table v-show="advance"><tr><td>
-    <a style="color: blue;" v-on:click="advanceToggle"> - - <?=__('hair_salon.simple')?> - - </a>
+    <a style="color: blue;" v-on:click="advanceToggle"> - - <?=__('salon.simple')?> - - </a>
 </td></tr></table>
 <table v-show="advance && !advance2"><tr><td>
-    <a style="color: blue;" v-on:click="advance2Toggle"> - - <?=__('hair_salon.advance')?> - - </a>
+    <a style="color: blue;" v-on:click="advance2Toggle"> - - <?=__('salon.advance')?> - - </a>
 </td></tr></table>
 
 <div style="width:100%;text-align: center;">
-    <input type="submit" value="<?=__('hair_salon.update')?>" class="column1" v-on:click="update">
+    <input type="submit" value="<?=__('salon.update')?>" class="column1" v-on:click="update">
 </div>
 
 <div style="width:100%;text-align: center;">
-    <input type="submit" value="<?=__('hair_salon.shiftAdd')?>" class="column1" v-on:click="shiftAdd">
+    <input type="submit" value="<?=__('salon.shiftAdd')?>" class="column1" v-on:click="shiftAdd">
 </div>
 
 </div>

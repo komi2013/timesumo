@@ -46,7 +46,7 @@
 </div>
 
 <div style="padding:10px;">
-    <?=__('hair_salon.customer')?>
+    <?=__('salon.customer')?>
     <?php foreach ($arr_customer as $d) {?>
         <div style="padding:10px;"> {{$d}} </div>
     <?php }?>
@@ -58,7 +58,7 @@
 
 
 <div style="width:100%;text-align: center;">
-    <input type="submit" value="<?=__('hair_salon.delete')?>" class="column1 cancel"><br>
+    <input type="submit" value="<?=__('salon.delete')?>" class="column1 cancel"><br>
 </div>
 </div>
 <div id="ad_right"><iframe src="/htm/ad_right/" width="160" height="600" frameborder="0" scrolling="no"></iframe></div>

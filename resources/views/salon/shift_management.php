@@ -131,13 +131,13 @@
     <?php $count=-1; foreach ($days7 as $time => $d) {?>
             <?php if( substr($time,8,5) == $openTime ){?>  
             <td border="0"> 
-            <div class="day"><?=__('hair_salon.day'.substr($time,6,1))?></div>                
+            <div class="day"><?=__('salon.day'.substr($time,6,1))?></div>                
             <?php }?>
             <div class="min10 amt_<?=round(count($d)/$max,1)*10?> 
                  <?php if(substr($time,11,2) == '50'){
                      echo 'hour';
                  }?>
-                 " date="<?=__('hair_salon.day'.substr($time,6,1))?> <?=substr($time,8,5)?>" usrs="<?=json_encode($d)?>">
+                 " date="<?=__('salon.day'.substr($time,6,1))?> <?=substr($time,8,5)?>" usrs="<?=json_encode($d)?>">
                 <?= count($d) != $count ? count($d) : '' ?>
             </div>
             <?php if( substr($time,8,5) == $closeTime  ){ ?> </td> <?php }?>

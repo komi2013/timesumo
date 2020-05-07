@@ -54,7 +54,7 @@ class CancelController extends Controller {
 
         }
 //        dd($days21);
-        return view('hair_salon.cancel', 
+        return view('salon.cancel', 
                 compact('days21','openHour','closeHour'));
     }
 }

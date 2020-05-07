@@ -55,7 +55,7 @@ class MenuEditController extends Controller {
         $facilitys = json_encode($facilitys);
         $services = json_encode($services);
         $add = json_encode($add);
-        return view('hair_salon.menu_edit', compact('menu','necessary','facilitys','services','add'));
+        return view('salon.menu_edit', compact('menu','necessary','facilitys','services','add'));
     }
 }
 

@@ -95,7 +95,7 @@ class ShiftController extends Controller {
         }
         $i = 0;
         while ($i < 7) {
-            $week[] = __('hair_salon.day'.$i); 
+            $week[] = __('salon.day'.$i); 
             ++$i;
         }
         $routine = json_encode($routine);
@@ -103,7 +103,7 @@ class ShiftController extends Controller {
         $endOption = json_encode($endOption);
         $minutes = json_encode($minutes);
         $week = json_encode($week);
-        return view('hair_salon.shift_regular', 
+        return view('salon.shift_regular', 
                 compact('routine','startOption','endOption','minutes','week','advance',
                         'Hstart','Hend','Mstart','Mend'));
     }

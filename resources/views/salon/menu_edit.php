@@ -39,14 +39,14 @@
 
 <div style="width:100%;text-align: center;">
     <input type="text" v-model="menu_name" class="column1" v-on:change="checkMenu"><br>
-    <div id="menu_name_error" style="color: red;" v-if="menu_error"><?=__('hair_salon.menuNameError')?></div>
+    <div id="menu_name_error" style="color: red;" v-if="menu_error"><?=__('salon.menuNameError')?></div>
 </div>
 
 <div v-for="(d,k) in necessary" style="width:100%;text-align: center;">
     <div style="width:100%;text-align:right;"><span style="font-size:20px;background-color: silver;" v-on:click="del(k)">&nbsp;-&nbsp;</span></div>
     <select style="width:90%;height:40px;" v-model="d.service_id" v-on:change="goService">
         <option v-for="(d2,k2) in services" v-bind:value="k2">{{ d2 }}</option>
-        <option value="serviceAdd" >&nbsp;&nbsp;&nbsp;<?=__('hair_salon.serviceAdd')?></option>
+        <option value="serviceAdd" >&nbsp;&nbsp;&nbsp;<?=__('salon.serviceAdd')?></option>
     </select>
     <select style="width:90%;height:40px;" v-model="d.facility_id">
         <option v-for="(d2,k2) in facilitys" v-bind:value="k2">{{ d2 }}</option>
@@ -61,8 +61,8 @@
 </div>
 <div style="width:100%;text-align:right;"><span style="font-size:20px;background-color:silver;" v-on:click="add">&nbsp;+&nbsp;</span></div>
 <div style="width:100%;text-align: center;">
-<input type="submit" value="<?=__('hair_salon.menu_new')?>" class="column1" v-on:click="update(0)"><br>
-<input type="submit" value="<?=__('hair_salon.menu_edit')?>" class="column1" v-on:click="update(<?=$menu->menu_id?>)"><br>
+<input type="submit" value="<?=__('salon.menu_new')?>" class="column1" v-on:click="update(0)"><br>
+<input type="submit" value="<?=__('salon.menu_edit')?>" class="column1" v-on:click="update(<?=$menu->menu_id?>)"><br>
 </div>
 </div>
 <div id="ad_right"><iframe src="/htm/ad_right/" width="160" height="600" frameborder="0" scrolling="no"></iframe></div>

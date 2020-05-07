@@ -32,7 +32,7 @@ class ShopUpdateController extends Controller {
                 $obj = DB::table('t_facility')
                         ->where('group_id', $request->group_id)
                         ->get();
-                $salon_facility = new \App\Data\SalonFacility();
+                $salon_facility = new \App\My\SalonFacility();
                 foreach ($obj as $d) {
                     if (in_array($d->facility_name, $salon_facility->seat)) {
                         DB::table('t_facility')

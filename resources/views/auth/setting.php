@@ -40,7 +40,7 @@
 <div id="content">
 
 <div id="ad" class="pc_disp_none" style="text-align: center;"><iframe src="/htm/ad/" width="320" height="50" frameborder="0" scrolling="no"></iframe></div>
-<input type="text" class="column1" :value="usr_name" v-model="usr_name" ><br>
+<input type="text" class="column1" :value="usr_name" v-model="usr_name" @change="updateName" ><br>
 
 <select style="margin:10px;width:60%;height:40px;" v-model="lang" v-on:change="changeLang">
     <option v-for="(d,k) in langs" v-bind:value="d">{{ d }}</option>
@@ -78,8 +78,6 @@
     <input style="margin: 10px;padding:10px;" type="submit" value="<?=__('auth.signout')?>" v-on:click="signout">
 </div>
 
-<div style="width:100%;text-align: center;">&nbsp</div>
-<?=\Cookie::get('lang')?>
 </div>
 <div id="ad_right"><iframe src="/htm/ad_right/" width="160" height="600" frameborder="0" scrolling="no"></iframe></div>
 
@@ -88,13 +86,13 @@
 const app = new Vue({
   el: '#content',
   data: {
-    usr_name: '',
+    usr_name: <?=json_encode($usr_name)?>,
     lang: "<?=\Cookie::get('lang')?>",
     langs: ['ja','en'],
     group_usrs: [],
     group_facility: [],
     arr_group: [],
-    group_id: <?=$group_id?>,
+    group_id: 0,
     removeUsr: [],
     owner: 0
   },
@@ -106,7 +104,7 @@ const app = new Vue({
         $.post('/Auth/Session/signout/',param,function(){},"json")
         .always(function(res){
             if(res[0]){
-//                location.href = '';
+                location.href = '';
             }else{
                 alert('system error');
             }
@@ -170,12 +168,12 @@ const app = new Vue({
         });
     },
     updateName: function () {
+        console.log(this.usr_name);
         var param = {
             _token : $('[name="csrf-token"]').attr('content')
-            ,arr_group : this.arr_group
-            ,group_id : this.group_id
+            ,usr_name : this.usr_name
         }
-        $.post('/Auth/GroupName/',param,function(){},"json")
+        $.post('/Auth/UsrName/',param,function(){},"json")
         .always(function(res){
             if(res[0] == 1){
                 location.href = '';

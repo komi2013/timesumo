@@ -53,7 +53,7 @@
     <img src="/img/icon/menu.png" class="icon" id="menu_button">
   </td>
   <td style="text-align: center;">
-    <?=date(__('hair_salon.today'))?>
+    <?=date(__('salon.today'))?>
   </td>
   <td style="text-align:center;width:25%;">
     <a href="/"><img src="/img/icon/home.png" class="icon"></a>
@@ -70,16 +70,16 @@
 
 <div id="content">
 <p id="menu_name"><?=$menu->menu_name?></p>
-<?php if($staff){ ?><input type="text" value="<?=$customer?>" placeholder="<?=__('hair_salon.customer')?>" id="customer"><?php } ?>
+<?php if($staff){ ?><input type="text" value="<?=$customer?>" placeholder="<?=__('salon.customer')?>" id="customer"><?php } ?>
 <table>
     <?php  foreach ($days21 as $date => $d) {?>
         <?php $u = strtotime($date);?>
         <?php if(date('D',$u) == 'Sun' && date('H:i',$u) == $openTime){?> <tr> <?php }?>
             <?php if(date('H:i',$u ) == $openTime){?>  
             <td border="0" class="day_td"> 
-            <div class="day"><?=date(__('hair_salon.date'),$u)?> <?=__('hair_salon.day'.date('w',$u))?></div>                
+            <div class="day"><?=date(__('salon.date'),$u)?> <?=__('salon.day'.date('w',$u))?></div>                
             <?php }?>
-            <div date="<?=date('m/d',$u)?> <?=__('hair_salon.day'.date('w',$u))?>"
+            <div date="<?=date('m/d',$u)?> <?=__('salon.day'.date('w',$u))?>"
                  unix="<?=$u?>"
                  start="<?=date('H:i',$u)?>" end="<?=date('H:i',($u + 60 * $end_minute))?>"
                 class="min10

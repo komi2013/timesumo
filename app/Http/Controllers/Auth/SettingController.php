@@ -10,9 +10,13 @@ use Carbon\Carbon;
 class SettingController extends Controller {
 
     public function index(Request $request, $directory=null, $controller=null,$action=null) {
+        if(!session('usr_id')){
+            return redirect('/Auth/EmailLogin/index/');
+        }
         \App::setLocale(\Cookie::get('lang') ?: 'ja');
-        $group_id = 0;
-        return view('auth.setting', compact('group_id'));
+        $usr = DB::table('t_usr')->where('usr_id',session('usr_id'))->first();
+        $usr_name = $usr->usr_name;
+        return view('auth.setting', compact('usr_name'));
     }
     public function factory(Request $request, $directory=null, $controller=null,$action=null, 
             $usr_id=0,$group_id=0) {

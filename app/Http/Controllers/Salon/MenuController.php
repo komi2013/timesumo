@@ -80,7 +80,7 @@ class MenuController extends Controller {
         }
         $obj = DB::table('t_facility')->whereIn('facility_id', $arr_facility_id)->get();
 //dd($menu);
-        return view('hair_salon.menu', compact('menu','shops','group_id'));
+        return view('salon.menu', compact('menu','shops','group_id'));
     }
 }
 

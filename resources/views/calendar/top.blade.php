@@ -77,9 +77,9 @@
 <div id="content">
 <table style="width:100%;">
     <thead><tr>
-        <th class="sunday_th"><?=__('hair_salon.day0')?></th>
+        <th class="sunday_th"><?=__('salon.day0')?></th>
     <?php $i = 1; while($i < 7){ ?>
-        <th class="day_th"><?=__('hair_salon.day'.$i)?></th>
+        <th class="day_th"><?=__('salon.day'.$i)?></th>
     <?php ++$i; } ?>
     </tr></thead>
     <?php foreach ($day35 as $date => $d) {?>

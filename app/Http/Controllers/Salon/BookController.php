@@ -165,7 +165,7 @@ class BookController extends Controller {
         $today = date('Y-m-d');
         $openTime = $openHour.':00';
         $closeTime = $closeHour - 1 .':50';
-        return view('hair_salon.book', 
+        return view('salon.book', 
             compact('days21','today','menu_id','openTime','closeTime','menu','end_minute','staff','customer'));
     }
 }

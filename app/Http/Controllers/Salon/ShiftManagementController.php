@@ -101,7 +101,7 @@ class ShiftManagementController extends Controller {
         }
         $usr_ids = json_encode($usr_ids);
 //        dd($days7);
-        return view('hair_salon.shift_management', 
+        return view('salon.shift_management', 
                 compact('days7','usr_ids','openTime','closeTime','max'));
     }
 }

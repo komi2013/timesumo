@@ -1,5 +1,5 @@
 <?php
-namespace App\Data;
+namespace App\My;
 use Illuminate\Support\Facades\DB;
 
 class Side

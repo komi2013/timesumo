@@ -32,13 +32,13 @@ class ShopController extends Controller {
         
         $shop = [];
         $shop[0]['shop_name'] = '';
-        $shop[0]['seat'] = __('hair_salon.seat');
+        $shop[0]['seat'] = __('salon.seat');
         $shop[0]['seat_amount'] = 1;
-        $shop[0]['shampoo_seat'] = __('hair_salon.shampoo_seat');
+        $shop[0]['shampoo_seat'] = __('salon.shampoo_seat');
         $shop[0]['shampoo_seat_amount'] = 0;
-        $shop[0]['digital_perm'] = __('hair_salon.digital_perm');
+        $shop[0]['digital_perm'] = __('salon.digital_perm');
         $shop[0]['digital_perm_amount'] = 0;
-        $salon_facility = new \App\Data\SalonFacility();
+        $salon_facility = new \App\My\SalonFacility();
         if ($is_group_relate) {
             $obj = DB::table('m_group')->whereIn('group_id', $arr_group_id)->get();
             foreach ($obj as $d) {
@@ -74,7 +74,7 @@ class ShopController extends Controller {
         }
 //        dd($shop);
         krsort($shop);
-        return view('hair_salon.shop', compact('shop'));
+        return view('salon.shop', compact('shop'));
     }
 }
 

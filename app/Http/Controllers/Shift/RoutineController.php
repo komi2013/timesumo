@@ -81,7 +81,7 @@ class RoutineController extends Controller {
         }
         $i = 0;
         while ($i < 7) {
-            $week[] = __('hair_salon.day'.$i); 
+            $week[] = __('salon.day'.$i); 
             ++$i;
         }
         $time_unit[0] = __('calendar.hour');
