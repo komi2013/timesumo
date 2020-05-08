@@ -74,6 +74,9 @@
 <div style="width:100%;text-align: center;">
     <input style="margin: 10px;padding:10px;" type="submit" value="外す" v-on:click="remove">
 </div>
+<div style="padding:5px;">
+    <a target="_blank" :href="'/Auth/EmailLogin/staff/'+group.group_id+'/'+group.password+'/'">招待URL</a>
+</div>
 <div style="width:100%;text-align: center;">
     <input style="margin: 10px;padding:10px;" type="submit" value="<?=__('auth.signout')?>" v-on:click="signout">
 </div>
@@ -94,7 +97,8 @@ const app = new Vue({
     arr_group: [],
     group_id: 0,
     removeUsr: [],
-    owner: 0
+    owner: 0,
+    group:<?=json_encode($group)?>
   },
   methods: {
     signout: function () {

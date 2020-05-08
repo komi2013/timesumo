@@ -12,5 +12,25 @@ class EmailLoginController extends Controller {
 
         return view('auth.email_login');
     }
+    public function staff(Request $request, $directory=null, $controller=null,$action=null,
+            $group_id,$password) {
+
+        $group = DB::table('m_group')->where('group_id',$group_id)->first();
+        if ($group->password != $password) {
+            return view('errors.404');
+        }
+        $request->session()->put('group_id', $group_id);
+
+        return view('auth.email_login');
+
+    }
+    public function owner(Request $request, $directory=null, $controller=null,$action=null,
+            $job_id) {
+
+        $request->session()->put('job_id', $job_id);
+
+        return view('auth.email_login');
+
+    }
 }
 

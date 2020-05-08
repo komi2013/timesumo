@@ -43,7 +43,7 @@ class AbilityController extends Controller {
         }
         $area = json_encode($area);
 //        $service = json_encode(json_decode($service,true));
-        $obj = DB::table('t_ability')->where('usr_id',$usr_id)->get();
+        $obj = DB::table('r_ability')->where('usr_id',$usr_id)->get();
         foreach ($obj as $d) {
             $service[$d->service_id]['ability'] = 'ability';
         }

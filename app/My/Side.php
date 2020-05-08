@@ -30,6 +30,10 @@ class Side
             }
             $link[] = $arr;
         }
+        $arr['url'] = '';
+        $arr['name'] = '';
+        $arr['thisPage'] = '';
+        $link[] = $arr;
         return $link;
     }
 }

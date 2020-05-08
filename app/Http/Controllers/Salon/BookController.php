@@ -19,7 +19,7 @@ class BookController extends Controller {
 //        $request->session()->put('group_id',6);
         $group_id = 2;
         \App::setLocale('ja');
-        $menu = DB::table('t_menu')->where('menu_id', $menu_id)->first();
+        $menu = DB::table('m_menu')->where('menu_id', $menu_id)->first();
         if ($staff > 0) {
             if ($menu->group_id != $request->session()->get('group_id')) {
                 \Config::set('logging.channels.daily.path',storage_path('logs/warning.log'));
@@ -41,7 +41,7 @@ class BookController extends Controller {
         $openHour = substr($shop->open_time,0,2);
         $frameDate->setTime($openHour, 0, 0);
         $begin = $frameDate->format('Y-m-d H:00:00');
-        $obj = DB::table('t_menu_necessary')->where('menu_id', $menu_id)->get();
+        $obj = DB::table('m_menu_necessary')->where('menu_id', $menu_id)->get();
         foreach ($obj as $d) {
             $required['service_'.$d->service_id] = 0;
             $required['facility_'.$d->facility_id] = 1;
@@ -53,7 +53,7 @@ class BookController extends Controller {
         foreach ($obj as $d) {
             $required['facility_'.$d->facility_id] = $d->amount;
         }
-        $obj = DB::table('t_ability')->whereIn('service_id', $arr_service_id)->get();
+        $obj = DB::table('r_ability')->whereIn('service_id', $arr_service_id)->get();
         foreach ($obj as $d) {
             $arr[] = $d->service_id;
             $ability[$d->usr_id] = $arr;

@@ -16,7 +16,7 @@ class MenuEditController extends Controller {
         $usr_id = 1;
 //        \Cookie::queue('lang', $lang);
 //        \App::setLocale($lang);
-        $menu = DB::table('t_menu')->where('menu_id',$menu_id)->first();
+        $menu = DB::table('m_menu')->where('menu_id',$menu_id)->first();
         $shop_group = DB::table('r_group_relate')
                 ->where('group_id',$menu->group_id)
                 ->where('usr_id',$usr_id)
@@ -26,7 +26,7 @@ class MenuEditController extends Controller {
             die("which menu are you ?");
             return redirect('/Auth/Sign/in/0/');
         }
-        $obj = DB::table('t_menu_necessary')->where('menu_id', $menu_id)->get();
+        $obj = DB::table('m_menu_necessary')->where('menu_id', $menu_id)->get();
         $arr_facility_id = [0];
         $final_end_min = 0;
         foreach ($obj as $d) {

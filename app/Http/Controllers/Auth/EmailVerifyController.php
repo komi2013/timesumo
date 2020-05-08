@@ -15,30 +15,21 @@ class EmailVerifyController extends Controller {
             return view('errors.404');
         }
 
-        $obj = DB::table('t_usr')
+        $usr = DB::table('t_usr')
             ->where('email',session('email'))
             ->first();
         
-        if (isset($obj->usr_id) AND $obj->oauth_type == 3) {
+        if (isset($usr->usr_id) AND $usr->oauth_type == 3) {
             DB::table('t_usr')
-                ->where("usr_id",$obj->usr_id)
+                ->where("usr_id",$usr->usr_id)
                 ->update([
                     "password" => Hash::make(session('password'))
                     ,"updated_at" => now()
                 ]);
-            $usr_id = $obj->usr_id;
+            new \App\My\AfterLogin($usr->usr_id);
         } else {
             $arr_email = explode("@", session('email'));
-            
-            $usr_id = DB::select("select nextval('t_usr_usr_id_seq')")[0]->nextval;
-            DB::table('t_usr')->insert([
-                "usr_id" => $usr_id
-                ,"oauth_type" => 3
-                ,"updated_at" => now()
-                ,"email" => session('email')
-                ,"password" => Hash::make(session('password'))
-                ,"usr_name" => $arr_email[0]
-            ]);
+            new \App\My\AfterLogin($arr_email[0]);
         }
         $request->session()->forget('email_auth');
         $request->session()->forget('email');

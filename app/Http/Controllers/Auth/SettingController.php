@@ -15,9 +15,21 @@ class SettingController extends Controller {
             return redirect('/Auth/EmailLogin/index/');
         }
         \App::setLocale(\Cookie::get('lang') ?: 'ja');
-        $usr = DB::table('t_usr')->where('usr_id',session('usr_id'))->first();
+        $usr_id = session('usr_id');
+        $group_id = session('group_id');
+//        $group_id = 2;
+        $usr = DB::table('t_usr')->where('usr_id',$usr_id)->first();
+        $group = DB::table('m_group')->where('group_id',$group_id)->first();
         $usr_name = $usr->usr_name;
-        return view('auth.setting', compact('usr_name'));
+        
+        
+
+//        var_dump($group_id);
+//        dd(json_decode($extra,true));
+        
+        
+        
+        return view('auth.setting', compact('usr_name','group'));
     }
     public function factory(Request $request, $directory=null, $controller=null,$action=null, 
             $usr_id=0,$group_id=0) {

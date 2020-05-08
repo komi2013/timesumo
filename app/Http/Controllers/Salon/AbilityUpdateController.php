@@ -23,8 +23,8 @@ class AbilityUpdateController extends Controller {
         }
 
         DB::beginTransaction();
-        DB::table('t_ability')->where('usr_id', $usr_id)->delete();
-        DB::table('t_ability')->insert($ability);
+        DB::table('r_ability')->where('usr_id', $usr_id)->delete();
+        DB::table('r_ability')->insert($ability);
         DB::commit();
         $res[0] = 1;
         die( json_encode($res) );

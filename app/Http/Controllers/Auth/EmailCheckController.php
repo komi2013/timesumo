@@ -15,9 +15,7 @@ class EmailCheckController extends Controller {
         
         if (isset($usr->usr_id) AND Hash::check($request->password, $usr->password)) {
             $login = true;
-            $Login = new \App\My\Login();
-            $Login->usr_id = $usr->usr_id;
-            $Login->after();
+            new \App\My\AfterLogin($usr->usr_id);
             $redirect = session('redirect') ?: '/';
             $request->session()->forget('redirect');
         } else {

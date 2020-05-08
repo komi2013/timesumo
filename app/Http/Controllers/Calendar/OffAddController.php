@@ -122,8 +122,7 @@ dd($request->all());
         $schedule_id = DB::select("select nextval('t_schedule_schedule_id_seq')")[0]->nextval;
         if ( !isset($leave_schedule_id) AND isset($leave_amount->usr_id) ) {
             DB::table('h_leave_amount')->insert([
-                    "leave_amount_id" => $leave_amount->leave_amount_id
-                    ,"usr_id" => $leave_amount->usr_id
+                    "usr_id" => $leave_amount->usr_id
                     ,"enable_start" => $leave_amount->enable_start
                     ,"enable_end" => $leave_amount->enable_end
                     ,"grant_days" => $leave_amount->grant_days
