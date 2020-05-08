@@ -15,7 +15,26 @@ class RoutineController extends Controller {
         $group_id = $request->session()->get('group_id');
         $group_id = 2;
 //        \App::setLocale('ja');
-
+        $obj = DB::table('r_rule')
+                ->where('group_id', $group_id)
+                ->orderBy('updated_at','ASC')
+                ->get();
+        $arr['holiday_flg'] = 0;
+        $arr['approver1'] = 0;
+        $arr['approver2'] = 0;
+        $arr['compensatory_within'] = 0;
+        foreach ($obj as $d) {
+            if( !isset($d->usr_id) OR 
+                    ($d->approver1 != $usr_id AND $d->approver2 != $usr_id) ) {
+                die('you can not access this');
+            }
+            if ($target_usr == $d->usr_id) {
+                $arr['holiday_flg'] = $d->holiday_flg;
+                $arr['approver1'] = $d->approver1;
+                $arr['approver2'] = $d->approver2;
+                $arr['compensatory_within'] = $d->compensatory_within;
+            }
+        }
         $obj = DB::table('r_routine')
                 ->where('group_id', $group_id)
                 ->orderBy('updated_at','ASC')
@@ -31,19 +50,11 @@ class RoutineController extends Controller {
             ++$i;
         }
         $arr['routine_id'] = 0;
-        $arr['holiday_flg'] = 0;
-        $arr['approver1'] = 0;
-        $arr['approver2'] = 0;
-        $arr['compensatory_within'] = 0;
         $arr['fix_flg'] = 0;
         $arr['usr_id'] = $target_usr;
         $arr['group_id'] = $group_id;
         $target_data = false;
         foreach ($obj as $d) {
-            if( !isset($d->usr_id) OR 
-                    ($d->approver1 != $usr_id AND $d->approver2 != $usr_id) ) {
-                die('you can not access this');
-            }
             if ($target_data) {
                 break;
             }
@@ -58,10 +69,6 @@ class RoutineController extends Controller {
                 ++$i;
             }
             $arr['routine_id'] = $d->routine_id;
-            $arr['holiday_flg'] = $d->holiday_flg;
-            $arr['approver1'] = $d->approver1;
-            $arr['approver2'] = $d->approver2;
-            $arr['compensatory_within'] = $d->compensatory_within;
             $arr['fix_flg'] = $d->fix_flg;
             if ($target_usr == $d->usr_id) {
                 $target_data = true;

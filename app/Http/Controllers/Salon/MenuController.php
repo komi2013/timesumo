@@ -13,7 +13,7 @@ class MenuController extends Controller {
 //            return redirect('/Auth/Sign/in/0/');
 //        }
         $usr_id = $request->session()->get('usr_id');
-        $usr_id = 1;
+        $usr_id = 2;
 //        \Cookie::queue('lang', $lang);
 //        \App::setLocale($lang);
         $obj = DB::table('r_group_relate')->where('usr_id',$usr_id)->where('owner_flg',1)->get();

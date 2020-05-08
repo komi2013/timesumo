@@ -2,6 +2,7 @@
 <html>
   <head>
     <meta charset="UTF-8" />
+    <title>Rule & Shift</title>
     <link rel="shortcut icon" href="" />
     <script src="/plugin/min.js"></script>
     <link rel="stylesheet" href="/css/basic.css<?=config('my.cache_v')?>" />
