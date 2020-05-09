@@ -8,17 +8,22 @@ use Carbon\Carbon;
 
 class StampController extends Controller {
 
-    public function index(Request $request, $directory=null, $controller=null,$action=null,
+    public function index(Request $request,$directory,$controller,$action,
             $password='') {
-        $usr_id = $request->session()->get('usr_id');
-        $usr_id = 4;
-        $group_id = $request->session()->get('group_id');
-        $group_id = 2;
+        if (!session('usr_id')) {
+            $request->session()->put('redirect',$_SERVER['REQUEST_URI']);
+            return redirect('/Auth/EmailLogin/index/');
+        }
+        $usr_id = session('usr_id');
+        $group_id = session('group_id');
+        \App::setLocale($request->cookie('lang'));
         $group = DB::table('m_group')
                 ->where('group_id', $group_id)
                 ->first();
         if ($group->password != $password) {
-            die('no accesss right');
+            \Config::set('logging.channels.daily.path',storage_path('logs/warning.log'));
+            \Log::warning('no access right:line'.__LINE__.':'.$_SERVER['REQUEST_URI'] ?? "".' '. json_encode($_POST));
+            return json_encode([2,'no access right']);
         }
         $stamp = DB::table('t_timestamp')
                 ->where('usr_id', $usr_id)

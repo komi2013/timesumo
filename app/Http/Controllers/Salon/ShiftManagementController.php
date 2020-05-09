@@ -8,20 +8,18 @@ use Carbon\Carbon;
 
 class ShiftManagementController extends Controller {
 
-    public function index(Request $request, $directory=null, $controller=null,
-            $action=null, $menu_id='', $language='') {
-//        if (!$request->session()->get('usr_id')) {
-//            return redirect('/Auth/Sign/in/0/');
-//        }
-        $usr_id = $request->session()->get('usr_id');
-        $usr_id = 1;
-        $group_id = 1;
-        \App::setLocale('ja');
+    public function index(Request $request, $directory=null, $controller=null,$action=null) {
+        if (!session('usr_id')) {
+            $request->session()->put('redirect',$_SERVER['REQUEST_URI']);
+            return redirect('/Auth/EmailLogin/index/');
+        }
+        $usr_id = session('usr_id');
+        $group_id = session('group_id');
+        \App::setLocale($request->cookie('lang'));
         Carbon::setWeekStartsAt(Carbon::SUNDAY);
         Carbon::setWeekEndsAt(Carbon::SATURDAY);
         $today = Carbon::today();
         $frameDate = Carbon::createFromDate($today->year, $today->month, $today->startOfWeek()->format('d'));
-        
         $obj = DB::table('r_routine')->where('group_id',$group_id)->get();
         $openHour = strtotime('23:59:59');
         $closeHour = strtotime('00:00:00');
@@ -39,16 +37,13 @@ class ShiftManagementController extends Controller {
                 ++$i;
             }
         }
-
         $openHour = strtotime(date('H:00:00',$openHour));
         if (date('H:00:00',$closeHour) != date('H:i:s',$closeHour)) {
             $closeHour = strtotime(date('H:00:00',$closeHour)) + (60 * 60); // 1 hour
-
         }
         $openTime = date('H:00',$openHour);
         $closeTime = $closeHour - (60 * 10); 
         $closeTime = date('H:i',$closeTime);
-
         $frameDate->setTime(date('H',$openHour), 0, 0);
         $days7 = [];
         $i = 0;
@@ -67,7 +62,6 @@ class ShiftManagementController extends Controller {
             $frameDate->setTime(date('H',$openHour), 0, 0);
             ++$i;
         }
-
         $obj = DB::table('r_routine')->where('group_id',$group_id)->get();
         $i = 0;
         $arr_usr_id = [];
@@ -81,9 +75,7 @@ class ShiftManagementController extends Controller {
                     $start = new Carbon($d->$t_start);
                     $end = new Carbon($d->$t_end);
                     while ($start < $end) {
-//                        echo '<pre>'; var_dump('start_'.$i.' '.$start->format('H:i:s')); echo '</pre>';
                         $days7['start_'.$i.' '.$start->format('H:i:s')][] = $d->usr_id;
-                        
                         if ( $max < count($days7['start_'.$i.' '.$start->format('H:i:s')]) ) {
                             $max = count($days7['start_'.$i.' '.$start->format('H:i:s')]);
                         }
@@ -100,7 +92,6 @@ class ShiftManagementController extends Controller {
             $usr_ids[$d->usr_id] = $d->usr_name;
         }
         $usr_ids = json_encode($usr_ids);
-//        dd($days7);
         return view('salon.shift_management', 
                 compact('days7','usr_ids','openTime','closeTime','max'));
     }

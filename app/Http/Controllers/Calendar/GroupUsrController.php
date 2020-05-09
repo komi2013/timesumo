@@ -10,6 +10,11 @@ class GroupUsrController extends Controller {
 
     public function get(Request $request,$directory=null,$controller=null,$action=null,
             $word=null) {
+        if (!session('usr_id')) {
+            \Config::set('logging.channels.daily.path',storage_path('logs/warning.log'));
+            \Log::warning('no session usr_id:'.$_SERVER['REQUEST_URI'] ?? "".' '. json_encode($_POST));
+            return json_encode([2,'no session usr_id']);
+        }
         $request->session()->reflash();
         $group_ids = json_decode(session('group_ids'),true) ?: [];
         $obj = DB::table('r_group_relate')->select('usr_id')
@@ -39,7 +44,7 @@ class GroupUsrController extends Controller {
             $arr = [$d->usr_id,$d->usr_name];
             $arr_usr[$d->usr_id] = $arr;
         }
-        echo json_encode($arr_usr);
+        return json_encode($arr_usr);
     }
 }
 

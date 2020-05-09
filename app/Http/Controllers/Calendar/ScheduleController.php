@@ -10,11 +10,14 @@ class ScheduleController extends Controller {
 
     public function edit(Request $request, $directory=null, $controller=null,$action=null, 
             $id_date=null,$tag=1) {
-        $usr_id = $request->session()->get('usr_id');
-        $lang = 'ja';
-        \App::setLocale('ja');
-        $usr_id = 2;
-        $group_id = session('group_id') ?: 0;
+        if (!session('usr_id')) {
+            $request->session()->put('redirect',$_SERVER['REQUEST_URI']);
+            return redirect('/Auth/EmailLogin/index/');
+        }
+        $usr_id = session('usr_id');
+        $group_id = session('group_id');
+        \App::setLocale($request->cookie('lang'));
+
         $mystaff = session('mystaff') ?: 0;
 
         $schedule_id = null;
@@ -76,14 +79,20 @@ class ScheduleController extends Controller {
                 }
             }
             if ($access_right == 0) {
-                die('no access right');
+                $msg = 'no access right:line'.__LINE__.':'.$_SERVER['REQUEST_URI'] ?? "".' '. json_encode($_POST);
+                \Config::set('logging.channels.daily.path',storage_path('logs/warning.log'));
+                \Log::warning($msg);
+                return view('errors.500', compact('msg'));
             }
             $is = DB::table('r_group_relate')
                     ->where("group_id", $group_id)
                     ->where("usr_id", $usr_id)
                     ->first();
             if (!isset($is->usr_id)) {
-                die('you are not part of this group');
+                $msg = 'group is different:line'.__LINE__.':'.$_SERVER['REQUEST_URI'] ?? "".' '. json_encode($_POST);
+                \Config::set('logging.channels.daily.path',storage_path('logs/warning.log'));
+                \Log::warning($msg);
+                return view('errors.500', compact('msg'));
             }
             $obj = DB::table('t_todo')->where("schedule_id", $schedule_id)->first();
             $todo = $obj->todo ?? '';

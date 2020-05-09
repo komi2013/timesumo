@@ -9,13 +9,10 @@ use Carbon\Carbon;
 class CancelUpdateController extends Controller {
 
     public function lessuri(Request $request, $directory=null, $controller=null,$action=null) {
-//        if (!$request->session()->get('usr_id')) {
-//            return redirect('/Auth/Sign/in/0/');
-//        }
-        $usr_id = $request->session()->get('usr_id');
-        $usr_id = 1;
-        $group_id = 1;
-        \App::setLocale('ja');
+        if (!session('usr_id')) {
+            return json_encode([2,'no session usr_id']);
+        }
+        $usr_id = session('usr_id');
         $schedule = $request->schedule;
         $schedule_id = $schedule['schedule_id'];
         

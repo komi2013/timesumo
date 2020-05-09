@@ -8,16 +8,15 @@ use Carbon\Carbon;
 
 class CancelingController extends Controller {
 
-    public function index(Request $request, $directory=null, $controller=null,
-            $action=null, $schedule_id='') {
-//        if (!$request->session()->get('usr_id')) {
-//            return redirect('/Auth/Sign/in/0/');
-//        }
-        $usr_id = $request->session()->get('usr_id');
-        $usr_id = 1;
-        $group_id = 6;
-        \App::setLocale('ja');
-        
+    public function index(Request $request, $directory=null, $controller=null,$action=null,
+            $schedule_id='') {
+        if (!session('usr_id')) {
+            $request->session()->put('redirect',$_SERVER['REQUEST_URI']);
+            return redirect('/Auth/EmailLogin/index/');
+        }
+        $usr_id = session('usr_id');
+        $group_id = session('group_id');
+        \App::setLocale($request->cookie('lang'));
         $obj = DB::table('t_schedule')->where('schedule_id',$schedule_id)->get();
         $access_right = false;
         $arr_customer = [];
@@ -44,7 +43,10 @@ class CancelingController extends Controller {
             }
         }
         if (!$access_right) {
-            die('404');
+            $msg = 'no access right:line'.__LINE__.':'.$_SERVER['REQUEST_URI'] ?? "".' '. json_encode($_POST);
+            \Config::set('logging.channels.daily.path',storage_path('logs/warning.log'));
+            \Log::warning($msg);
+            return view('errors.500', compact('msg'));
         }
         $schedule['schedule_id'] = $schedule_id;
         $obj = DB::table('t_usr')->whereIn('usr_id',$arr_usr_id)->get();

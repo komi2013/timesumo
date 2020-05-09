@@ -9,10 +9,15 @@ use Carbon\Carbon;
 class OffGetController extends Controller {
 
     public function lessuri(Request $request, $directory=null, $controller=null, $action=null) {
-
-        $usr_id = 2;
-        $group_id = 2;
-        \App::setLocale('ja');
+        if (!session('usr_id')) {
+            \Config::set('logging.channels.daily.path',storage_path('logs/warning.log'));
+            \Log::warning('no session usr_id:'.$_SERVER['REQUEST_URI'] ?? "".' '. json_encode($_POST));
+            return json_encode([2,'no session usr_id']);
+        }
+        $usr_id = session('usr_id');
+        $group_id = session('group_id');
+        \App::setLocale($request->cookie('lang'));
+        
         $request->session()->reflash();
         
         $timestamp = DB::table('t_timestamp')

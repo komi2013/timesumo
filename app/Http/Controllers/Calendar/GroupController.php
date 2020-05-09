@@ -41,7 +41,9 @@ class GroupController extends Controller {
             }
         }
         if (!$owner) {
-            die('you can not change this group');
+            \Config::set('logging.channels.daily.path',storage_path('logs/warning.log'));
+            \Log::warning('no owner:'.$_SERVER['REQUEST_URI'] ?? "".' '. json_encode($_POST));
+            return json_encode([2,'no owner']);
         }
         $obj = DB::table('m_group')->whereIn("group_id", $group_ids)->get();
         $m_group = null;

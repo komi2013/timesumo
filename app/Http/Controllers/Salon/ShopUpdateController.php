@@ -10,17 +10,13 @@ use Carbon\Carbon;
 
 class ShopUpdateController extends Controller {
 
-    public function lessuri(Request $request, $directory=null, $controller=null,
-            $action=null, $one='', $two='') {
-        $usr_id = $request->session()->get('usr_id');
-        $usr_id = 1;
-//        ,group_id : g
-//        ,shop_name : $('#shop_name_'+g).val()
-//        ,seat : $('#seat_'+g).val()
-//        ,shampoo_seat : $('#shampoo_seat_'+g).val()
-//        ,digital_perm : $('#digital_perm_'+g).val()
+    public function lessuri(Request $request, $directory=null, $controller=null,$action=null) {
+        if (!session('usr_id')) {
+            return json_encode([2,'no session usr_id']);
+        }
+        $usr_id = session('usr_id');
+        $group_id = session('group_id');
         if ($request->group_id > 0) {
-//            $usr_id = DB::select("select nextval('t_usr_usr_id_seq')")[0]->nextval;
             $arr_group_id = json_decode( $request->session()->get('group_ids'),true );
             if(in_array($request->group_id, $arr_group_id)){
                 DB::beginTransaction();
@@ -61,7 +57,9 @@ class ShopUpdateController extends Controller {
                 }
                 DB::commit();
             } else {
-                //wow this guy try to do something
+                \Config::set('logging.channels.daily.path',storage_path('logs/warning.log'));
+                \Log::warning('group is different:line'.__LINE__.':'.$_SERVER['REQUEST_URI'] ?? "".' '. json_encode($_POST));
+                return json_encode([2,'group is different']);
             }
         } else {
             $group_id = DB::select("select nextval('m_group_group_id_seq')")[0]->nextval;
@@ -102,7 +100,7 @@ class ShopUpdateController extends Controller {
             DB::commit();
         }
         $res[0] = 1;
-        die( json_encode($res) );
+        return json_encode($res);
     }
 }
 

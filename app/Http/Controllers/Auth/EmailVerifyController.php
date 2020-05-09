@@ -10,11 +10,11 @@ class EmailVerifyController extends Controller {
 
     public function code(Request $request, $directory=null, $controller=null,$action=null,
             $auth) {
-        \App::setLocale($request->cookie('lang'));
         if ($auth != session('email_auth')) {
-            return view('errors.404');
+            $request->session()->put('redirect',$_SERVER['REQUEST_URI']);
+            return redirect('/Auth/EmailLogin/index/');
         }
-
+        \App::setLocale($request->cookie('lang'));
         $usr = DB::table('t_usr')
             ->where('email',session('email'))
             ->first();

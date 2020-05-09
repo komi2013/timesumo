@@ -8,18 +8,19 @@ use Carbon\Carbon;
 
 class RoutineEditController extends Controller {
 
-    public function lessuri(Request $request, $directory=null, $controller=null,$action=null,
-            $month=null) {
-        $usr_id = $request->session()->get('usr_id');
-        $usr_id = 4;
-        $group_id = $request->session()->get('group_id');
-        $group_id = 2;
-        $group_owner = $request->session()->get('group_owner');
-        $group_owner = true;
-//        \App::setLocale('ja');
+    public function lessuri(Request $request, $directory=null, $controller=null,$action=null) {
+        if (!session('usr_id')) {
+            return json_encode([2,'no session usr_id']);
+        }
+        $usr_id = session('usr_id');
+        $group_id = session('group_id');
+        $group_owner = session('group_owner');
+
         $r = $request->routine;
         if( $r['group_id'] != $group_id) {
-            die('you can not access this');
+            \Config::set('logging.channels.daily.path',storage_path('logs/warning.log'));
+            \Log::warning('group is different:line'.__LINE__.':'.$_SERVER['REQUEST_URI'] ?? "".' '. json_encode($_POST));
+            return json_encode([2,'group is different']);
         }
         $i = 0;
         while ($i < 7) {
@@ -69,7 +70,9 @@ class RoutineEditController extends Controller {
             $add['routine_id'] = DB::select("select nextval('r_routine_routine_id_seq')")[0]->nextval;
         }
         if (!$group_owner AND !$edit) {
-            die('not owner approver either');
+            \Config::set('logging.channels.daily.path',storage_path('logs/warning.log'));
+            \Log::warning('no access right:line'.__LINE__.':'.$_SERVER['REQUEST_URI'] ?? "".' '. json_encode($_POST));
+            return json_encode([2,'no access right']);
         }
         DB::beginTransaction();
         if($edit){
@@ -80,8 +83,7 @@ class RoutineEditController extends Controller {
         DB::commit();
         DB::table('r_routine')->insert($add);
         $res[0] = 1;
-        echo json_encode($res);
-//        return view('shift.timesheet', compact('days','month'));
+        return json_encode($res);
     }
 }
 

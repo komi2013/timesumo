@@ -8,17 +8,15 @@ use Carbon\Carbon;
 
 class BookController extends Controller {
 
-    public function index(Request $request, $directory=null, $controller=null,
-            $action=null, $menu_id='', $staff=0) {
-//        if (!$request->session()->get('usr_id')) {
-//            return redirect('/Auth/Sign/in/0/');
-//        }
-        $usr_id = $request->session()->get('usr_id');
-        $usr_id = 1;
-//        \Cookie::queue('lang', $lang);
-//        $request->session()->put('group_id',6);
-        $group_id = 2;
-        \App::setLocale('ja');
+    public function index(Request $request, $directory=null, $controller=null,$action=null,
+            $menu_id='', $staff=0) {
+        if (!session('usr_id')) {
+            $request->session()->put('redirect',$_SERVER['REQUEST_URI']);
+            return redirect('/Auth/EmailLogin/index/');
+        }
+        $usr_id = session('usr_id');
+        $group_id = session('group_id');
+        \App::setLocale($request->cookie('lang'));
         $menu = DB::table('m_menu')->where('menu_id', $menu_id)->first();
         if ($staff > 0) {
             if ($menu->group_id != $request->session()->get('group_id')) {
@@ -31,9 +29,7 @@ class BookController extends Controller {
             $customer = \Cookie::get('usr_name');
         }
         $group_id = $menu->group_id;
-
         $shop = DB::table('m_group')->where('group_id', $group_id)->first();
-        
         $today = Carbon::today();
         Carbon::setWeekStartsAt(Carbon::SUNDAY);
         Carbon::setWeekEndsAt(Carbon::SATURDAY);
@@ -91,7 +87,7 @@ class BookController extends Controller {
                 ->where('time_end', '>',date('Y-m-d H:i:s')) // more take for other booking
                 ->where('time_start', '<', $end) // more take for other booking 
                 ->get();
-//dd(json_decode($obj,true));
+
         foreach ($obj as $d) {
             $start = new Carbon($d->time_start);
             $end = new Carbon($d->time_end);
@@ -99,7 +95,6 @@ class BookController extends Controller {
                 $startI = floor($start->format('i')/10) * 10;
                 $k = $start->format('Y-m-d H:').str_pad($startI, 2, 0, STR_PAD_LEFT).':00';
                 if (isset($days21[$k])) {
-//                    $days21[$k]['schedule_ids'][] = $d->schedule_id;
                     if (in_array($d->usr_id,$arr_facility_id)) {
                         --$days21[$k]['facility_'.$d->usr_id];
                         $facilities[$d->usr_id] = $d->schedule_id;
@@ -161,7 +156,6 @@ class BookController extends Controller {
         if (count($del) > 0) {
             // delete statement
         }
-//        dd($days21);
         $today = date('Y-m-d');
         $openTime = $openHour.':00';
         $closeTime = $closeHour - 1 .':50';

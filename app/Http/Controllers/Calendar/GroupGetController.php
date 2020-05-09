@@ -10,8 +10,13 @@ class GroupGetController extends Controller {
 
     public function get(Request $request, $directory=null, $controller=null, 
             $action=null, $group_id=0, $oauth_type=null) {
+        if (!session('usr_id')) {
+            \Config::set('logging.channels.daily.path',storage_path('logs/warning.log'));
+            \Log::warning('no session usr_id:'.$_SERVER['REQUEST_URI'] ?? "".' '. json_encode($_POST));
+            return json_encode([2,'no session usr_id']);
+        }
+        $usr_id = session('usr_id');
         $request->session()->reflash();
-        $usr_id = 2;
         $obj = DB::table('r_group_relate')->where("usr_id", $usr_id)->get();
         $arr_group = [];
         $group_ids = [];
@@ -74,7 +79,7 @@ class GroupGetController extends Controller {
         $res[3] = $group_ids;
         $res[4] = $arr_group;
         $res[5] = $group_id;
-        echo json_encode($res);
+        return json_encode($res);
     }
 }
 

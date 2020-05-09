@@ -9,8 +9,13 @@ use Illuminate\Support\Facades\Storage;
 class ScheduleAddController extends Controller {
 
     public function lessuri(Request $request, $directory=null, $controller=null, $action=null) {
-
-        $usr_id = 2;
+        if (!session('usr_id')) {
+            \Config::set('logging.channels.daily.path',storage_path('logs/warning.log'));
+            \Log::warning('no session usr_id:'.$_SERVER['REQUEST_URI'] ?? "".' '. json_encode($_POST));
+            return json_encode([2,'no session usr_id']);
+        }
+        $usr_id = session('usr_id');
+        $group_id = session('group_id');
         $usrs = json_decode($request->input('usrs'),true) ?? [];
         $group_ids = json_decode($request->session()->get('group_ids'),true);
         $obj = DB::table('r_group_relate')->whereIn("group_id", $group_ids)->get();
@@ -24,9 +29,10 @@ class ScheduleAddController extends Controller {
             }
         }
         if (!$group) {
-            $res[0] = 2;
-            $res[1] = 'you can not insert because you are not part of this group';
-            die(json_encode($res));
+            \Config::set('logging.channels.daily.path',storage_path('logs/warning.log'));
+            \Log::warning('group is different:'.$_SERVER['REQUEST_URI'] ?? "".' '. json_encode($_POST));
+            return json_encode([2,'group is different']);
+
         }
         $schedule_id = DB::select("select nextval('t_schedule_schedule_id_seq')")[0]->nextval;
         $file_paths = [];
@@ -40,7 +46,6 @@ class ScheduleAddController extends Controller {
             }
         }
 
-        $group_id = $request->input('group_id');
         $public_title = $request->input('public_title') ?? '';
         foreach ($usrs as $d) {
             $schedule[$d]['time_start'] = $request->input('time_start');
@@ -64,7 +69,7 @@ class ScheduleAddController extends Controller {
             ]);
         }
         $res[0] = 1;
-        echo json_encode($res);
+        return json_encode($res);
     }
 }
 

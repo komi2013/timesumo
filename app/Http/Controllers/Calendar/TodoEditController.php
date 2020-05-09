@@ -9,11 +9,11 @@ use Illuminate\Support\Facades\Storage;
 class TodoEditController extends Controller {
 
     public function lessuri(Request $request, $directory=null, $controller=null, $action=null) {
-
-
-        $usr_id = 2;
-        $res[0] = 1;
-
+        if (!session('usr_id')) {
+            return json_encode([2,'no session usr_id']);
+        }
+        $usr_id = session('usr_id');
+        $group_id = session('group_id');
         $paths = json_decode($request->input('file_paths'),true);
         $file_paths = [];
         foreach ($paths as $d) {
@@ -62,7 +62,7 @@ class TodoEditController extends Controller {
         }
 
         $res[0] = 1;
-        echo json_encode($res);
+        return json_encode($res);
     }
 }
 

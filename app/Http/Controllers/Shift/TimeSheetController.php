@@ -8,18 +8,20 @@ use Carbon\Carbon;
 
 class TimeSheetController extends Controller {
 
-    public function index(Request $request, $directory=null, $controller=null,$action=null,
+    public function index(Request $request,$directory,$controller,$action,
             $month=null) {
-        $usr_id = $request->session()->get('usr_id');
-        $usr_id = 4;
-        $group_id = $request->session()->get('group_id');
-        $group_id = 2;
-//        \App::setLocale('ja');
+        if (!session('usr_id')) {
+            $request->session()->put('redirect',$_SERVER['REQUEST_URI']);
+            return redirect('/Auth/EmailLogin/index/');
+        }
+        $usr_id = session('usr_id');
+        $group_id = session('group_id');
+        \App::setLocale($request->cookie('lang'));
+
         $month = $month ?? date('Y-m');
         $thisMonth = new Carbon($month);
         $thisMonth = new Carbon($thisMonth->format('Y-m-01 00:00:00'));
         $begin = $thisMonth->format('Y-m-d H:i:s');
-//        die($begin);
         $i = 0;
         $monthly = [];
         $endOfMonth = $thisMonth->daysInMonth;
@@ -77,8 +79,6 @@ class TimeSheetController extends Controller {
             }
             $days[] = $arr;
         }
-//        dd($days);
-        // r_routine, t_leave_amount, m_leave, r_extra
         $month = new Carbon($month);
         return view('shift.timesheet', compact('days','month'));
     }

@@ -10,14 +10,18 @@ class SpaceController extends Controller {
 
     public function index(Request $request,$directory=null,$controller=null,$action=null,
             $date=null,$usrs=null) {
-        $usr_id = 2;
-        $group_id = 2;
+        if (!session('usr_id')) {
+            $request->session()->put('redirect',$_SERVER['REQUEST_URI']);
+            return redirect('/Auth/EmailLogin/index/');
+        }
+        $usr_id = session('usr_id');
+        $group_id = session('group_id');
+        \App::setLocale($request->cookie('lang'));
         $arr_usr = json_decode($usrs);
         $usr_ids = [];
         foreach ($arr_usr as $d) {
             $usr_ids[] = $d;
         }
-//        echo '<pre>';
         $routine = DB::table('r_routine')
                 ->where("usr_id", $usr_id)
                 ->where("group_id", $group_id)
@@ -28,16 +32,10 @@ class SpaceController extends Controller {
         if ($routine->$start > $routine->$end) {
             $thisDay->addDay();
         }
-//        var_dump($routine->$start,$routine->$end);
         $begin = $date.' '.$routine->$start;
         $final = $thisDay->format('Y-m-d').' '.$routine->$end;
         $endRange = new Carbon($final);
         $range = new Carbon($begin);
-//        $range->subHour();
-
-//        var_dump($range);
-//        var_dump($endRange);
-//        echo '</pre>';
         $axis = [];
         $left = 0;
         while ($range < $endRange) {
@@ -45,7 +43,6 @@ class SpaceController extends Controller {
             $left += 30; // 1 hour 30px
             $range->addHour();
         }
-//        dd($usr_ids);
         $obj = DB::table('t_usr')
             ->whereIn("usr_id", $usr_ids)
             ->get();
@@ -71,7 +68,6 @@ class SpaceController extends Controller {
             $arr['width'] = round($start->diffInMinutes($end) /2);
             $space[$d->usr_id]['schedules'][] = $arr;
         }
-//        dd($space);
         return view('calendar.space', compact('space','axis'));
     }
 }

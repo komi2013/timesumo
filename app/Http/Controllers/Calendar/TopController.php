@@ -10,9 +10,12 @@ class TopController extends Controller {
 
     public function index(Request $request, $directory=null, $controller=null,$action=null,
             $month=null) {
-        $usr_id = $request->session()->get('usr_id');
-        $usr_id = 2;
-        \App::setLocale('ja');
+        if (!session('usr_id')) {
+            $request->session()->put('redirect',$_SERVER['REQUEST_URI']);
+            return redirect('/Auth/EmailLogin/index/');
+        }
+        $usr_id = session('usr_id');
+        \App::setLocale($request->cookie('lang'));
         Carbon::setWeekStartsAt(Carbon::SUNDAY);
         Carbon::setWeekEndsAt(Carbon::SATURDAY);
         if ($month) {

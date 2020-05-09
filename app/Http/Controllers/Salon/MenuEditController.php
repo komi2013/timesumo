@@ -7,15 +7,15 @@ use Illuminate\Support\Facades\DB;
 // only owner access
 class MenuEditController extends Controller {
 
-    public function edit(Request $request, $directory=null, $controller=null,
-            $action=null, $menu_id, $language='') {
-//        if (!$request->session()->get('usr_id')) {
-//            return redirect('/Auth/Sign/in/0/');
-//        }
-        $usr_id = $request->session()->get('usr_id');
-        $usr_id = 1;
-//        \Cookie::queue('lang', $lang);
-//        \App::setLocale($lang);
+    public function edit(Request $request, $directory=null, $controller=null,$action=null,
+            $menu_id) {
+        if (!session('usr_id')) {
+            $request->session()->put('redirect',$_SERVER['REQUEST_URI']);
+            return redirect('/Auth/EmailLogin/index/');
+        }
+        $usr_id = session('usr_id');
+        $group_id = session('group_id');
+        \App::setLocale($request->cookie('lang'));
         $menu = DB::table('m_menu')->where('menu_id',$menu_id)->first();
         $shop_group = DB::table('r_group_relate')
                 ->where('group_id',$menu->group_id)
@@ -23,8 +23,10 @@ class MenuEditController extends Controller {
                 ->first();
         $request->session()->put('group_id', $menu->group_id);
         if (!$shop_group->shop_group_id) {
-            die("which menu are you ?");
-            return redirect('/Auth/Sign/in/0/');
+            $msg = 'menu_id is wrong:line'.__LINE__.':'.$_SERVER['REQUEST_URI'] ?? "".' '. json_encode($_POST);
+            \Config::set('logging.channels.daily.path',storage_path('logs/warning.log'));
+            \Log::warning($msg);
+            return view('errors.500', compact('msg'));
         }
         $obj = DB::table('m_menu_necessary')->where('menu_id', $menu_id)->get();
         $arr_facility_id = [0];
@@ -50,7 +52,6 @@ class MenuEditController extends Controller {
         foreach ($obj as $d) {
             $services[$d->service_id] = $d->service_name;
         }
-//        krsort($necessary);
         $necessary = json_encode($necessary);
         $facilitys = json_encode($facilitys);
         $services = json_encode($services);

@@ -8,17 +8,19 @@ use Carbon\Carbon;
 
 class StampingController extends Controller {
 
-    public function lessuri(Request $request, $directory=null, $controller=null,$action=null,
-            $param=null) {
-        $usr_id = $request->session()->get('usr_id');
-        $usr_id = 4;
-        $group_id = $request->session()->get('group_id');
-        $group_id = 2;
+    public function lessuri(Request $request,$directory,$controller,$action) {
+        if (!session('usr_id')) {
+            return json_encode([2,'no session usr_id']);
+        }
+        $usr_id = session('usr_id');
+        $group_id = session('group_id');
         $group = DB::table('m_group')
                 ->where('group_id', $group_id)
                 ->first();
         if ($group->password != $request->password) {
-            die('no accesss right');
+            \Config::set('logging.channels.daily.path',storage_path('logs/warning.log'));
+            \Log::warning('password is wrong:line'.__LINE__.':'.$_SERVER['REQUEST_URI'] ?? "".' '. json_encode($_POST));
+            return json_encode([2,'password is wrong']);
         }
         $stamp = DB::table('t_timestamp')
                 ->where('usr_id', $usr_id)
@@ -63,7 +65,7 @@ class StampingController extends Controller {
                 ]);
         }
         $res[0] = 1;
-        die( json_encode($res) );
+        return json_encode($res);
     }
 }
 

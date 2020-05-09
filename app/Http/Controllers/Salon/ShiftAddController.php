@@ -10,22 +10,16 @@ use Carbon\Carbon;
 
 class ShiftAddController extends Controller {
 
-    public function lessuri(Request $request, $directory=null, $controller=null,
-            $action=null, $one='', $two='') {
-        $usr_id = $request->session()->get('usr_id');
-        $usr_id = 4;
-        $group_id = $request->session()->get('group_id');
-        $group_id = 1;
-
+    public function lessuri(Request $request, $directory=null, $controller=null,$action=null) {
+        if (!session('usr_id')) {
+            return json_encode([2,'no session usr_id']);
+        }
+        $usr_id = session('usr_id');
+        $group_id = session('group_id');
         $routine = DB::table('r_routine')
             ->where('usr_id',$usr_id)
             ->where('group_id',$group_id)
             ->first();
-        if ( !isset($routine->routine_id) ) {
-            $res[0] = 2;
-            $res[1] = 'please make routine';
-            die( json_encode($res) );
-        }
         $schedule = DB::table('t_schedule')
             ->where('usr_id',$usr_id)
             ->where('group_id',$group_id)
@@ -84,7 +78,6 @@ class ShiftAddController extends Controller {
             $day->addDay();
             ++$i;
         }
-//        dd($arr_sql);
         DB::table('t_schedule')
             ->where('schedule_id',$schedule_id)
             ->where('time_end','<',now())
@@ -92,7 +85,7 @@ class ShiftAddController extends Controller {
         DB::table('t_schedule')->insert($arr_sql);
         DB::commit();
         $res[0] = 1;
-        echo json_encode($res);
+        return json_encode($res);
     }
 }
 

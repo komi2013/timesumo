@@ -7,15 +7,15 @@ use Illuminate\Support\Facades\DB;
 // only owner access
 class MenuController extends Controller {
 
-    public function index(Request $request, $directory=null, $controller=null,
-            $action=null, $group_id='', $language='') {
-//        if (!$request->session()->get('usr_id')) {
-//            return redirect('/Auth/Sign/in/0/');
-//        }
-        $usr_id = $request->session()->get('usr_id');
-        $usr_id = 2;
-//        \Cookie::queue('lang', $lang);
-//        \App::setLocale($lang);
+    public function index(Request $request, $directory=null, $controller=null,$action=null,
+            $group_id='', $language='') {
+        if (!session('usr_id')) {
+            $request->session()->put('redirect',$_SERVER['REQUEST_URI']);
+            return redirect('/Auth/EmailLogin/index/');
+        }
+        $usr_id = session('usr_id');
+        $group_id = session('group_id');
+        \App::setLocale($request->cookie('lang'));
         $obj = DB::table('r_group_relate')->where('usr_id',$usr_id)->where('owner_flg',1)->get();
         $arr_group_id = [];
         foreach ($obj as $d) {
@@ -79,7 +79,6 @@ class MenuController extends Controller {
             }
         }
         $obj = DB::table('t_facility')->whereIn('facility_id', $arr_facility_id)->get();
-//dd($menu);
         return view('salon.menu', compact('menu','shops','group_id'));
     }
 }

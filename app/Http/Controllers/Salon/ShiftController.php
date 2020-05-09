@@ -11,14 +11,13 @@ class ShiftController extends Controller {
 
     public function regular(Request $request, $directory=null, $controller=null,
             $action=null, $arg1='', $arg2='') {
-//        if (!$request->session()->get('usr_id')) {
-//            return redirect('/Auth/Sign/in/0/');
-//        }
-//        $usr_id = $request->session()->get('usr_id');
-//        \Cookie::queue('lang', $lang);
-        \App::setLocale('ja');
-        $usr_id = 4;
-        $group_id = 1;
+        if (!session('usr_id')) {
+            $request->session()->put('redirect',$_SERVER['REQUEST_URI']);
+            return redirect('/Auth/EmailLogin/index/');
+        }
+        $usr_id = session('usr_id');
+        $group_id = session('group_id');
+        \App::setLocale($request->cookie('lang'));
         $i = 0;
         while ($i < 7) {
             $arr['routine_id'] = 0;

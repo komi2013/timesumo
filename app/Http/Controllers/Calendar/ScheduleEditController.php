@@ -10,10 +10,13 @@ use Illuminate\Support\Facades\Storage;
 class ScheduleEditController extends Controller {
 
     public function lessuri(Request $request, $directory=null, $controller=null, $action=null) {
-
-        $usr_id = 2;
-        $group_id = 2;
-        $arr3 = [];
+        if (!session('usr_id')) {
+            \Config::set('logging.channels.daily.path',storage_path('logs/warning.log'));
+            \Log::warning('no session usr_id:'.$_SERVER['REQUEST_URI'] ?? "".' '. json_encode($_POST));
+            return json_encode([2,'no session usr_id']);
+        }
+        $usr_id = session('usr_id');
+        $group_id = session('group_id');
         $usrs = json_decode($request->input('usrs'),true);
         $schedule_id = $request->input('schedule_id');
 
@@ -29,7 +32,9 @@ class ScheduleEditController extends Controller {
             } else if ($group_id == $d->group_id AND $access_right < substr($d->access_right,2,1)) {
                 $access_right = substr($d->access_right,2,1);
             } else {
-                die('you are not part of this group');
+                \Config::set('logging.channels.daily.path',storage_path('logs/warning.log'));
+                \Log::warning('group is different:'.$_SERVER['REQUEST_URI'] ?? "".' '. json_encode($_POST));
+                return json_encode([2,'group is different']);
             }
             $lastUpdate = new Carbon($d->updated_at);
             $viewTime = new Carbon($request->session()->get('view_time'));
@@ -37,9 +42,9 @@ class ScheduleEditController extends Controller {
                 $overwrite = true;
             }
             if ($overwrite) {
-                $res[0] = 2;
-                $res[1] = 'somebody overwrite this schedule, please refresh page and submit again';
-                die(json_encode($res));
+                \Config::set('logging.channels.daily.path',storage_path('logs/warning.log'));
+                \Log::warning('overwrite:'.$_SERVER['REQUEST_URI'] ?? "".' '. json_encode($_POST));
+                return json_encode([2,'overwrite']);
             }
             $time_start = $d->time_start;
             $time_end = $d->time_end;
@@ -54,16 +59,18 @@ class ScheduleEditController extends Controller {
             $accessRight = $d->access_right;
         }
         if ($access_right < 6) {
-            die('you can not update because you can not change others schedule');
+            \Config::set('logging.channels.daily.path',storage_path('logs/warning.log'));
+            \Log::warning('access_right < 6:'.$_SERVER['REQUEST_URI'] ?? "".' '. json_encode($_POST));
+            return json_encode([2,'access_right < 6']);
         }
         $is = DB::table('r_group_relate')
                 ->where("group_id", $group_id)
                 ->where("usr_id", $usr_id)
                 ->first();
         if (!isset($is->usr_id)) {
-            $res[0] = 2;
-            $res[1] = 'you can not update because you can not change others schedule';
-            die(json_encode($res));
+            \Config::set('logging.channels.daily.path',storage_path('logs/warning.log'));
+            \Log::warning('group is different:'.$_SERVER['REQUEST_URI'] ?? "".' '. json_encode($_POST));
+            return json_encode([2,'group is different']);
         }
         $todo = DB::table('t_todo')->where("schedule_id", $schedule_id)->first();
 
@@ -103,7 +110,6 @@ class ScheduleEditController extends Controller {
             $schedule[$d]['access_right'] = $accessRight;
         }
         DB::beginTransaction();
-        DB::beginTransaction();
         DB::table('h_schedule')->insert([
                 "schedule_id" => $schedule_id
                 ,"title" => $title
@@ -122,7 +128,6 @@ class ScheduleEditController extends Controller {
             ]);
         DB::table('t_schedule')->where('schedule_id', $request->input('schedule_id'))->delete();
         DB::table('t_schedule')->insert($schedule);
-
         if(isset($todo->updated_at)){
             DB::table('h_todo')->insert([
                     'todo' => $todo->todo
@@ -141,11 +146,9 @@ class ScheduleEditController extends Controller {
             'file_paths' => json_encode($file_paths),
             'updated_at' => $now
         ]);
-
-        DB::commit();
         DB::commit();
         $res[0] = 1;
-        echo json_encode($res);
+        return json_encode($res);
     }
 }
 

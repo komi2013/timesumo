@@ -7,16 +7,14 @@ use Illuminate\Support\Facades\DB;
 // only owner access
 class ShopController extends Controller {
 
-    public function edit(Request $request, $directory=null, $controller=null,
-            $action=null, $redirect='', $language='') {
-//        if (!$request->session()->get('usr_id')) {
-//            return redirect('/Auth/Sign/in/0/');
-//        }
-        $usr_id = $request->session()->get('usr_id');
-        $usr_id = 1;
-//        \Cookie::queue('lang', $lang);
-        \App::setLocale('ja');
-        
+    public function edit(Request $request, $directory=null, $controller=null,$action=null) {
+        if (!session('usr_id')) {
+            $request->session()->put('redirect',$_SERVER['REQUEST_URI']);
+            return redirect('/Auth/EmailLogin/index/');
+        }
+        $usr_id = session('usr_id');
+        $group_id = session('group_id');
+        \App::setLocale($request->cookie('lang'));
         $obj = DB::table('r_group_relate')->where('usr_id',$usr_id)->where('owner_flg',1)->get();
         $arr_group_id = [];
         $is_group_relate = false;
@@ -25,11 +23,7 @@ class ShopController extends Controller {
             $is_group_relate = true;
         }
         $request->session()->put('group_ids', json_encode($arr_group_id));
-//        if (!isset($arr_group_id[0])) {
-//            return redirect('/Auth/Sign/in/0/');
-//        }
-//        $group = DB::table('m_group')->whereIn('group_id', $arr_group_id)->get();
-        
+
         $shop = [];
         $shop[0]['shop_name'] = '';
         $shop[0]['seat'] = __('salon.seat');
@@ -67,12 +61,10 @@ class ShopController extends Controller {
                     $arr['digital_perm_amount'] = $d->amount;
                 }
                 $arr['shop_name'] = $shop[$d->group_id]['shop_name'];
-//                echo "<pre>"; var_dump($arr); echo "</pre>";
                 $shop[$d->group_id] = $arr;
                 $group_id = $d->group_id;
             }
         }
-//        dd($shop);
         krsort($shop);
         return view('salon.shop', compact('shop'));
     }

@@ -10,27 +10,26 @@ class ExtraController extends Controller {
 
     public function index(Request $request, $directory=null, $controller=null,$action=null,
             $target_usr=0) {
-        $usr_id = $request->session()->get('usr_id');
-        $usr_id = 2;
-        $group_id = $request->session()->get('group_id');
-        $group_id = 2;
-//        \App::setLocale('ja');
+        if (!session('usr_id')) {
+            $request->session()->put('redirect',$_SERVER['REQUEST_URI']);
+            return redirect('/Auth/EmailLogin/index/');
+        }
+        $usr_id = session('usr_id');
+        $group_id = session('group_id');
+        \App::setLocale($request->cookie('lang'));
         $r_group = DB::table('r_group_relate')
                 ->where('usr_id', $usr_id)
                 ->where('group_id', $group_id)
                 ->first();
-        if (!isset($r_group->usr_id)) {
-            die('you should belong group at first');
-        }
         $routine = DB::table('r_routine')
                 ->where('usr_id', $usr_id)
                 ->where('group_id', $group_id)
                 ->first();
-        if (!isset($routine->usr_id)) {
-            die('you should go to routine page');
-        }
         if ($r_group->owner_flg == 0 AND $routine->approver1 == 0 AND $routine->approver2 == 0) {
-            die('you have no access right');
+            $msg = 'no access right:line'.__LINE__.':'.$_SERVER['REQUEST_URI'] ?? "".' '. json_encode($_POST);
+            \Config::set('logging.channels.daily.path',storage_path('logs/warning.log'));
+            \Log::warning($msg);
+            return view('errors.500', compact('msg'));
         }
         $obj = DB::table('r_extra')
                 ->where('group_id', $group_id)
@@ -88,7 +87,6 @@ class ExtraController extends Controller {
         $over_flg[2] = __('calendar.week');
         $over_flg[3] = __('calendar.day');
         $usr = DB::table('t_usr')->where('usr_id', $target_usr)->first();
-//        $usr = json_decode($usr,true);
         $usr_name = $usr->usr_name;
         return view('shift.extra', compact('extra','hours','minutes','usr','over_flg',
                 'new','is_data','usr_name'));

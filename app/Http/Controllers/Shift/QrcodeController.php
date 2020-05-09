@@ -9,18 +9,23 @@ use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 class QrcodeController extends Controller {
 
-    public function index(Request $request, $directory=null, $controller=null,$action=null,
-            $param=null) {
-        $usr_id = $request->session()->get('usr_id');
-        $usr_id = 2;
-        $group_id = $request->session()->get('group_id');
-        $group_id = 2;
+    public function index(Request $request, $directory=null, $controller=null,$action=null) {
+        if (!session('usr_id')) {
+            $request->session()->put('redirect',$_SERVER['REQUEST_URI']);
+            return redirect('/Auth/EmailLogin/index/');
+        }
+        $usr_id = session('usr_id');
+        $group_id = session('group_id');
+        \App::setLocale($request->cookie('lang'));
         $relate = DB::table('r_group_relate')
                 ->where('usr_id', $usr_id)
                 ->where('group_id', $group_id)
                 ->first();
         if (!$relate->owner_flg) {
-            die('no access right');
+            $msg = 'no access right:line'.__LINE__.':'.$_SERVER['REQUEST_URI'] ?? "".' '. json_encode($_POST);
+            \Config::set('logging.channels.daily.path',storage_path('logs/warning.log'));
+            \Log::warning($msg);
+            return view('errors.500', compact('msg'));
         }
         $group = DB::table('m_group')->where('group_id', $group_id)->first();
         $qrcode = new QrCode();

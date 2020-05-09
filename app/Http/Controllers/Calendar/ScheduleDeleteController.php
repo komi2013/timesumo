@@ -9,10 +9,13 @@ use Carbon\Carbon;
 class ScheduleDeleteController extends Controller {
 
     public function lessuri(Request $request, $directory=null, $controller=null, $action=null) {
-
-        $usr_id = 10;
-        $group_id = 2;
-        $arr3 = [];
+        if (!session('usr_id')) {
+            \Config::set('logging.channels.daily.path',storage_path('logs/warning.log'));
+            \Log::warning('no session usr_id:'.$_SERVER['REQUEST_URI'] ?? "".' '. json_encode($_POST));
+            return json_encode([2,'no session usr_id']);
+        }
+        $usr_id = session('usr_id');
+        $group_id = session('group_id');
 
         $schedule_id = $request->input('schedule_id');
 
@@ -28,7 +31,9 @@ class ScheduleDeleteController extends Controller {
             } else if ($group_id == $d->group_id AND $access_right < substr($d->access_right,2,1)) {
                 $access_right = substr($d->access_right,2,1);
             } else {
-                die('you are not part of this group');
+                \Config::set('logging.channels.daily.path',storage_path('logs/warning.log'));
+                \Log::warning('group is different:'.$_SERVER['REQUEST_URI'] ?? "".' '. json_encode($_POST));
+                return json_encode([2,'group is different']);
             }
             $time_start = $d->time_start;
             $time_end = $d->time_end;
@@ -44,7 +49,9 @@ class ScheduleDeleteController extends Controller {
             $accessRight = $d->access_right;
         }
         if ($access_right < 6) {
-            die('you can not update because you can not change others schedule');
+            \Config::set('logging.channels.daily.path',storage_path('logs/warning.log'));
+            \Log::warning('access_right < 6:'.$_SERVER['REQUEST_URI'] ?? "".' '. json_encode($_POST));
+            return json_encode([2,'access_right < 6']);
         }
         $paths = json_decode($request->input('file_paths'),true) ?: [];
         foreach ($paths as $d) {
@@ -52,7 +59,6 @@ class ScheduleDeleteController extends Controller {
         }
         $todo = DB::table('t_todo')->where("schedule_id", $schedule_id)->first();
         $now = date('Y-m-d H:i:s');
-        DB::beginTransaction();
         DB::beginTransaction();
         DB::table('h_schedule')->insert([
                 "schedule_id" => $schedule_id
@@ -83,9 +89,8 @@ class ScheduleDeleteController extends Controller {
         }
         DB::table('t_todo')->where("schedule_id", $schedule_id)->delete();
         DB::commit();
-        DB::commit();
         $res[0] = 1;
-        echo json_encode($res);
+        return json_encode($res);
     }
 }
 

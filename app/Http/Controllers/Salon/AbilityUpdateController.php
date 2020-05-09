@@ -10,11 +10,12 @@ use Carbon\Carbon;
 
 class AbilityUpdateController extends Controller {
 
-    public function lessuri(Request $request, $directory=null, $controller=null,
-            $action=null, $one='', $two='') {
-        $usr_id = $request->session()->get('usr_id');
-        $usr_id = 4;
-
+    public function lessuri(Request $request, $directory=null, $controller=null,$action=null) {
+        if (!session('usr_id')) {
+            return json_encode([2,'no session usr_id']);
+        }
+        $usr_id = session('usr_id');
+        $group_id = session('group_id');
         $request->ability;
         foreach ($request->ability as $k => $d) {
             $arr['usr_id'] = $usr_id;
@@ -27,7 +28,7 @@ class AbilityUpdateController extends Controller {
         DB::table('r_ability')->insert($ability);
         DB::commit();
         $res[0] = 1;
-        die( json_encode($res) );
+        return json_encode($res);
     }
 }
 

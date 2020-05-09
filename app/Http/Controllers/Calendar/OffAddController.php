@@ -10,26 +10,19 @@ class OffAddController extends Controller {
 
     public function lessuri(Request $request, $directory=null, $controller=null, $action=null) {
 
-var_dump($_FILES['files']['name']);
-var_dump($_FILES['files']['tmp_name']);
-var_dump(json_decode($request->input('usrs'),true));
-die;
-dd($request->all());
-        $usr_id = 2;
-        $group_id = 2;
-        \App::setLocale('ja');
-        if ($request->input('usrs')[0] != $usr_id OR $group_id != $request->input('group_id')) {
-            $res[0] = 2;
-            $res[1] = 'you are not this user or group is different';
-            die(json_encode($res));
+        if (!session('usr_id')) {
+            \Config::set('logging.channels.daily.path',storage_path('logs/warning.log'));
+            \Log::warning('no session usr_id:'.$_SERVER['REQUEST_URI'] ?? "".' '. json_encode($_POST));
+            return json_encode([2,'no session usr_id']);
         }
+        $usr_id = session('usr_id');
+        $group_id = session('group_id');
 
         $now = date('Y-m-d H:i:s');
         $routine = DB::table('r_routine')
                 ->where('usr_id', $usr_id)
                 ->where('group_id', $group_id)
                 ->first();
-        DB::beginTransaction();
         DB::beginTransaction();
         if (strpos($request->input('leave_id'),'schedule') > -1) { // compensatory leave
             $leave_schedule_id = str_replace("schedule_", "", $request->input('leave_id'));
@@ -40,9 +33,10 @@ dd($request->all());
                 ->first();
             if ( ( $compensatory->compensatory_days == 0 AND $compensatory->compensatory_hours == 0 )
                     OR $routine->fix_flg == 0) {
-                $res[0] = 2;
-                $res[1] = 'this compensatory leave is not available';
-                die(json_encode($res));
+                \Config::set('logging.channels.daily.path',storage_path('logs/warning.log'));
+                \Log::warning('compensatory leave is not available:'.$_SERVER['REQUEST_URI'] ?? "".' '. json_encode($_POST));
+                return json_encode([2,'compensatory leave is not available']);
+
             }
             DB::table('h_compensatory')->insert([
                     "compensatory_id" => $compensatory->compensatory_id
@@ -78,9 +72,9 @@ dd($request->all());
                         ->where("leave_id", $leave_id)
                         ->first();
                 if (!isset($leave_amount->usr_id)) {
-                    $res[0] = 2;
-                    $res[1] = 'this is not exist leave';
-                    die(json_encode($res));
+                    \Config::set('logging.channels.daily.path',storage_path('logs/warning.log'));
+                    \Log::warning('leave not exist:'.$_SERVER['REQUEST_URI'] ?? "".' '. json_encode($_POST));
+                    return json_encode([2,'leave not exist']);
                 }
 
                 $holidays = [];
@@ -107,7 +101,9 @@ dd($request->all());
                     $start->addDay();
                 }
                 if ($leave_amount->grant_days < $leave_amount->used_days + $use_days) {
-                    die('you try to take more than you can');
+                    \Config::set('logging.channels.daily.path',storage_path('logs/warning.log'));
+                    \Log::warning('leave days not enough:'.$_SERVER['REQUEST_URI'] ?? "".' '. json_encode($_POST));
+                    return json_encode([2,'leave days not enough']);
                 }
                 DB::table('t_leave_amount')
                     ->where('usr_id', $usr_id)
@@ -164,7 +160,6 @@ dd($request->all());
             ]);
         }
 
-        DB::commit();
         DB::commit();
         $res[0] = 1;
         echo json_encode($res);

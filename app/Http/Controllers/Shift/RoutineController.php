@@ -10,11 +10,13 @@ class RoutineController extends Controller {
 
     public function index(Request $request, $directory=null, $controller=null,$action=null,
             $target_usr=0) {
-        $usr_id = $request->session()->get('usr_id');
-        $usr_id = 2;
-        $group_id = $request->session()->get('group_id');
-        $group_id = 2;
-//        \App::setLocale('ja');
+        if (!session('usr_id')) {
+            $request->session()->put('redirect',$_SERVER['REQUEST_URI']);
+            return redirect('/Auth/EmailLogin/index/');
+        }
+        $usr_id = session('usr_id');
+        $group_id = session('group_id');
+        \App::setLocale($request->cookie('lang'));
         $obj = DB::table('r_rule')
                 ->where('group_id', $group_id)
                 ->orderBy('updated_at','ASC')
@@ -26,7 +28,10 @@ class RoutineController extends Controller {
         foreach ($obj as $d) {
             if( !isset($d->usr_id) OR 
                     ($d->approver1 != $usr_id AND $d->approver2 != $usr_id) ) {
-                die('you can not access this');
+                $msg = 'no access right:line'.__LINE__.':'.$_SERVER['REQUEST_URI'] ?? "".' '. json_encode($_POST);
+                \Config::set('logging.channels.daily.path',storage_path('logs/warning.log'));
+                \Log::warning($msg);
+                return view('errors.500', compact('msg'));
             }
             if ($target_usr == $d->usr_id) {
                 $arr['holiday_flg'] = $d->holiday_flg;

@@ -8,15 +8,14 @@ use Carbon\Carbon;
 
 class CancelController extends Controller {
 
-    public function index(Request $request, $directory=null, $controller=null,
-            $action=null) {
-//        if (!$request->session()->get('usr_id')) {
-//            return redirect('/Auth/Sign/in/0/');
-//        }
-        $usr_id = $request->session()->get('usr_id');
-        $usr_id = 1;
-        $group_id = 6;
-        \App::setLocale('ja');
+    public function index(Request $request, $directory=null, $controller=null,$action=null) {
+        if (!session('usr_id')) {
+            $request->session()->put('redirect',$_SERVER['REQUEST_URI']);
+            return redirect('/Auth/EmailLogin/index/');
+        }
+        $usr_id = session('usr_id');
+        $group_id = session('group_id');
+        \App::setLocale($request->cookie('lang'));
         Carbon::setWeekStartsAt(Carbon::SUNDAY);
         Carbon::setWeekEndsAt(Carbon::SATURDAY);
         $today = Carbon::today();
@@ -29,33 +28,21 @@ class CancelController extends Controller {
         $days21 = [];
         $i = 0;
         while ($i < 21) {
-//            $hour = $openHour;
-//            while ($hour < $closeHour) {
-                $days21[$frameDate->format('Y-m-d')] = [];
-//                $frameDate->addHour();
-//                ++$hour;
-//            }
+            $days21[$frameDate->format('Y-m-d')] = [];
             $frameDate->addDay();
-//            $frameDate->setTime($openHour, $openMinute, 0);
             ++$i;
         }
         $frameDate->subDay();
-//echo $frameDate->format('Y-m-d ').$shop->close_time; die;
         $obj = DB::table('t_schedule')
                 ->where('time_start','>=',date('Y-m-d ').$shop->open_time)
                 ->where('time_end','<=',$frameDate->format('Y-m-d ').$shop->close_time)
                 ->where('group_id',$group_id)
                 ->where('tag',4)
                 ->orderBy('time_start','ASC')->get();
-//        dd(json_decode($obj,true));
         foreach ($obj as $d) {
-            
             $days21[substr($d->time_start,0,10)][$d->schedule_id] = substr($d->time_start,11,5).' '.$d->title;
-
         }
-//        dd($days21);
-        return view('salon.cancel', 
-                compact('days21','openHour','closeHour'));
+        return view('salon.cancel',compact('days21','openHour','closeHour'));
     }
 }
 

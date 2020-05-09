@@ -21,8 +21,9 @@ class GroupNameController extends Controller {
                 ->where("group_id", $group_id)
                 ->first();
         if (!isset($relate->owner_flg) OR $relate->owner_flg == 0) {
-            
-            die('hey do not change group');
+            \Config::set('logging.channels.daily.path',storage_path('logs/warning.log'));
+            \Log::warning('no owner:'.$_SERVER['REQUEST_URI'] ?? "".' '. json_encode($_POST));
+            return json_encode([2,'no owner']);
         }
         $arr_group = $request->arr_group;
         $now = date('Y-m-d H:i:s');

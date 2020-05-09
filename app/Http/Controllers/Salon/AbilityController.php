@@ -9,17 +9,14 @@ use Illuminate\Support\Facades\Cookie;
 
 class AbilityController extends Controller {
 
-    public function edit(Request $request, $directory=null, $controller=null,
-            $action=null, $areas='日本', $language='') {
-//        if (!$request->session()->get('usr_id')) {
-//            return redirect('/Auth/Sign/in/0/');
-//        }
-//        $usr_id = $request->session()->get('usr_id');
-//        \Cookie::queue('lang', $lang);
-//        \App::setLocale($lang);
-
-        $usr_id = 5;
-        \App::setLocale('ja');
+    public function edit(Request $request, $directory=null, $controller=null,$action=null,
+            $areas='日本', $language='') {
+        if (!session('usr_id')) {
+            $request->session()->put('redirect',$_SERVER['REQUEST_URI']);
+            return redirect('/Auth/EmailLogin/index/');
+        }
+        $usr_id = session('usr_id');
+        \App::setLocale($request->cookie('lang'));
         Cookie::queue('areas',$areas, 60 * 24 * 365);
         $arr_area = explode(",", $areas);
         $obj = DB::table('m_service')->whereIn('area',$arr_area)->get();
@@ -42,13 +39,11 @@ class AbilityController extends Controller {
             $area[] = $k;
         }
         $area = json_encode($area);
-//        $service = json_encode(json_decode($service,true));
         $obj = DB::table('r_ability')->where('usr_id',$usr_id)->get();
         foreach ($obj as $d) {
             $service[$d->service_id]['ability'] = 'ability';
         }
         $service = json_encode($service);
-//        $ability = json_encode(json_decode($ability,true));
         return view('salon.ability', compact('service','area'));
     }
 }

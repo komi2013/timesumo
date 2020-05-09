@@ -9,18 +9,15 @@ use Carbon\Carbon;
 class BookUpdateController extends Controller {
 
     public function lessuri(Request $request, $directory=null, $controller=null,$action=null) {
-//        if (!$request->session()->get('usr_id')) {
-//            return redirect('/Auth/Sign/in/0/');
-//        }
-        $usr_id = $request->session()->get('usr_id');
-        $usr_id = 1;
-        \App::setLocale('ja');
-        
+        if (!session('usr_id')) {
+            return json_encode([2,'no session usr_id']);
+        }
         $menu = DB::table('m_menu')->where('menu_id', $request->menu_id)->first();
-        if ($request->staff > 0) {
-            
+        if ($request->staff > 0) {            
             if ($menu->group_id != $request->session()->get('group_id')) {
-                die('you are not staff');
+                \Config::set('logging.channels.daily.path',storage_path('logs/warning.log'));
+                \Log::warning('you are not staff:'.$_SERVER['REQUEST_URI'] ?? "".' '. json_encode($_POST));
+                return json_encode([2,'you are not staff']);
             }
             $customer = $request->customer;
         } else {
@@ -57,11 +54,6 @@ class BookUpdateController extends Controller {
             }
             $arr_usr_id[] = $d->usr_id;
         }
-//        $obj = DB::table('t_facility')->whereIn('facility_id',$arr_facility_id)->get();
-//        foreach ($obj as $d) {
-//            $facilities[$d->facility_id] = $d->amount;
-//        }
-//        var_dump($facilities);
         $usr_facility_id = array_unique(array_merge($arr_usr_id,$arr_facility_id));
         $obj = DB::table('t_schedule')
                 ->whereIn('usr_id', $usr_facility_id )
@@ -88,13 +80,6 @@ class BookUpdateController extends Controller {
                     }
                 }
             }
-//            if ( isset($facilities[$d->usr_id]) ) {
-//                --$facilities[$d->usr_id];
-//                if ($facilities[$d->usr_id] < 1) {
-//                    
-//                }
-//            }
-
         }
         foreach ($necessary_usr as $k => $d) {
             if ($d > 0) {
@@ -194,7 +179,6 @@ class BookUpdateController extends Controller {
                     ,"editable_flg" => 0];
             }
         }
-//        var_dump($arr_sql); die;
         DB::table('t_schedule')->insert($arr_sql);
         DB::table('t_todo')->insert([
             "schedule_id" => $schedule_id
@@ -203,9 +187,8 @@ class BookUpdateController extends Controller {
         ]);
 
         DB::commit();
-
         $res[0] = 1;
-        die( json_encode($res) );
+        return json_encode($res);
 
     }
 }

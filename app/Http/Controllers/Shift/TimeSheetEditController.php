@@ -8,13 +8,13 @@ use Carbon\Carbon;
 
 class TimeSheetEditController extends Controller {
 
-    public function lessuri(Request $request, $directory=null, $controller=null,$action=null,
-            $month=null) {
-        $usr_id = $request->session()->get('usr_id');
-        $usr_id = 4;
-        $group_id = $request->session()->get('group_id');
-        $group_id = 2;
-//        \App::setLocale('ja');
+    public function lessuri(Request $request,$directory,$controller,$action) {
+        if (!session('usr_id')) {
+            return json_encode([2,'no session usr_id']);
+        }
+        $usr_id = session('usr_id');
+        $group_id = session('group_id');
+        
         $month = $request->month ?? date('Y-m');
         $thisMonth = new Carbon($month);
         $thisMonth = new Carbon($thisMonth->format('Y-m-01 00:00:00'));
@@ -92,8 +92,7 @@ class TimeSheetEditController extends Controller {
         DB::table('t_timestamp')->insert($add);
         DB::commit();
         $res[0] = 1;
-        echo json_encode($res);
-//        return view('shift.timesheet', compact('days','month'));
+        return json_encode($res);
     }
 }
 

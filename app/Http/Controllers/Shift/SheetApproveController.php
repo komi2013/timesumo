@@ -9,29 +9,25 @@ use Carbon\Carbon;
 class SheetApproveController extends Controller {
 
     public function lessuri(Request $request, $directory=null, $controller=null,$action=null) {
-
-        $usr_id = $request->session()->get('usr_id');
-        $usr_id = 2;
-        $group_id = $request->session()->get('group_id');
-        $group_id = 2;
-        \App::setLocale('ja');
+        if (!session('usr_id')) {
+            return json_encode([2,'no session usr_id']);
+        }
+        $usr_id = session('usr_id');
+        $group_id = session('group_id');
 
         $r_group = DB::table('r_group_relate')
                 ->where('usr_id', $usr_id)
                 ->where('group_id', $group_id)
                 ->first();
-        if (!isset($r_group->usr_id)) {
-            die('you should belong group at first');
-        }
         $rule = DB::table('r_rule')
                 ->where('usr_id', $usr_id)
                 ->where('group_id', $group_id)
                 ->first();
-        if (!isset($rule->usr_id)) {
-            die('you should go to rule page');
-        }
+
         if ($r_group->owner_flg == 0 AND $rule->approver1 == 0 AND $rule->approver2 == 0 AND $usr_id != $target_usr) {
-            die('you have no access right');
+            \Config::set('logging.channels.daily.path',storage_path('logs/warning.log'));
+            \Log::warning('no access right:line'.__LINE__.':'.$_SERVER['REQUEST_URI'] ?? "".' '. json_encode($_POST));
+            return json_encode([2,'no access right']);
         }
         $begin = new Carbon(session('begin'));
         $begin->addSeconds();
@@ -93,7 +89,6 @@ class SheetApproveController extends Controller {
         }
 
         DB::beginTransaction();
-        DB::beginTransaction();
         DB::table('h_timestamp')->insert($timestamp);
         DB::table('h_worked_wage')->insert($worked_wage);
         DB::table('t_schedule')
@@ -109,9 +104,7 @@ class SheetApproveController extends Controller {
                 ->where('group_id', $group_id)
                 ->where('time_in','>=', $begin)
                 ->where('time_in','<', $end)
-//                ->where('approved_id','=', 0)
                 ->update(['approved_id' => $approved_id]);
-        DB::commit();
         DB::commit();
 
         $res[0] = 1;

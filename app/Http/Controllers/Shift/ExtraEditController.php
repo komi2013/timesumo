@@ -8,26 +8,23 @@ use Carbon\Carbon;
 
 class ExtraEditController extends Controller {
 
-    public function lessuri(Request $request, $directory=null, $controller=null,$action=null,
-            $month=null) {
-        $usr_id = $request->session()->get('usr_id');
-        $usr_id = 2;
-        $group_id = $request->session()->get('group_id');
-        $group_id = 2;
-//        \App::setLocale('ja');
-//        $e = $request->extra;
+    public function lessuri(Request $request, $directory=null, $controller=null,$action=null) {
+        if (!session('usr_id')) {
+            return json_encode([2,'no session usr_id']);
+        }
+        $usr_id = session('usr_id');
+        $group_id = session('group_id');
         $r_group = DB::table('r_group_relate')
                 ->where('usr_id', $usr_id)
                 ->where('group_id', $group_id)
                 ->first();
-        if (!isset($r_group->usr_id)) {
-            die('you should belong group at first');
-        }
         $now = date('Y-m-d H:i:s');
 
         foreach ($request->extra as $k => $d) {
             if( $d['group_id'] != $group_id) {
-                die('you can not access this');
+                \Config::set('logging.channels.daily.path',storage_path('logs/warning.log'));
+                \Log::warning('group is different:line'.__LINE__.':'.$_SERVER['REQUEST_URI'] ?? "".' '. json_encode($_POST));
+                return json_encode([2,'group is different']);
             }
             $start = $d['Hstart'].':'.$d['Mstart'].'00';
             $end = $d['Hend'].':'.$d['Mend'].'00';
@@ -44,11 +41,10 @@ class ExtraEditController extends Controller {
                 ->where('usr_id', $target_usr)
                 ->where('group_id', $group_id)
                 ->first();
-        if (!isset($routine->usr_id)) {
-            die('you should go to routine page');
-        }
         if ($r_group->owner_flg == 0 AND $routine->approver1 == 0 AND $routine->approver2 == 0) {
-            die('you have no access right');
+            \Config::set('logging.channels.daily.path',storage_path('logs/warning.log'));
+            \Log::warning('no access right:line'.__LINE__.':'.$_SERVER['REQUEST_URI'] ?? "".' '. json_encode($_POST));
+            return json_encode([2,'no access right']);
         }
         $edit = false;
         $del = DB::table('r_extra')
@@ -78,8 +74,7 @@ class ExtraEditController extends Controller {
         DB::commit();
         
         $res[0] = 1;
-        echo json_encode($res);
-//        return view('shift.timesheet', compact('days','month'));
+        return json_encode($res);
     }
 }
 

@@ -12,13 +12,10 @@ class MenuUpdateController extends Controller {
 
     public function lessuri(Request $request, $directory=null, $controller=null,
             $action=null, $one='', $two='') {
-        $usr_id = $request->session()->get('usr_id');
-        $usr_id = 1;
-
-//            ,menu_name : this.menu_name
-//            ,necessary : this.necessary
-//            ,menu_id : menu_id
-        
+        if (!session('usr_id')) {
+            return json_encode([2,'no session usr_id']);
+        }
+        $usr_id = session('usr_id');
         if ($request->menu_id > 0) {
             // nessary security menu_id and menu_necessary_id should be session
             DB::beginTransaction();
@@ -58,7 +55,7 @@ class MenuUpdateController extends Controller {
         DB::commit();
         $res[0] = 1;
         $res[1] = $menu_id;
-        echo json_encode($res);
+        return json_encode($res);
     }
 }
 
