@@ -15,58 +15,26 @@ class ShopController extends Controller {
         $usr_id = session('usr_id');
         $group_id = session('group_id');
         \App::setLocale($request->cookie('lang'));
-        $obj = DB::table('r_group_relate')->where('usr_id',$usr_id)->where('owner_flg',1)->get();
-        $arr_group_id = [];
-        $is_group_relate = false;
+        $relate = DB::table('r_group_relate')
+                ->where('usr_id',$usr_id)
+                ->where('group_id',$group_id)
+                ->where('owner_flg',1)
+                ->first();
+        if (!isset($relate->usr_id)) {
+            $msg = 'no access right:line'.__LINE__.':'.$_SERVER['REQUEST_URI'] ?? "".' '. json_encode($_POST);
+            \Config::set('logging.channels.daily.path',storage_path('logs/warning.log'));
+            \Log::warning($msg);
+            return view('errors.500', compact('msg'));
+        }
+        $group = DB::table('m_group')->where('group_id', $group_id)->first();
+        $shop_name = $group->group_name;
+        $obj = DB::table('t_facility')->where('group_id', $group_id)->get();
         foreach ($obj as $d) {
-            $arr_group_id[] = $d->group_id;
-            $is_group_relate = true;
+            $facilities[$d->facility_id] = $d;
         }
-        $request->session()->put('group_ids', json_encode($arr_group_id));
-
-        $shop = [];
-        $shop[0]['shop_name'] = '';
-        $shop[0]['seat'] = __('salon.seat');
-        $shop[0]['seat_amount'] = 1;
-        $shop[0]['shampoo_seat'] = __('salon.shampoo_seat');
-        $shop[0]['shampoo_seat_amount'] = 0;
-        $shop[0]['digital_perm'] = __('salon.digital_perm');
-        $shop[0]['digital_perm_amount'] = 0;
-        $salon_facility = new \App\My\SalonFacility();
-        if ($is_group_relate) {
-            $obj = DB::table('m_group')->whereIn('group_id', $arr_group_id)->get();
-            foreach ($obj as $d) {
-                $arr['shop_name'] = $d->group_name;
-                $shop[$d->group_id] = $arr;
-            }
-            $obj = DB::table('t_facility')
-                    ->whereIn('group_id', $arr_group_id)
-                    ->orderBy('group_id','desc')->get();
-            $group_id = 0;
-            foreach ($obj as $d) {
-                if ($group_id != $d->group_id ) {
-                    $arr['shampoo_seat_amount'] = 0;
-                    $arr['digital_perm_amount'] = 0;
-                }
-                if (in_array($d->facility_name, $salon_facility->seat)) {
-                    $arr['seat'] = $d->facility_name;
-                    $arr['seat_amount'] = $d->amount;
-                }
-                if (in_array($d->facility_name, $salon_facility->shampoo_seat)) {
-                    $arr['shampoo_seat'] = $d->facility_name;
-                    $arr['shampoo_seat_amount'] = $d->amount;
-                }
-                if (in_array($d->facility_name, $salon_facility->digital_perm)) {
-                    $arr['digital_perm'] = $d->facility_name;
-                    $arr['digital_perm_amount'] = $d->amount;
-                }
-                $arr['shop_name'] = $shop[$d->group_id]['shop_name'];
-                $shop[$d->group_id] = $arr;
-                $group_id = $d->group_id;
-            }
-        }
-        krsort($shop);
-        return view('salon.shop', compact('shop'));
+        $facilities = json_encode($facilities);
+        $request->session()->flash('facilities',$facilities);
+        return view('salon.shop', compact('facilities','shop_name'));
     }
 }
 
