@@ -19,80 +19,29 @@ class RoutineController extends Controller {
         \App::setLocale($request->cookie('lang'));
         $obj = DB::table('r_rule')
                 ->where('group_id', $group_id)
-                ->orderBy('updated_at','ASC')
+                ->where('usr_id', $target_usr)
                 ->get();
-        $arr['holiday_flg'] = 0;
-        $arr['approver1'] = 0;
-        $arr['approver2'] = 0;
-        $arr['compensatory_within'] = 0;
-        foreach ($obj as $d) {
-            if( !isset($d->usr_id) OR 
-                    ($d->approver1 != $usr_id AND $d->approver2 != $usr_id) ) {
-                $msg = 'no access right:line'.__LINE__.':'.$_SERVER['REQUEST_URI'] ?? "".' '. json_encode($_POST);
-                \Config::set('logging.channels.daily.path',storage_path('logs/warning.log'));
-                \Log::warning($msg);
-                return view('errors.500', compact('msg'));
-            }
-            if ($target_usr == $d->usr_id) {
-                $arr['holiday_flg'] = $d->holiday_flg;
-                $arr['approver1'] = $d->approver1;
-                $arr['approver2'] = $d->approver2;
-                $arr['compensatory_within'] = $d->compensatory_within;
-            }
+        $rule = json_decode($obj,true);
+        if ($rule[0]['approver1'] != $usr_id AND $rule[0]['approver2'] != $usr_id) {
+            $msg = 'no access right:line'.__LINE__.':'.$_SERVER['REQUEST_URI'] ?? "".' '. json_encode($_POST);
+            \Config::set('logging.channels.daily.path',storage_path('logs/warning.log'));
+            \Log::warning($msg);
+            return view('errors.500', compact('msg'));            
         }
         $obj = DB::table('r_routine')
                 ->where('group_id', $group_id)
-                ->orderBy('updated_at','ASC')
+                ->where('usr_id', $target_usr)
                 ->get();
+        $routine = json_decode($obj,true);
         $i = 0;
         while ($i < 7) {
-            $start = 'start_'.$i;
-            $end = 'end_'.$i;
-            $arr['H'.$start] = '00';
-            $arr['H'.$end] = '23';
-            $arr['M'.$start] = '00';
-            $arr['M'.$end] = '00';
-            ++$i;
-        }
-        $arr['routine_id'] = 0;
-        $arr['fix_flg'] = 0;
-        $arr['usr_id'] = $target_usr;
-        $arr['group_id'] = $group_id;
-        $target_data = false;
-        foreach ($obj as $d) {
-            if ($target_data) {
-                break;
+            if ($routine[0]['start_'.$i]) {
+                $routine[0]['start_'.$i] = substr($routine[0]['start_'.$i],0,5);
+                $routine[0]['end_'.$i] = substr($routine[0]['end_'.$i],0,5);
+                $routine[0]['disable_'.$i] = 0;
+            } else {
+                $routine[0]['disable_'.$i] = 1;
             }
-            $i = 0;
-            while ($i < 7) {
-                $start = 'start_'.$i;
-                $end = 'end_'.$i;
-                $arr['H'.$start] = substr($d->$start, 0, 2);
-                $arr['H'.$end] = substr($d->$end, 0, 2);
-                $arr['M'.$start] = substr($d->$start, 3, 2);
-                $arr['M'.$end] = substr($d->$end, 3, 2);
-                ++$i;
-            }
-            $arr['routine_id'] = $d->routine_id;
-            $arr['fix_flg'] = $d->fix_flg;
-            if ($target_usr == $d->usr_id) {
-                $target_data = true;
-            }
-        }
-        $routine = $arr;
-
-        $i = 0;
-        while ($i < 24) {
-            $hours[] = str_pad($i, 2, "0", STR_PAD_LEFT); 
-            ++$i;
-        }
-        $i = 0;
-        while ($i < 6) {
-            $minutes[] = str_pad($i * 10, 2, "0", STR_PAD_LEFT); 
-            ++$i;
-        }
-        $i = 0;
-        while ($i < 7) {
             $week[] = __('salon.day'.$i); 
             ++$i;
         }
@@ -108,9 +57,13 @@ class RoutineController extends Controller {
         foreach ($obj as $d) {
             $groups[$d->usr_id] = $d->usr_name; 
         }
-        
-        return view('shift.routine', compact('routine','hours','minutes','week',
-                        'time_unit','groups'));
+//        dd($rule);
+        $rule = json_encode($rule);
+        $request->session()->flash('rule', $rule);
+        $routine = json_encode($routine);
+        $request->session()->flash('routine', $routine);
+        $request->session()->flash('target_usr', $target_usr);
+        return view('shift.routine', compact('routine','rule','week','time_unit','groups'));
     }
 }
 

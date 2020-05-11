@@ -12,11 +12,14 @@
     <meta name="csrf-token" content="<?=csrf_token()?>" />
   </head>
 <style>
-    th {
+    #content th {
        text-align: center; 
     }
     .time {
         width: 40px;
+    }
+    .disable {
+        background-color: silver;
     }
 </style>
 <body>
@@ -42,49 +45,33 @@
 </table>
 
 <div id="content" >
-    <table style="text-align: center; width:100%;">
-    <tr v-for="(d,k) in week" v-bind:class="routine['shift_'+k]">
-        <th>{{d}}</th>
-        <td>
-            <select style="height:30px;" v-model="routine['Hstart_'+k]">
-                <option v-for="i in hours" v-bind:value="i">{{i}}</option>
-            </select>
-            <select style="height:30px;" v-model="routine['Mstart_'+k]">
-                <option v-for="i in minutes" v-bind:value="i">{{i}}</option>
-            </select>
-        </td>
+    <table style="text-align: center; margin-left:10px;">
+    <tr v-for="(d,k) in week" :class="{disable:routine[0]['disable_'+k]}" >
+        <th style="width:100px;color:blue;" v-on:click="activate(k)" >{{d}}</th>
+        <td><input type="text" class="time" v-if="!routine[0]['disable_'+k]" :value="routine[0]['start_'+k]" v-model="routine[0]['start_'+k]" @change="format('start_',k)"></td>
         <td> ~ </td>
-        <td>
-            <select style="height:30px;" v-model="routine['Hend_'+k]">
-                <option v-for="i in hours" v-bind:value="i">{{i}}</option>
-            </select>
-            <select style="height:30px;"  v-model="routine['Mend_'+k]">
-                <option v-for="i in minutes" v-bind:value="i">{{i}}</option>
-            </select>
-        </td>
+        <td><input type="text" class="time" v-if="!routine[0]['disable_'+k]" :value="routine[0]['end_'+k]" v-model="routine[0]['end_'+k]" @change="format('end_',k)"></td>
     </tr>
     </table>
     <table>
-        <tr><th>祝日休み</th><td><input type="checkbox" v-value="routine['holiday_flg']" v-model="routine['holiday_flg']"></td></tr>
+        <tr><th>祝日休み</th><td><input type="checkbox" v-value="rule[0]['holiday_flg']" v-model="rule[0]['holiday_flg']"></td></tr>
         <tr><th>承認者①</th><td>
-            <select style="height:30px;" v-model="routine['approver1']">
+            <select style="height:30px;" v-model="rule[0]['approver1']">
                 <option v-for="(d,k) in groups" v-bind:value="k">{{d}}</option>
             </select>
             </td></tr>
         <tr><th>承認者②</th><td>
-            <select style="height:30px;" v-model="routine['approver2']">
+            <select style="height:30px;" v-model="rule[0]['approver2']">
                 <option v-for="(d,k) in groups" v-bind:value="k">{{d}}</option>
             </select>
             </td></tr>
-        <tr><th>時間単位</th><td>
-            <select style="height:30px;" v-model="routine['work_time_unit']">
-                <option v-for="(d,k) in time_unit" v-bind:value="k">{{d}}</option>
-            </select>
-            </td></tr>
-        <tr><th>代休</th><td>
-            <select style="height:30px;" v-model="routine['compensatory_within']">
+        <tr><th>代休取得期限</th><td>
+            <select style="height:30px;" v-model="rule[0]['compensatory_within']">
                 <option v-for="d in compensatory" v-bind:value="d">{{d}}</option>
             </select>
+            </td></tr>
+        <tr><th>時間給</th><td>
+            <input type="number" style="height:30px;width:50px;" :value="rule[0]['wage']" v-model="rule[0]['wage']">
             </td></tr>
     </table>
     <div style="width:100%;text-align:center;">
@@ -100,18 +87,18 @@ var content = new Vue({
   el: '#content',
   data: {
     routine: eval(<?=json_encode($routine)?>),
-    hours: eval(<?=json_encode($hours)?>),
-    minutes: eval(<?=json_encode($minutes)?>),
+    rule: eval(<?=json_encode($rule)?>),
     week: eval(<?=json_encode($week)?>),
     groups: eval(<?=json_encode($groups)?>),
     time_unit: eval(<?=json_encode($time_unit)?>),
-    compensatory:[10,20,30,40,50,60,70,80,90],
+    compensatory:[30,60,90],
   },
   methods: {
     update: function (e) {
         var param = {
             _token : $('[name="csrf-token"]').attr('content')
             ,routine: this.routine
+            ,rule: this.rule
         }
         $.post('/Shift/RoutineEdit/',param,function(){},"json")
         .always(function(res){
@@ -121,6 +108,18 @@ var content = new Vue({
                 alert('system error');
             }
         });
+    },
+    format: function (ini,k) {
+        var t = this.routine[0][ini+k].replace(/[^0-9]/g,'');
+        this.routine[0][ini+k] = t.substr(0,2) + ':' + t.substr(2,2);
+    },
+    activate: function (k) {
+        if (this.routine[0]['disable_'+k]) {
+            this.routine[0]['disable_'+k] = 0;
+        }else{
+            this.routine[0]['disable_'+k] = 1;
+        }
+        
     },
   }
 });
