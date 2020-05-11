@@ -68,7 +68,6 @@ class OffAddController extends Controller {
 
                 $leave_amount = DB::table('t_leave_amount')
                         ->where("usr_id", $usr_id)
-                        ->where("group_id", $group_id)
                         ->where("leave_id", $leave_id)
                         ->first();
                 if (!isset($leave_amount->usr_id)) {
@@ -107,7 +106,6 @@ class OffAddController extends Controller {
                 }
                 DB::table('t_leave_amount')
                     ->where('usr_id', $usr_id)
-                    ->where('group_id', $group_id)
                     ->where('leave_id', $leave_id)
                     ->update([
                         "used_days" => $leave_amount->used_days + $use_days
@@ -125,7 +123,6 @@ class OffAddController extends Controller {
                     ,"used_days" => $leave_amount->used_days
                     ,"note" => $leave_amount->note
                     ,"updated_at" => $leave_amount->updated_at
-                    ,"group_id" => $leave_amount->group_id
                     ,"leave_id" => $leave_amount->leave_id
                     ,"action_by" => $usr_id
                     ,"action_at" => $now
@@ -162,7 +159,7 @@ class OffAddController extends Controller {
 
         DB::commit();
         $res[0] = 1;
-        echo json_encode($res);
+        return json_encode($res);
     }
 }
 

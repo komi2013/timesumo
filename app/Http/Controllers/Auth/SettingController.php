@@ -23,13 +23,13 @@ class SettingController extends Controller {
         return view('auth.setting', compact('usr_name','group'));
     }
     public function factory(Request $request, $directory, $controller,$action, 
-            $usr_id=0,$group_id=0) {
+            $usr_id=0,$group_id=0,$lang='ja') {
         echo '<pre>';
         var_dump(session('usr_id'),session('group_id'));
         
         $request->session()->put('usr_id', $usr_id);
         $request->session()->put('group_id', $group_id);
-        
+        \Cookie::queue('lang',$lang, 60 * 24 * 365);
         var_dump(session('usr_id'),session('group_id'));
         $test = 0;
         var_dump(!$test);

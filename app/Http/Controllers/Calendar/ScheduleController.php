@@ -27,7 +27,7 @@ class ScheduleController extends Controller {
         }
         $hours = $arr;
         $Arr = new \App\My\Calendar();
-        $arr_tags = 'tags_'.$lang;
+        $arr_tags = 'tags_'.\Cookie::get('lang');
         $tags = $Arr->$arr_tags;
         $bind = [
             'usr_id' => $usr_id

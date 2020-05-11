@@ -73,7 +73,6 @@ class OffDeleteController extends Controller {
             if ($m_leave->leave_amount_flg == 1) {
                 $leave_amount = DB::table('t_leave_amount')
                         ->where('usr_id', $usr_id)
-                        ->where('group_id', $group_id)
                         ->where('leave_id', $leave_id)
                         ->first();
                 $pre_leave_amount = DB::table('h_leave_amount')
@@ -88,7 +87,6 @@ class OffDeleteController extends Controller {
                         ,"used_days" => $leave_amount->used_days
                         ,"note" => $leave_amount->note
                         ,"updated_at" => $leave_amount->updated_at
-                        ,"group_id" => $leave_amount->group_id
                         ,"leave_id" => $leave_amount->leave_id
                         ,"action_by" => $usr_id
                         ,"action_at" => $now
@@ -97,7 +95,6 @@ class OffDeleteController extends Controller {
                     ]);
                 DB::table('t_leave_amount')
                     ->where('usr_id', $usr_id)
-                    ->where('group_id', $group_id)
                     ->where('leave_id', $leave_id)
                     ->update([
                         "used_days" => $pre_leave_amount->used_days

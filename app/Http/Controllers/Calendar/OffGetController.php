@@ -63,36 +63,12 @@ class OffGetController extends Controller {
                 }   
             }
         }
-
-        $obj = DB::table('t_leave_amount')
-                ->where("usr_id", $usr_id)
-                ->where("group_id", $group_id)
-                ->get();
-        $thisTime = new Carbon($request->date);
-        foreach ($obj as $d) {
-            $start = new Carbon($d->enable_start);
-            $end = new Carbon($d->enable_end);
-            $available = $d->grant_days - $d->used_days;
-            if ( isset($leave[$d->leave_id]) ) {
-                $available = $available - $leave[$d->leave_id];
-            }
-            if ($thisTime > $start AND $thisTime < $end AND $available > 0) {
-                $arr['available'] = $available;
-                $arr['enable_end'] = $d->enable_end;
-                $leave[$d->leave_id] = $arr;
-            }
-        }
-        
         $obj = DB::table('m_leave')
                 ->where("group_id", $group_id)
                 ->get();
-
         foreach ($obj as $d) {
             $arr = [];
-            if ( isset($leave[$d->leave_id]['available']) ) {
-                $arr['available'] = $leave[$d->leave_id]['available'];
-                $arr['enable_end'] = $leave[$d->leave_id]['enable_end'];
-            } else if ( !$d->leave_amount_flg ) {
+            if ( !$d->leave_amount_flg ) {
                 $arr['available'] = $d->leave_days;
                 $arr['enable_end'] = '2099-01-01';
             } else {
@@ -104,6 +80,21 @@ class OffGetController extends Controller {
             $arr['leave_name'] = $d->leave_name;
             $arr['prove_flg'] = $d->prove_flg;
             $leave[$d->leave_id] = $arr;
+            $arr_leave_id[] = $d->leave_id;
+        }
+        $obj = DB::table('t_leave_amount')
+                ->where("usr_id", $usr_id)
+                ->whereIn("leave_id", $arr_leave_id)
+                ->get();
+        $thisTime = new Carbon($request->date);
+        foreach ($obj as $d) {
+            $start = new Carbon($d->enable_start);
+            $end = new Carbon($d->enable_end);
+            $available = $d->grant_days - $d->used_days;
+            if ($thisTime > $start AND $thisTime < $end AND $available > 0) {
+                $leave[$d->leave_id]['available'] = $available;
+                $leave[$d->leave_id]['enable_end'] = $d->enable_end;
+            }
         }
         $routine = DB::table('r_routine')
                 ->where('usr_id', $usr_id)
