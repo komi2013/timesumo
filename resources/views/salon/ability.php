@@ -67,8 +67,7 @@
 const app = new Vue({
   el: '#content',
   data: {
-    service: eval(<?=$service?>),
-    area: eval(<?=$area?>),
+    service: eval(<?=$service?>)
   },
   methods: {
     update: function (menu_id) {
