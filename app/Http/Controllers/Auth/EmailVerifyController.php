@@ -18,7 +18,6 @@ class EmailVerifyController extends Controller {
         $usr = DB::table('t_usr')
             ->where('email',session('email'))
             ->first();
-        
         if (isset($usr->usr_id) AND $usr->oauth_type == 3) {
             DB::table('t_usr')
                 ->where("usr_id",$usr->usr_id)
@@ -29,17 +28,15 @@ class EmailVerifyController extends Controller {
             new \App\My\AfterLogin($usr->usr_id);
         } else {
             $arr_email = explode("@", session('email'));
-            new \App\My\AfterLogin($arr_email[0]);
+            $obj = new \App\My\AfterRegister($arr_email[0]);
+            new \App\My\AfterLogin($obj->usr_id);
         }
         $request->session()->forget('email_auth');
         $request->session()->forget('email');
         $request->session()->forget('password');
-        $request->session()->put('usr_id', $usr_id);
         $redirect = session('redirect') ?: '/';
         $request->session()->forget('redirect');
         return redirect($redirect);
-        
-//        return view('auth.email_complete', compact('redirect','message'));
     }
 }
 

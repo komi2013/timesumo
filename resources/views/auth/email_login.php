@@ -46,8 +46,8 @@
     <div v-if="password_error2" style="color: red;"><?=__('auth.passwordError2')?></div>
     <input type="submit" value="<?=__('auth.signin')?>" class="column1" v-on:click="login('login')"><br>
     <div v-if="password_error4" style="color: red;"><?=__('auth.passwordError4')?></div>
-    <input type="submit" value="<?=__('auth.register')?>" class="column1" v-on:click="login('reg')"><br>
-    <input type="submit" value="<?=__('auth.reissue_password')?>" class="column1" v-on:click="login('reg')"><br>
+    <input type="submit" v-if="!sent" value="<?=__('auth.register')?>" class="column1" v-on:click="login('reg')"><br>
+    <input type="submit" v-if="!sent" value="<?=__('auth.reissue_password')?>" class="column1" v-on:click="login('reg')"><br>
     <div v-if="sent" style="color: green;"><?=__('auth.sent')?></div>
 </div>
 
@@ -113,7 +113,6 @@ const app = new Vue({
         }else{
             $.post('/Auth/EmailSend/',param,function(){},"json")
             .always(function(res){
-                console.log(res);
                 if(res[0] == 1){
                     app.sent = true;
                 }else{

@@ -56,26 +56,27 @@
     </template>
 </select>
 <div style="width:80%;display:inline-block;"></div>
-<div style="width:10%;display:inline-block;">外す</div>
+<!--<div style="width:10%;display:inline-block;">se</div>-->
 <template v-for="(d,k) in group_usrs">
     <label v-bind:for="d[0]"><div style="margin:5px;">
         <div style="width:80%;display:inline-block;">{{d[1]}}</div>
         <div style="width:10%;display:inline-block;" v-if="owner">
-            <input type="checkbox"　v-bind:value="d[0]" v-model="removeUsr" v-bind:id="d[0]">
+            <input type="checkbox"　v-bind:value="d[0]" v-model="usrs" v-bind:id="d[0]">
         </div></div></label>
 </template>
 <template v-for="(d,k) in group_facility">
     <label v-bind:for="d[0]"><div style="margin:5px;">
         <div style="width:80%;display:inline-block;">{{d[1]}}</div>
         <div style="width:10%;display:inline-block;" v-if="owner">
-            <input type="checkbox"　v-bind:value="d[0]" v-model="removeUsr" v-bind:id="d[0]">
+            <input type="checkbox"　v-bind:value="d[0]" v-model="usrs" v-bind:id="d[0]">
         </div></div></label>
 </template>
 <div style="width:100%;text-align: center;">
-    <input style="margin: 10px;padding:10px;" type="submit" value="外す" v-on:click="remove">
+    <input style="margin: 10px;padding:10px;" type="submit" value="削除" v-on:click="staff('del')">
+    <input style="margin: 10px;padding:10px;" type="submit" value="管理者" v-on:click="staff('admin')">
 </div>
 <div style="padding:5px;">
-    <a target="_blank" :href="'/Auth/EmailLogin/staff/'+group.group_id+'/'+group.password+'/'">招待URL</a>
+    <a target="_blank" v-if="urlUsr" :href="'/Auth/EmailLogin/staff/'+group.group_id+'/'+group.password+'/'+usrs[0]+'/'">招待URL({{urlUsr}})</a>
 </div>
 <div style="width:100%;text-align: center;">
     <input style="margin: 10px;padding:10px;" type="submit" value="<?=__('auth.signout')?>" v-on:click="signout">
@@ -96,7 +97,7 @@ const app = new Vue({
     group_facility: [],
     arr_group: [],
     group_id: 0,
-    removeUsr: [],
+    usrs: [],
     owner: 0,
     group:<?=json_encode($group)?>
   },
@@ -142,10 +143,11 @@ const app = new Vue({
             }
         });
     },
-    remove: function () {
+    staff: function (action) {
         var param = {
             _token : $('[name="csrf-token"]').attr('content')
-            ,removeUsr : this.removeUsr           
+            ,usrs : this.usrs
+            ,action : action
         }
         $.post('/Auth/Group/',param,function(){},"json")
         .always(function(res){
@@ -172,7 +174,6 @@ const app = new Vue({
         });
     },
     updateName: function () {
-        console.log(this.usr_name);
         var param = {
             _token : $('[name="csrf-token"]').attr('content')
             ,usr_name : this.usr_name
@@ -186,7 +187,16 @@ const app = new Vue({
             }
         });
     },
-  }
+  },
+  computed: {
+    urlUsr() {
+        if(this.group_usrs[this.usrs[0]]){
+            return this.group_usrs[this.usrs[0]][1];
+        }else{
+            return '';
+        }
+    },
+  },
 });
 setTimeout(function(){
   app.groupChange(app.group_id);

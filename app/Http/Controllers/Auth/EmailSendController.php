@@ -26,7 +26,7 @@ class EmailSendController extends Controller {
             "password" => $request->password
         ];
         $simple->template = 'mail.auth_emailsend';
-        $simple->arr_bcc = ['komatsuka@yahoo.com'];
+        $simple->arr_bcc = [];
         $simple->arr_to = [$request->email];
         $simple->simple_send();
         $res[0] = 1;

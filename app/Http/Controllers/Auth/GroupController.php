@@ -28,7 +28,7 @@ class GroupController extends Controller {
         }
         $now = date('Y-m-d H:i:s');
         $obj = DB::table('r_group_relate')
-                ->whereIn("usr_id", $request->removeUsr)
+                ->whereIn("usr_id", $request->usrs)
                 ->where("group_id", $group_id)
                 ->get();
         $relate = json_decode($obj,true);
@@ -38,7 +38,7 @@ class GroupController extends Controller {
             $relate[$k]['action_flg'] = 0;
         }
         $obj = DB::table('t_facility')
-                ->whereIn("facility_id", $request->removeUsr)
+                ->whereIn("facility_id", $request->usrs)
                 ->where("group_id", $group_id)
                 ->get();
         $facility = json_decode($obj,true);
@@ -51,12 +51,12 @@ class GroupController extends Controller {
         DB::beginTransaction();
         DB::table('h_group_relate')->insert($relate);
         DB::table('r_group_relate')
-                ->whereIn("usr_id", $request->removeUsr)
+                ->whereIn("usr_id", $request->usrs)
                 ->where("group_id", $group_id)
                 ->delete();
         DB::table('h_facility')->insert($facility);
         DB::table('t_facility')
-                ->whereIn("facility_id", $request->removeUsr)
+                ->whereIn("facility_id", $request->usrs)
                 ->where("group_id", $group_id)
                 ->delete();
         DB::commit();
