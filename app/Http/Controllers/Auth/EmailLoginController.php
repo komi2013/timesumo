@@ -7,13 +7,7 @@ use Illuminate\Support\Facades\DB;
 
 
 class EmailLoginController extends Controller {
-
-    public function index(Request $request) {
-
-        return view('auth.email_login');
-    }
-    public function staff(Request $request, $directory=null, $controller=null,$action=null,
-            $group_id,$password,$sample_usr) {
+    public function __construct(Request $request) {
         if ($request->cookie('lang')) {
             $lang = $request->cookie('lang');
         } else {
@@ -22,6 +16,13 @@ class EmailLoginController extends Controller {
         }
         \Cookie::queue('lang', $lang);
         \App::setLocale($lang);
+    }
+    public function index(Request $request) {
+
+        return view('auth.email_login');
+    }
+    public function staff(Request $request,$directory,$controller,$action,
+            $group_id,$password,$sample_usr) {
         $group = DB::table('m_group')->where('group_id',$group_id)->first();
         if ($group->password != $password) {
             return view('errors.404');
@@ -31,16 +32,8 @@ class EmailLoginController extends Controller {
         return view('auth.email_login');
 
     }
-    public function owner(Request $request, $directory=null, $controller=null,$action=null,
+    public function owner(Request $request,$directory,$controller,$action,
             $area_id) {
-        if ($request->cookie('lang')) {
-            $lang = $request->cookie('lang');
-        } else {
-            $lang = explode(',', $_SERVER['HTTP_ACCEPT_LANGUAGE'])[0];
-            $lang = (strpos($lang,'en') !== false) ? 'en' : $lang;
-        }
-        \Cookie::queue('lang', $lang);
-        \App::setLocale($lang);
         $request->session()->put('area_id', $area_id);
         return view('auth.email_login');
 

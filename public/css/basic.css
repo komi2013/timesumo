@@ -4,6 +4,9 @@ a {
 body {
   margin: 0 auto;
 }
+table {
+    border-collapse: collapse;
+}
 .icon {
   max-height: 48px;
   vertical-align: middle;

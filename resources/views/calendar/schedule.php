@@ -112,7 +112,6 @@
         <option v-for="d in minutes" v-bind:value="d">{{d}}</option>
         </select>
         </template>
-        </template>
     </div>
     <br>
     <div class="centerize">
@@ -303,7 +302,7 @@ var app = new Vue({
                     this.minuteEnd = '59';
                 }
             }
-            var next = this.next.slice(0,available);
+            var next = next.slice(0,available);
         }
         return next;
     },

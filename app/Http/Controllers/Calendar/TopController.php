@@ -23,7 +23,13 @@ class TopController extends Controller {
         } else {
             $dt = new Carbon(date('Y-m-01'));
         }
-        $today = new Carbon();
+        $today = $dt->format(__('calendar.month_f'));
+        $prev = new Carbon($dt->format('Y-m-d'));
+        $prev = $prev->subMonth(1);
+        $prev = $prev->format('Y-m');
+        $next = new Carbon($dt->format('Y-m-d'));
+        $next = $next->addMonth(1);
+        $next = $next->format('Y-m');
         $varDate = new Carbon($dt->startOfWeek()->format('Y-m-d'));
 
         $begin = $varDate->format('Y-m-d 00:00:00');
@@ -40,10 +46,17 @@ class TopController extends Controller {
                 ->where('usr_id',$usr_id)
                 ->orderBy('time_start','ASC')->get();
         foreach ($obj as $d) {
-            $day35[substr($d->time_start,0,10)][$d->schedule_id] = $d->title;
+            $day35[substr($d->time_start,0,10)][$d->schedule_id] = [$d->public_title,$d->tag];
+            $start = new Carbon($d->time_start);
+            $end = new Carbon($d->time_end);
+            while ($start->diffInDays($end) > 0) {
+                $start->addDay();
+                $day35[$start->format('Y-m-d')][$d->schedule_id] = [$d->public_title,$d->tag];
+            }
+            
+            
         }
-
-        return view('calendar.top', compact('day35','today'));
+        return view('calendar.top', compact('day35','today','prev','next'));
         
     }
 }

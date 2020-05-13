@@ -17,8 +17,7 @@ class ScheduleAddController extends Controller {
         $usr_id = session('usr_id');
         $group_id = session('group_id');
         $usrs = json_decode($request->input('usrs'),true) ?? [];
-        $group_ids = json_decode($request->session()->get('group_ids'),true);
-        $obj = DB::table('r_group_relate')->whereIn("group_id", $group_ids)->get();
+        $obj = DB::table('r_group_relate')->where("group_id", $group_id)->get();
         foreach ($obj as $d) {
             $db_usr_ids[] = $d->usr_id;
         }
@@ -45,8 +44,17 @@ class ScheduleAddController extends Controller {
                 Storage::putFileAs('/public'.$path, $d, $name);
             }
         }
-
         $public_title = $request->input('public_title') ?? '';
+        $obj = DB::table('r_routine')
+                ->where("group_id", $group_id)
+                ->whereIn("usr_id", $usrs)
+                ->get();
+        foreach ($obj as $d) {
+            if ($d->fix_flg == 1 // AND start or end is our of routine 
+                    ) {
+                
+            }
+        }
         foreach ($usrs as $d) {
             $schedule[$d]['time_start'] = $request->input('time_start');
             $schedule[$d]['time_end'] = $request->input('time_end');
