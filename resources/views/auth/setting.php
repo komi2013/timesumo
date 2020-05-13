@@ -72,8 +72,9 @@
         </div></div></label>
 </template>
 <div style="width:100%;text-align: center;">
-    <input style="margin: 10px;padding:10px;" type="submit" value="削除" v-on:click="staff('del')">
-    <input style="margin: 10px;padding:10px;" type="submit" value="管理者" v-on:click="staff('admin')">
+<!--    <input style="margin: 10px;padding:10px;" type="submit" value="退出" v-on:click="staff('Out')">
+    <input style="margin: 10px;padding:10px;" v-if="owner" type="submit" value="削除" v-on:click="staff('Delete')">-->
+    <input style="margin: 10px;padding:10px;" v-if="owner" type="submit" value="管理者" v-on:click="staff('Admin')">
 </div>
 <div style="padding:5px;">
     <a target="_blank" v-if="urlUsr" :href="'/Auth/EmailLogin/staff/'+group.group_id+'/'+group.password+'/'+usrs[0]+'/'">招待URL({{urlUsr}})</a>
@@ -97,7 +98,7 @@ const app = new Vue({
     group_facility: [],
     arr_group: [],
     group_id: 0,
-    usrs: [],
+    usrs: [<?=$usr_id?>],
     owner: 0,
     group:<?=json_encode($group)?>
   },
@@ -147,9 +148,8 @@ const app = new Vue({
         var param = {
             _token : $('[name="csrf-token"]').attr('content')
             ,usrs : this.usrs
-            ,action : action
         }
-        $.post('/Auth/Group/',param,function(){},"json")
+        $.post('/Auth/Group'+action+'/',param,function(){},"json")
         .always(function(res){
             if(res[0] == 1){
                 location.href = '';

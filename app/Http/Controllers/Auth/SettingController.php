@@ -20,7 +20,7 @@ class SettingController extends Controller {
         $usr = DB::table('t_usr')->where('usr_id',$usr_id)->first();
         $group = DB::table('m_group')->where('group_id',$group_id)->first();
         $usr_name = $usr->usr_name;
-        return view('auth.setting', compact('usr_name','group'));
+        return view('auth.setting', compact('usr_name','group','usr_id'));
     }
     public function factory(Request $request, $directory, $controller,$action, 
             $usr_id=0,$group_id=0,$lang='ja') {
