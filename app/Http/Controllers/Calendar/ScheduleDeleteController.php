@@ -59,7 +59,18 @@ class ScheduleDeleteController extends Controller {
         }
         $todo = DB::table('t_todo')->where("schedule_id", $schedule_id)->first();
         $now = date('Y-m-d H:i:s');
+
+        $obj = DB::table('t_compensatory')->where("schedule_id", $schedule_id)->get();
+        $compensatory = json_decode($obj,true);
+        foreach ($compensatory as $k => $d) {
+            $compensatory[$k]['action_by'] = $usr_id;
+            $compensatory[$k]['action_at'] = $now;
+            $compensatory[$k]['action_flg'] = 0;
+        }
         DB::beginTransaction();
+        DB::table('h_compensatory')->insert($compensatory);
+        DB::table('t_compensatory')->where("schedule_id", $schedule_id)->delete();
+
         DB::table('h_schedule')->insert([
                 "schedule_id" => $schedule_id
                 ,"title" => $title

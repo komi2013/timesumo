@@ -31,10 +31,6 @@ class ScheduleEditController extends Controller {
                 $access_right = substr($d->access_right,1,1);
             } else if ($group_id == $d->group_id AND $access_right < substr($d->access_right,2,1)) {
                 $access_right = substr($d->access_right,2,1);
-            } else {
-                \Config::set('logging.channels.daily.path',storage_path('logs/warning.log'));
-                \Log::warning('group is different:'.$_SERVER['REQUEST_URI'] ?? "".' '. json_encode($_POST));
-                return json_encode([2,'group is different']);
             }
             $lastUpdate = new Carbon($d->updated_at);
             $viewTime = new Carbon($request->session()->get('view_time'));
@@ -109,7 +105,62 @@ class ScheduleEditController extends Controller {
             $schedule[$d]['updated_at'] = $now;
             $schedule[$d]['access_right'] = $accessRight;
         }
+        $obj = DB::table('t_compensatory')->where("schedule_id", $schedule_id)->get();
+        $compensatory = json_decode($obj,true);
+        foreach ($compensatory as $k => $d) {
+            $compensatory[$k]['action_by'] = $usr_id;
+            $compensatory[$k]['action_at'] = $now;
+            $compensatory[$k]['action_flg'] = 0;
+        }
+        $compensatory_del = $compensatory;
+        $compensatory = [];
+        $now = date('Y-m-d H:i:s');
+        $obj = DB::table('r_routine')
+                ->where("group_id", $group_id)
+                ->whereIn("usr_id", $usrs)
+                ->get();
+        foreach ($obj as $d) {
+            if ($d->fix_flg == 1) {
+                $start = new Carbon($request->input('time_start'));
+                $end = new Carbon($request->input('time_end'));
+                $days = 0;
+                while ($start->diffInDays($end) >= 0 AND $start < $end) {
+                    $start_i = 'start_'.$start->format('w');
+                    if ( !$d->$start_i ) {
+                        ++$days; 
+                    }
+                    $start->addDay();
+                }
+                $arr = [];
+                if ($days > 0) {
+                    $arr['compensatory_start'] = $start->format('Y-m-d');
+                    $arr['compensatory_end'] = $start;
+                    $arr['usr_id'] = $d->usr_id;
+                    $arr['group_id'] = $group_id;
+                    $arr['schedule_id'] = $schedule_id;
+                    $arr['updated_at'] = $now;
+                    $arr['compensatory_days'] = $days;
+                    $compensatory[] = $arr;
+                }
+            }
+        }
+        $obj = DB::table('r_rule')
+                ->where("group_id", $group_id)
+                ->whereIn("usr_id", $usrs)
+                ->get();
+        $rule = [];
+        foreach ($obj as $d) {
+            $rule[$d->usr_id] = $d->compensatory_within;
+        }
+        foreach ($compensatory as $k => $d) {
+            $start = $compensatory[$k]['compensatory_end'];
+            $start->addDay($rule[$d['usr_id']]);
+            $compensatory[$k]['compensatory_end'] = $start->format('Y-m-d');
+        }
         DB::beginTransaction();
+        DB::table('h_compensatory')->insert($compensatory_del);
+        DB::table('t_compensatory')->where("schedule_id", $schedule_id)->delete();
+        DB::table('t_compensatory')->insert($compensatory);
         DB::table('h_schedule')->insert([
                 "schedule_id" => $schedule_id
                 ,"title" => $title

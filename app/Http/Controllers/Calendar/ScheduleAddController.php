@@ -5,6 +5,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Carbon\Carbon;
 
 class ScheduleAddController extends Controller {
 
@@ -45,16 +46,7 @@ class ScheduleAddController extends Controller {
             }
         }
         $public_title = $request->input('public_title') ?? '';
-        $obj = DB::table('r_routine')
-                ->where("group_id", $group_id)
-                ->whereIn("usr_id", $usrs)
-                ->get();
-        foreach ($obj as $d) {
-            if ($d->fix_flg == 1 // AND start or end is our of routine 
-                    ) {
-                
-            }
-        }
+        $now = date('Y-m-d H:i:s');
         foreach ($usrs as $d) {
             $schedule[$d]['time_start'] = $request->input('time_start');
             $schedule[$d]['time_end'] = $request->input('time_end');
@@ -64,9 +56,54 @@ class ScheduleAddController extends Controller {
             $schedule[$d]['schedule_id'] = $schedule_id;
             $schedule[$d]['group_id'] = $group_id;
             $schedule[$d]['public_title'] = $public_title;
-            $schedule[$d]['updated_at'] = now();
+            $schedule[$d]['updated_at'] = $now;
             $schedule[$d]['access_right'] = 777;
         }
+        $compensatory = [];
+        $obj = DB::table('r_routine')
+                ->where("group_id", $group_id)
+                ->whereIn("usr_id", $usrs)
+                ->get();
+        foreach ($obj as $d) {
+            if ($d->fix_flg == 1) {
+                $start = new Carbon($request->input('time_start'));
+                $end = new Carbon($request->input('time_end'));
+                $days = 0;
+                while ($start->diffInDays($end) >= 0 AND $start < $end) {
+                    $start_i = 'start_'.$start->format('w');
+                    if ( !$d->$start_i ) {
+                        ++$days; 
+                    }
+                    $start->addDay();
+                }
+                $arr = [];
+                if ($days > 0) {
+                    $arr['compensatory_start'] = $start->format('Y-m-d');
+                    $arr['compensatory_end'] = $start;
+                    $arr['usr_id'] = $d->usr_id;
+                    $arr['group_id'] = $group_id;
+                    $arr['schedule_id'] = $schedule_id;
+                    $arr['updated_at'] = $now;
+                    $arr['compensatory_days'] = $days;
+                    $compensatory[] = $arr;
+                }
+            }
+        }
+        $obj = DB::table('r_rule')
+                ->where("group_id", $group_id)
+                ->whereIn("usr_id", $usrs)
+                ->get();
+        $rule = [];
+        foreach ($obj as $d) {
+            $rule[$d->usr_id] = $d->compensatory_within;
+        }
+        foreach ($compensatory as $k => $d) {
+            $start = $compensatory[$k]['compensatory_end'];
+            $start->addDay($rule[$d['usr_id']]);
+            $compensatory[$k]['compensatory_end'] = $start->format('Y-m-d');
+        }
+        DB::beginTransaction();
+        DB::table('t_compensatory')->insert($compensatory);
         DB::table('t_schedule')->insert($schedule);
         if ($request->input('todo') OR isset($file_paths[0])) {
             DB::table('t_todo')->insert([
@@ -76,6 +113,7 @@ class ScheduleAddController extends Controller {
                 'updated_at' => now()
             ]);
         }
+        DB::commit();
         $res[0] = 1;
         return json_encode($res);
     }
