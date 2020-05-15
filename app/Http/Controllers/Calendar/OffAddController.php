@@ -23,6 +23,10 @@ class OffAddController extends Controller {
                 ->where('usr_id', $usr_id)
                 ->where('group_id', $group_id)
                 ->first();
+        $rule = DB::table('r_rule')
+            ->where('usr_id', $usr_id)
+            ->where('group_id', $group_id)
+            ->first();
         DB::beginTransaction();
         if (strpos($request->input('leave_id'),'schedule') > -1) { // compensatory leave
             $leave_schedule_id = str_replace("schedule_", "", $request->input('leave_id'));
@@ -77,7 +81,7 @@ class OffAddController extends Controller {
                 }
 
                 $holidays = [];
-                if ($routine->holiday_flg == 1) {
+                if ($rule->holiday_flg == 1) {
                     $obj = DB::table('c_holiday')->select('holiday_date')
                             ->where('country', 'jp')
                             ->where('holiday_date','>', $request->time_start)

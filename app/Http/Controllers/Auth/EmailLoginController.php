@@ -7,17 +7,18 @@ use Illuminate\Support\Facades\DB;
 
 
 class EmailLoginController extends Controller {
-    public function __construct(Request $request) {
-        if ($request->cookie('lang')) {
-            $lang = $request->cookie('lang');
+    public function __construct() {
+        if (\Cookie::get('lang')) {
+            $lang = \Cookie::get('lang');
         } else {
             $lang = explode(',', $_SERVER['HTTP_ACCEPT_LANGUAGE'])[0];
             $lang = (strpos($lang,'en') !== false) ? 'en' : $lang;
         }
+        \Config::set('session.lifetime', 60 * 24 * 365);
         \Cookie::queue('lang', $lang);
         \App::setLocale($lang);
     }
-    public function index(Request $request) {
+    public function index(Request $request,$directory,$controller,$action) {
 
         return view('auth.email_login');
     }
