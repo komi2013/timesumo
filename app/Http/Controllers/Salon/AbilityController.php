@@ -24,11 +24,7 @@ class AbilityController extends Controller {
         $i = 0;
         foreach ($obj as $d) {
             $arr['service_name'] = $d->service_name;
-            if ( $i < 6 ) {
-                $arr['ability'] = 'ability';
-            } else {
-                $arr['ability'] = '';
-            }
+            $arr['ability'] = '';
             $service[$d->service_id] = $arr;
             ++$i;
         }

@@ -83,7 +83,7 @@ const app = new Vue({
         }
         $.post('/Salon/AbilityUpdate/',param,function(){},"json")
         .always(function(res){
-            if(res[0]){
+            if(res[0] == 1){
                 location.href = '';
             }else{
                 alert('system error');
