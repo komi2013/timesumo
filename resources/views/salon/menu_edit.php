@@ -2,7 +2,7 @@
 <html>
   <head>
     <meta charset="UTF-8" />
-    <title>Sign In</title>
+    <title>Menu Edit</title>
     <link rel="shortcut icon" href="" />
     <script src="/plugin/min.js"></script>
     <link rel="stylesheet" type="text/css" href="/css/basic.css<?=config('my.cache_v')?>" />

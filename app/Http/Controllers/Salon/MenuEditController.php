@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\DB;
 // only owner access
 class MenuEditController extends Controller {
 
-    public function edit(Request $request, $directory=null, $controller=null,$action=null,
+    public function edit(Request $request,$directory,$controller,$action,
             $menu_id) {
         if (!session('usr_id')) {
             $request->session()->put('redirect',$_SERVER['REQUEST_URI']);
@@ -22,7 +22,7 @@ class MenuEditController extends Controller {
                 ->where('usr_id',$usr_id)
                 ->first();
         $request->session()->put('group_id', $menu->group_id);
-        if (!$shop_group->shop_group_id) {
+        if (!$shop_group->group_relate_id) {
             $msg = 'menu_id is wrong:line'.__LINE__.':'.$_SERVER['REQUEST_URI'] ?? "".' '. json_encode($_POST);
             \Config::set('logging.channels.daily.path',storage_path('logs/warning.log'));
             \Log::warning($msg);

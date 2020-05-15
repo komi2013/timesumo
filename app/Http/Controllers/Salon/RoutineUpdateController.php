@@ -22,16 +22,10 @@ class RoutineUpdateController extends Controller {
             if ($r[0]['shift_'.$i] === 'O') {
                 $arr['start_'.$i] = $r[0]['Hstart_'.$i].':'.$r[0]['Mstart_'.$i].':00';
                 $arr['end_'.$i] = $r[0]['Hend_'.$i].':'.$r[0]['Mend_'.$i].':00';
-                $arr['break_start_'.$i] = $r[0]['Hbreak_start_'.$i].':'.$r[0]['Mbreak_start_'.$i].':00';
-                $arr['break_end_'.$i] = $r[0]['Hbreak_end_'.$i].':'.$r[0]['Mbreak_end_'.$i].':00';   
             } else {
                 $arr['start_'.$i] = null;
                 $arr['end_'.$i] = null;
-                $arr['break_start_'.$i] = null;
-                $arr['break_end_'.$i] = null;
             }
-            $arr['break_start_'.$i] = strlen($arr['break_start_'.$i]) === 7 ? $arr['break_start_'.$i] : null;
-            $arr['break_end_'.$i] = strlen($arr['break_end_'.$i]) === 7 ? $arr['break_end_'.$i] : null;
             ++$i;
         }
         if ($request->session()->get('routine_id') > 0) {
