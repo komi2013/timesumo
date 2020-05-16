@@ -43,11 +43,11 @@
     <div style="color:red;" v-if="shopNameError"><?=__('salon.shopNameError')?></div>
 </div>
 
-<table style="width:100%;"><tbody>
+<table style="width:100%;text-align: center;"><tbody>
     <tr style="height:50px;" v-for="(d,k) in facilities" >
-        <td style="width:50%;text-align: center;">{{d['facility_name']}}</td>
-        <td style="width:49%;">
-            <input type="number" :value="d['amount']" v-model="d['amount']">
+        <td style="text-align: center;">{{d['facility_name']}}</td>
+        <td>
+            <input style="height:40px;width:40px;" type="number" :value="d['amount']" v-model="d['amount']">
         </td>
     </tr>
 </tbody></table>
@@ -79,8 +79,8 @@ const app = new Vue({
         }
         $.post('/Salon/ShopUpdate/',param,function(){},"json")
         .always(function(res){
-            if(res[0]){
-                location.href = '/Salon/MenuEdit/edit/'+res[1];
+            if(res[0] == 1){
+                location.href = '/Salon/Shop/edit/';
             }else{
                 alert('system error');
             }
