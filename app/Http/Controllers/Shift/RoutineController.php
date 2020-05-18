@@ -9,7 +9,7 @@ use Carbon\Carbon;
 class RoutineController extends Controller {
 
     public function index(Request $request, $directory=null, $controller=null,$action=null,
-            $target_usr=0) {
+            $target_usr=null) {
         if (!session('usr_id')) {
             $request->session()->put('redirect',$_SERVER['REQUEST_URI']);
             return redirect('/Auth/EmailLogin/index/');
@@ -17,17 +17,34 @@ class RoutineController extends Controller {
         $usr_id = session('usr_id');
         $group_id = session('group_id');
         \App::setLocale($request->cookie('lang'));
-        $obj = DB::table('r_rule')
-                ->where('group_id', $group_id)
+        $target_usr = $target_usr ?: $usr_id;
+        $rule = DB::table('r_rule')
                 ->where('usr_id', $target_usr)
-                ->get();
-        $rule = json_decode($obj,true);
-        if ($rule[0]['approver1'] != $usr_id AND $rule[0]['approver2'] != $usr_id) {
-            $msg = 'no access right:line'.__LINE__.':'.$_SERVER['REQUEST_URI'] ?? "".' '. json_encode($_POST);
+                ->where('group_id', $group_id)
+                ->first();
+        if ($rule->approver1 != $usr_id AND $rule->approver2 != $usr_id) {
+            $msg = 'no approver:line'.__LINE__.':'.$_SERVER['REQUEST_URI'] ?? "".' '. json_encode($_POST);
             \Config::set('logging.channels.daily.path',storage_path('logs/warning.log'));
             \Log::warning($msg);
-            return view('errors.500', compact('msg'));            
+            return view('errors.500', compact('msg'));
         }
+        $usrs = [];
+        $arr_usr_id = [];
+        if ($rule->approver1 == $usr_id OR $rule->approver2 == $usr_id) {
+            $obj = DB::table('r_rule')
+                    ->where('approver1', $usr_id)
+                    ->orWhere('approver1', $usr_id)
+                    ->get();
+            foreach ($obj as $d) {
+                $usrs[$d->usr_id] = '';
+                $arr_usr_id[] = $d->usr_id;
+            }
+        }
+        $obj = DB::table('t_usr')->whereIn('usr_id', $arr_usr_id)->get();
+        foreach ($obj as $d) {
+            $usrs[$d->usr_id] = $d->usr_name;
+        }
+        
         $obj = DB::table('r_routine')
                 ->where('group_id', $group_id)
                 ->where('usr_id', $target_usr)
@@ -58,12 +75,13 @@ class RoutineController extends Controller {
             $groups[$d->usr_id] = $d->usr_name; 
         }
 //        dd($rule);
-        $rule = json_encode($rule);
+        $rule = json_encode([$rule]);
         $request->session()->flash('rule', $rule);
         $routine = json_encode($routine);
         $request->session()->flash('routine', $routine);
         $request->session()->flash('target_usr', $target_usr);
-        return view('shift.routine', compact('routine','rule','week','time_unit','groups'));
+        return view('shift.routine', compact('routine','rule','week','time_unit','groups'
+                ,'usrs','target_usr'));
     }
 }
 

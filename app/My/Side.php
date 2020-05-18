@@ -10,18 +10,21 @@ class Side
                     ->where("group_owner",'<=', session('group_owner') ?: 0)
                     ->where("approver",'<=', session('approver') ?: 0)
                     ->where("public", 0)
+                    ->orderBy('priority','ASC')
                     ->get();
         } else {
             $obj = DB::table('c_link')
                     ->where("public", 1)
+                    ->orderBy('priority','ASC')
                     ->get();
         }
 
         $arr_uri = explode("/", $_SERVER["REQUEST_URI"]);
         $link = [];
+        $lang = \Cookie::get('lang') ?: 'ja';
         foreach ($obj as $d) {
             $arr['url'] = $d->url;
-            $arr['name'] = $d->ja;
+            $arr['name'] = $d->$lang;
             $db_uri = explode("/", $d->url);
             if ($arr_uri[1] == $db_uri[1] AND $arr_uri[2] == $db_uri[2]) {
                 $arr['thisPage'] = 'style="background-color: #FCFCFC;"';

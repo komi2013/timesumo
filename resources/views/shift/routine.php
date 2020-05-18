@@ -48,9 +48,9 @@
     <table style="text-align: center; margin-left:10px;">
     <tr v-for="(d,k) in week" :class="{disable:routine[0]['disable_'+k]}" >
         <th style="width:100px;color:blue;" v-on:click="activate(k)" >{{d}}</th>
-        <td><input type="text" class="time" v-if="!routine[0]['disable_'+k]" :value="routine[0]['start_'+k]" v-model="routine[0]['start_'+k]" @change="format('start_',k)"></td>
+        <td><input type="text" class="time" v-if="!routine[0]['disable_'+k]" :value="routine[0]['start_'+k]" v-model="routine[0]['start_'+k]" @change="time('start_',k)"></td>
         <td> ~ </td>
-        <td><input type="text" class="time" v-if="!routine[0]['disable_'+k]" :value="routine[0]['end_'+k]" v-model="routine[0]['end_'+k]" @change="format('end_',k)"></td>
+        <td><input type="text" class="time" v-if="!routine[0]['disable_'+k]" :value="routine[0]['end_'+k]" v-model="routine[0]['end_'+k]" @change="time('end_',k)"></td>
     </tr>
     </table>
     <table>
@@ -98,7 +98,7 @@ var content = new Vue({
         var param = {
             _token : $('[name="csrf-token"]').attr('content')
             ,routine: this.routine
-            ,rule: this.rule
+            ,rule : this.rule
         }
         $.post('/Shift/RoutineEdit/',param,function(){},"json")
         .always(function(res){
@@ -109,9 +109,19 @@ var content = new Vue({
             }
         });
     },
-    format: function (ini,k) {
+    time: function (ini,k) {
+//        var t = this.routine[0][ini+k].replace(/[^0-9]/g,'');
+//        this.routine[0][ini+k] = t.substr(0,2) + ':' + t.substr(2,2);
         var t = this.routine[0][ini+k].replace(/[^0-9]/g,'');
-        this.routine[0][ini+k] = t.substr(0,2) + ':' + t.substr(2,2);
+        var hour = t.substr(0,2) * 1;
+        hour = hour > 23 ? 23 : hour ;
+        hour = hour < 10 ? '0'+hour : hour ;
+        hour = hour < 1 ? '00' : hour ;
+        var minute =  t.substr(2,2) * 1;
+        minute = minute > 59 ? 59 : minute;
+        minute = minute < 10 ? '0' + minute : minute;
+        minute = minute < 1 ? '00' : minute;
+        this.routine[0][ini+k] = hour + ':' + minute;
     },
     activate: function (k) {
         if (this.routine[0]['disable_'+k]) {

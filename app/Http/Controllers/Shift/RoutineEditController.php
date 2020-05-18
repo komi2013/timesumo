@@ -14,72 +14,79 @@ class RoutineEditController extends Controller {
         }
         $usr_id = session('usr_id');
         $group_id = session('group_id');
-        $group_owner = session('group_owner');
-
-        $routine = $request->routine;
-        $db_routine = json_decode(session('routine'),true);
+//        $group_owner = session('group_owner');
+        $req_ro = $request->routine;
+        $req_ru = $request->rule;
+        $target_usr = $req_ru[0]['usr_id'];
+        if ($req_ro[0]['usr_id'] != $req_ru[0]['usr_id']) {
+            \Config::set('logging.channels.daily.path',storage_path('logs/warning.log'));
+            \Log::warning('request usr is different:line'.__LINE__.':'.$_SERVER['REQUEST_URI'] ?? "".' '. json_encode($_POST));
+            return json_encode([2,'request usr is different']);
+        }
+//        var_dump($target_usr); 
+        $rule = DB::table('r_rule')
+                ->where('usr_id', $target_usr)
+                ->where('group_id', $group_id)
+                ->get();
+        $rule = json_decode($rule,true);
+        if ($rule[0]['approver1'] != $usr_id AND $rule[0]['approver2'] != $usr_id) {
+            \Config::set('logging.channels.daily.path',storage_path('logs/warning.log'));
+            \Log::warning('no approver:line'.__LINE__.':'.$_SERVER['REQUEST_URI'] ?? "".' '. json_encode($_POST));
+            return json_encode([2,'no approver']);
+        }
+//        $check = ['holiday_flg','approver1','approver2','compensatory_within','minimum_break','break_minute','wage'];
         $now = date('Y-m-d H:i:s');
-        $del_routine = [];
-        foreach ($db_routine as $k => $d) {
-            $db_routine[$k]['action_by'] = $usr_id;
-            $db_routine[$k]['action_at'] = $now;
-            $db_routine[$k]['action_flg'] = 1;
+        foreach ($rule as $k => $d) {
+            $rule[$k]['action_by'] = $usr_id;
+            $rule[$k]['action_at'] = $now;
+            $rule[$k]['action_flg'] = 1;
+        }
+        $obj = DB::table('r_routine')
+                ->where('group_id', $group_id)
+                ->where('usr_id', $target_usr)
+                ->get();
+        $routine = json_decode($obj,true);
+        foreach ($routine as $k => $d) {
+            $routine[$k]['action_by'] = $usr_id;
+            $routine[$k]['action_at'] = $now;
+            $routine[$k]['action_flg'] = 1;
+        }
+        $upd_ro = [];
+        foreach ($req_ro as $k => $d) {
+            $upd_ro = $d;
             $i = 0;
             while ($i < 7) {
-                unset($db_routine[$k]['disable_'.$i]);
-                ++$i;
-            }
-            unset($db_routine[$k]['fix_flg']);
-        }
-        $db_rule = json_decode(session('rule'),true);
-        $del_rule = [];
-        foreach ($db_rule as $k => $d) {
-            $db_rule[$k]['action_by'] = $usr_id;
-            $db_rule[$k]['action_at'] = $now;
-            $db_rule[$k]['action_flg'] = 1;
-        }
-        $routine = [];
-        foreach ($request->routine as $d) {
-            $arr = [];
-            $i = 0;
-            while ($i < 7) {
-                if ($d['disable_'.$i]) {
-                    $arr['start_'.$i] = null;
-                    $arr['end_'.$i] = null;
+                if ($upd_ro['disable_'.$i]) {
+                    $upd_ro['start_'.$i] = null;
+                    $upd_ro['end_'.$i] = null;
                 } else {
-                    $arr['start_'.$i] = $d['start_'.$i].':00';
-                    $arr['end_'.$i] = $d['end_'.$i].':00';
+                    $upd_ro['start_'.$i] .= ':00';
+                    $upd_ro['end_'.$i] .= ':00';
                 }
+                unset($upd_ro['disable_'.$i]);
                 ++$i;
             }
-            $arr['updated_at'] = $now;
-            $routine = $arr;
+            $upd_ro['updated_at'] = $now;
         }
-        foreach ($request->rule as $d) {
-            $arr = [];
-            $arr['holiday_flg'] =  $d['holiday_flg'];
-            $arr['approver1'] =  $d['approver1'];
-            $arr['approver2'] =  $d['approver2'];
-            $arr['compensatory_within'] =  $d['compensatory_within'];
-            $arr['minimum_break'] =  $d['minimum_break'];
-            $arr['break_minute'] =  $d['break_minute'];
-            $arr['wage'] =  $d['wage'];
-            $arr['currency'] =  $d['currency'];
-            $arr['updated_at'] =  $now;
-            $rule = $arr;
+        $upd_ru = [];
+        foreach ($req_ru as $k => $d) {
+            $upd_ru = $d;
+            $upd_ru['updated_at'] = $now;
+            $upd_ru['holiday_flg'] = ($d['holiday_flg'] == 'true' OR $d['holiday_flg'] == 1) ? 1 : 0;
         }
+
         DB::beginTransaction();
 
-        DB::table('h_routine')->insert($db_routine);
-        DB::table('h_rule')->insert($db_rule);
+        DB::table('h_routine')->insert($routine);
+        DB::table('h_rule')->insert($rule);
         DB::table('r_routine')
-                ->where("usr_id", session('target_usr'))
+                ->where("usr_id", $target_usr)
                 ->where("group_id", $group_id)
-                ->update($routine);
+                ->update($upd_ro);
         DB::table('r_rule')
-                ->where("usr_id", session('target_usr'))
+                ->where("usr_id", $target_usr)
                 ->where("group_id", $group_id)
-                ->update($rule);
+                ->update($upd_ru);
         DB::commit();
         $res[0] = 1;
         return json_encode($res);

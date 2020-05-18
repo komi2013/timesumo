@@ -2,7 +2,7 @@
 <html>
   <head>
     <meta charset="UTF-8" />
-    <title>Sign In</title>
+    <title>Extra</title>
     <link rel="shortcut icon" href="" />
     <script src="/plugin/min.js"></script>
     <link rel="stylesheet" type="text/css" href="/css/basic.css<?=config('my.cache_v')?>" />
@@ -15,8 +15,9 @@
     th {
        text-align: center; 
     }
-    .time {
+    input[type=text]  {
         width: 40px;
+        height:30px;
     }
 </style>
 <body>
@@ -42,39 +43,33 @@
 </table>
 
 <div id="content" >
+    <select style="height:40px;" v-model="target" @change="changeUsr">
+        <option v-for="(d,k) in usrs" :value="k">{{ d }}</option>
+    </select>
     <template v-for="(d,k) in extra">
     <div style="width:100%;text-align:right;"><span style="font-size:20px;background-color: silver;" v-on:click="del(k)">&nbsp;-&nbsp;</span></div>
     <table>
-    <tr>
-        <th>残業時間帯</th>
-        <td>
-            <select style="height:30px;" v-model="d['Hstart']">
-                <option v-for="i in hours" v-bind:value="i">{{i}}</option>
-            </select>
-            <select style="height:30px;" v-model="d['Mstart']">
-                <option v-for="i in minutes" v-bind:value="i">{{i}}</option>
-            </select>
-        </td>
-        <td> ~ </td>
-        <td>
-            <select style="height:30px;" v-model="d['Hend']">
-                <option v-for="i in hours" v-bind:value="i">{{i}}</option>
-            </select>
-            <select style="height:30px;"  v-model="d['Mend']">
-                <option v-for="i in minutes" v-bind:value="i">{{i}}</option>
-            </select>
-        </td>
-    </tr>
-    </table>
-    <table>
-    <tr><th>休日出勤</th><td><input type="checkbox" v-value="d['dayoff_flg']" v-model="d['dayoff_flg']"></td></tr>
     <tr><th>手当の割合(%)</th>
         <td>
-            <input type="text" v-value="d['extra_percent']" v-model="d['extra_percent']">
-            <i style="color: red;font-size: 12px;" v-if="d['extra_percent'] < 1 || isNaN(d['extra_percent'])" ><br>数値１以上お願いします</i>
+            <input type="text" v-value="d['extra_ratio']" v-model="d['extra_ratio']">
+            <i style="color: red;font-size: 12px;" v-if="d['extra_ratio'] < 1 || isNaN(d['extra_ratio'])" ><br>数値１以上お願いします</i>
         </td>
     </tr>
     <tr>
+        <th>残業時間　数/帯</th>
+        <td><input type="checkbox" :value="d['over_flg']" v-model="d['over_flg']"></td>
+    </tr>
+    <tr v-if="d['over_flg'] == 0" >
+        <th>残業時間帯</th>
+        <td>
+          <input type="text" :value="d['extra_start']" v-model="d['extra_start']" @change="time(k,'extra_start')">
+          ~
+          <input type="text" :value="d['extra_end']" v-model="d['extra_end']" @change="time(k,'extra_end')">
+        </td>
+    </tr>
+    <tr v-if="d['over_flg'] == 0"><th>休日出勤</th><td>
+        <input type="checkbox" v-value="d['dayoff_flg']" v-model="d['dayoff_flg']"></td></tr>
+    <tr v-if="d['over_flg'] > 0">
         <th>勤務時間超単位</th>
         <td>
             <select style="height:30px;" v-model="d['over_flg']">
@@ -82,16 +77,10 @@
             </select>
         </td>
     </tr>
-    <template v-if="d['over_flg'] > 0">
-    <tr><th>〜時間以上</th><td>
-            <input type="text" v-value="d['hour_start']" v-model="d['hour_start']">
+    <tr v-if="d['over_flg'] > 0"><th>〜時間以上</th><td>
+        <input type="text" :value="d['hour_start']" v-model="d['hour_start']">
         <i style="color: red;font-size: 12px;" v-if="d['hour_start'] < 1 || isNaN(d['hour_start'])" ><br>数値１以上お願いします</i>
         </td></tr>
-    <tr><th>〜時間未満</th><td>
-            <input type="text" v-value="d['hour_end']" v-model="d['hour_end']">
-        <i style="color: red;font-size: 12px;" v-if="d['hour_end'] < 1 || isNaN(d['hour_end'])" ><br>数値１以上お願いします</i>
-        </td></tr>
-    </template>
     </table>
     </template>
     <div style="width:100%;text-align:right;"><span style="font-size:20px;background-color:silver;" v-on:click="add">&nbsp;+&nbsp;</span></div>
@@ -108,17 +97,29 @@ var app = new Vue({
   el: '#content',
   data: {
     extra: eval(<?=json_encode($extra)?>),
-    hours: eval(<?=json_encode($hours)?>),
-    minutes: eval(<?=json_encode($minutes)?>),
     over_flg: eval(<?=json_encode($over_flg)?>),
-    new: eval(<?=json_encode($new)?>),
+    addData: eval(<?=json_encode($add)?>),
+    usrs: eval(<?=json_encode($usrs)?>),
+    target: eval(<?=json_encode($target_usr)?>),
   },
   methods: {
+    time: function (k,ini) {
+        var t = this.extra[k][ini].replace(/[^0-9]/g,'');
+        var hour = t.substr(0,2) * 1;
+        hour = hour > 23 ? 23 : hour ;
+        hour = hour < 10 ? '0'+hour : hour ;
+        hour = hour < 1 ? '00' : hour ;
+        var minute =  t.substr(2,2) * 1;
+        minute = minute > 59 ? 59 : minute;
+        minute = minute < 10 ? '0' + minute : minute;
+        minute = minute < 1 ? '00' : minute;
+        this.extra[k][ini] = hour + ':' + minute;
+    },
     del: function (k) {
         this.$delete(this.extra,k);
     },
     add: function (e) {
-        this.$set(this.extra,this.extra.length,this.new);
+        this.$set(this.extra,this.extra.length,this.addData);
     },
     update: function (e) {
         var param = {
@@ -134,13 +135,12 @@ var app = new Vue({
             }
         });
     },
+    changeUsr: function (e) {
+        location.href = '/Shift/Extra/index/' + this.target + '/';
+    },
   }
 });
 
-var is_data = <?=$is_data?>;
-if(is_data === 0){
-    app.add();
-}
 
 </script>
 <script defer src="https://www.googletagmanager.com/gtag/js?id=UA-57298122-1"></script>

@@ -9,7 +9,7 @@ use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 class QrcodeController extends Controller {
 
-    public function index(Request $request, $directory=null, $controller=null,$action=null) {
+    public function index(Request $request,$directory,$controller,$action) {
         if (!session('usr_id')) {
             $request->session()->put('redirect',$_SERVER['REQUEST_URI']);
             return redirect('/Auth/EmailLogin/index/');

@@ -44,7 +44,7 @@
 <div id="content" style="text-align: center;">
     <?=$qr?>
     <br><br>
-    <a target="_blank" href="<?=$url?>"><?=$url?></a>
+    <a target="_blank" href="<?=$url?>" style="word-break: break-all;"><?=$url?></a>
 </div>
 
 <div id="ad_right"><iframe src="/htm/ad_right/" width="160" height="600" frameborder="0" scrolling="no"></iframe></div>
