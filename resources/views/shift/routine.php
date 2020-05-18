@@ -45,6 +45,9 @@
 </table>
 
 <div id="content" >
+    <select style="height:40px;" v-model="target" @change="changeUsr">
+        <option v-for="(d,k) in usrs" :value="k">{{ d }}</option>
+    </select>
     <table style="text-align: center; margin-left:10px;">
     <tr v-for="(d,k) in week" :class="{disable:routine[0]['disable_'+k]}" >
         <th style="width:100px;color:blue;" v-on:click="activate(k)" >{{d}}</th>
@@ -92,6 +95,8 @@ var content = new Vue({
     groups: eval(<?=json_encode($groups)?>),
     time_unit: eval(<?=json_encode($time_unit)?>),
     compensatory:[30,60,90],
+    usrs: eval(<?=json_encode($usrs)?>),
+    target: eval(<?=json_encode($target_usr)?>),
   },
   methods: {
     update: function (e) {
@@ -110,8 +115,6 @@ var content = new Vue({
         });
     },
     time: function (ini,k) {
-//        var t = this.routine[0][ini+k].replace(/[^0-9]/g,'');
-//        this.routine[0][ini+k] = t.substr(0,2) + ':' + t.substr(2,2);
         var t = this.routine[0][ini+k].replace(/[^0-9]/g,'');
         var hour = t.substr(0,2) * 1;
         hour = hour > 23 ? 23 : hour ;
@@ -129,7 +132,9 @@ var content = new Vue({
         }else{
             this.routine[0]['disable_'+k] = 1;
         }
-        
+    },
+    changeUsr: function (e) {
+        location.href = '/Shift/Routine/index/' + this.target + '/';
     },
   }
 });

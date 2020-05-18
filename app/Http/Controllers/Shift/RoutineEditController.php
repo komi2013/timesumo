@@ -14,7 +14,6 @@ class RoutineEditController extends Controller {
         }
         $usr_id = session('usr_id');
         $group_id = session('group_id');
-//        $group_owner = session('group_owner');
         $req_ro = $request->routine;
         $req_ru = $request->rule;
         $target_usr = $req_ru[0]['usr_id'];
@@ -23,7 +22,6 @@ class RoutineEditController extends Controller {
             \Log::warning('request usr is different:line'.__LINE__.':'.$_SERVER['REQUEST_URI'] ?? "".' '. json_encode($_POST));
             return json_encode([2,'request usr is different']);
         }
-//        var_dump($target_usr); 
         $rule = DB::table('r_rule')
                 ->where('usr_id', $target_usr)
                 ->where('group_id', $group_id)
@@ -34,7 +32,6 @@ class RoutineEditController extends Controller {
             \Log::warning('no approver:line'.__LINE__.':'.$_SERVER['REQUEST_URI'] ?? "".' '. json_encode($_POST));
             return json_encode([2,'no approver']);
         }
-//        $check = ['holiday_flg','approver1','approver2','compensatory_within','minimum_break','break_minute','wage'];
         $now = date('Y-m-d H:i:s');
         foreach ($rule as $k => $d) {
             $rule[$k]['action_by'] = $usr_id;

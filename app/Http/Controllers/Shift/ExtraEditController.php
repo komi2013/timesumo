@@ -16,8 +16,9 @@ class ExtraEditController extends Controller {
         $group_id = session('group_id');
 
         $now = date('Y-m-d H:i:s');
+        $targets = [];
         foreach ($request->extra as $k => $d) {
-            if( $d['group_id'] != $group_id) {
+            if( $d['group_id'] != $group_id ) {
                 \Config::set('logging.channels.daily.path',storage_path('logs/warning.log'));
                 \Log::warning('group is different:line'.__LINE__.':'.$_SERVER['REQUEST_URI'] ?? "".' '. json_encode($_POST));
                 return json_encode([2,'group is different']);
@@ -34,17 +35,23 @@ class ExtraEditController extends Controller {
             }
             $add[$k]['updated_at'] = $now;
             $target_usr = $d['usr_id'];
+            $targets[$d['usr_id']] = 0;
         }
-        $routine = DB::table('r_routine')
+        if (count($targets) != 1) {
+            \Config::set('logging.channels.daily.path',storage_path('logs/warning.log'));
+            \Log::warning('request usr is different:line'.__LINE__.':'.$_SERVER['REQUEST_URI'] ?? "".' '. json_encode($_POST));
+            return json_encode([2,'request usr is different']);
+        }
+        $rule = DB::table('r_rule')
                 ->where('usr_id', $target_usr)
                 ->where('group_id', $group_id)
-                ->first();
-        if ($r_group->owner_flg == 0 AND $routine->approver1 == 0 AND $routine->approver2 == 0) {
+                ->get();
+        $rule = json_decode($rule,true);
+        if ($rule[0]['approver1'] != $usr_id AND $rule[0]['approver2'] != $usr_id) {
             \Config::set('logging.channels.daily.path',storage_path('logs/warning.log'));
-            \Log::warning('no access right:line'.__LINE__.':'.$_SERVER['REQUEST_URI'] ?? "".' '. json_encode($_POST));
-            return json_encode([2,'no access right']);
+            \Log::warning('no approver:line'.__LINE__.':'.$_SERVER['REQUEST_URI'] ?? "".' '. json_encode($_POST));
+            return json_encode([2,'no approver']);
         }
-
         $del = DB::table('r_extra')
                 ->where('group_id', $group_id)
                 ->where('usr_id', $target_usr)

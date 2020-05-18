@@ -33,7 +33,7 @@ class RoutineController extends Controller {
         if ($rule->approver1 == $usr_id OR $rule->approver2 == $usr_id) {
             $obj = DB::table('r_rule')
                     ->where('approver1', $usr_id)
-                    ->orWhere('approver1', $usr_id)
+                    ->orWhere('approver2', $usr_id)
                     ->get();
             foreach ($obj as $d) {
                 $usrs[$d->usr_id] = '';
@@ -74,12 +74,7 @@ class RoutineController extends Controller {
         foreach ($obj as $d) {
             $groups[$d->usr_id] = $d->usr_name; 
         }
-//        dd($rule);
-        $rule = json_encode([$rule]);
-        $request->session()->flash('rule', $rule);
-        $routine = json_encode($routine);
-        $request->session()->flash('routine', $routine);
-        $request->session()->flash('target_usr', $target_usr);
+        $rule = [$rule];
         return view('shift.routine', compact('routine','rule','week','time_unit','groups'
                 ,'usrs','target_usr'));
     }

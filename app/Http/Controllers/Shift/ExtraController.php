@@ -17,31 +17,24 @@ class ExtraController extends Controller {
         $usr_id = session('usr_id');
         $group_id = session('group_id');
         \App::setLocale($request->cookie('lang'));
-        $r_group = DB::table('r_group_relate')
-                ->where('usr_id', $usr_id)
-                ->where('group_id', $group_id)
-                ->first();
+        $target_usr = $target_usr ?: $usr_id;
         $rule = DB::table('r_rule')
-                ->where('usr_id', $usr_id)
+                ->where('usr_id', $target_usr)
                 ->where('group_id', $group_id)
                 ->first();
-        if ($r_group->owner_flg == 0 AND $rule->approver1 == 0 AND $rule->approver2 == 0) {
-            $msg = 'no access right:line'.__LINE__.':'.$_SERVER['REQUEST_URI'] ?? "".' '. json_encode($_POST);
+        if ($rule->approver1 != $usr_id AND $rule->approver2 != $usr_id) {
+            $msg = 'no approver:line'.__LINE__.':'.$_SERVER['REQUEST_URI'] ?? "".' '. json_encode($_POST);
             \Config::set('logging.channels.daily.path',storage_path('logs/warning.log'));
             \Log::warning($msg);
             return view('errors.500', compact('msg'));
         }
         $usrs = [];
         $arr_usr_id = [];
-        if ($r_group->owner_flg) {
-            $obj = DB::table('r_group_relate')->where('group_id', $group_id)->get();
-            foreach ($obj as $d) {
-                $usrs[$d->usr_id] = '';
-                $arr_usr_id[] = $d->usr_id;
-            }
-        }
-        if ($rule->approver1 OR $rule->approver2) {
-            $obj = DB::table('r_rule')->where('group_id', $group_id)->get();
+        if ($rule->approver1 == $usr_id OR $rule->approver2 == $usr_id) {
+            $obj = DB::table('r_rule')
+                    ->where('approver1', $usr_id)
+                    ->orWhere('approver2', $usr_id)
+                    ->get();
             foreach ($obj as $d) {
                 $usrs[$d->usr_id] = '';
                 $arr_usr_id[] = $d->usr_id;
@@ -51,7 +44,6 @@ class ExtraController extends Controller {
         foreach ($obj as $d) {
             $usrs[$d->usr_id] = $d->usr_name;
         }
-        $target_usr = $target_usr ?: $usr_id;
         $obj = DB::table('r_extra')
                 ->where('group_id', $group_id)
                 ->where('usr_id', $target_usr)
