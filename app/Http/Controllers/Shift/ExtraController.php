@@ -17,7 +17,18 @@ class ExtraController extends Controller {
         $usr_id = session('usr_id');
         $group_id = session('group_id');
         \App::setLocale($request->cookie('lang'));
-        $target_usr = $target_usr ?: $usr_id;
+        if (!$target_usr) {
+            $bind = [
+                'group_id' => $group_id,
+                'usr_id' => $usr_id
+            ];
+            $sql = "SELECT * FROM r_rule WHERE group_id = :group_id AND "
+                    . " ( approver1 = :usr_id OR approver2 = :usr_id )";
+            $obj = DB::select($sql, $bind);
+            foreach ($obj as $d) {
+                $target_usr = $d->usr_id;
+            }
+        }
         $rule = DB::table('r_rule')
                 ->where('usr_id', $target_usr)
                 ->where('group_id', $group_id)
