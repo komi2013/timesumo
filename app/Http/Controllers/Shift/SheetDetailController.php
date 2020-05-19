@@ -18,19 +18,46 @@ class SheetDetailController extends Controller {
         $usr_id = session('usr_id');
         $group_id = session('group_id');
         \App::setLocale($request->cookie('lang'));
-
-        $r_group = DB::table('r_group_relate')
-                ->where('usr_id', $usr_id)
-                ->where('group_id', $group_id)
-                ->first();
+        if (!$target_usr) {
+            $bind = [
+                'group_id' => $group_id,
+                'usr_id' => $usr_id
+            ];
+            $sql = "SELECT * FROM r_rule WHERE group_id = :group_id AND "
+                    . " ( approver1 = :usr_id OR approver2 = :usr_id )";
+            $obj = DB::select($sql, $bind);
+            foreach ($obj as $d) {
+                $target_usr = $d->usr_id;
+            }
+        }
         $rule = DB::table('r_rule')
-                ->where('usr_id', $usr_id)
+                ->where('usr_id', $target_usr)
                 ->where('group_id', $group_id)
                 ->first();
-        if ($r_group->owner_flg == 0 AND $rule->approver1 == 0 AND $rule->approver2 == 0 AND $usr_id != $target_usr) {
+        if (!isset($rule->approver1)) {
+            return view('errors.404');
+        }
+        if ($rule->approver1 != $usr_id AND $rule->approver2 != $usr_id) {
+            $msg = 'no approver:line'.__LINE__.':'.$_SERVER['REQUEST_URI'] ?? "".' '. json_encode($_POST);
             \Config::set('logging.channels.daily.path',storage_path('logs/warning.log'));
-            \Log::warning('no access right:line'.__LINE__.':'.$_SERVER['REQUEST_URI'] ?? "".' '. json_encode($_POST));
-            return json_encode([2,'no access right']);
+            \Log::warning($msg);
+            return view('errors.500', compact('msg'));
+        }
+        $usrs = [];
+        $arr_usr_id = [];
+        if ($rule->approver1 == $usr_id OR $rule->approver2 == $usr_id) {
+            $obj = DB::table('r_rule')
+                    ->where('approver1', $usr_id)
+                    ->orWhere('approver2', $usr_id)
+                    ->get();
+            foreach ($obj as $d) {
+                $usrs[$d->usr_id] = '';
+                $arr_usr_id[] = $d->usr_id;
+            }
+        }
+        $obj = DB::table('t_usr')->whereIn('usr_id', $arr_usr_id)->get();
+        foreach ($obj as $d) {
+            $usrs[$d->usr_id] = $d->usr_name;
         }
 
         $month = $month ?? date('Y-m');
@@ -147,7 +174,7 @@ class SheetDetailController extends Controller {
                 $monthly[$date]['offmin'] += $offmin;
                 $arr[$d->schedule_id] = $d->title;
                 $monthly[$date]['schedules'][$d->schedule_id] =  $d->title;
-            } else if ($d->tag != 6 OR $d->tag != 3) { //6 = service, 3 = out
+            } else if (!in_array($d->tag,[6,3])) { //6 = service, 3 = out
                 foreach ($extra as $d2) {
                     $extra_start = new Carbon(date('Y-m-d ',strtotime($d->time_start)).$d2->extra_start);
                     $extra_end = new Carbon(date('Y-m-d ',strtotime($d->time_start)).$d2->extra_end);
@@ -277,7 +304,13 @@ class SheetDetailController extends Controller {
         $request->session()->flash('wage', $wage);
         $days = json_encode($days);
         $total_wage = json_encode($total_wage);
-        return view('shift.sheet_detail', compact('month','days','total_wage','approveButton'));
+        $month->addMonth();
+        $next = $month->format('Y-m');
+        $month->subMonth(2);
+        $prev = $month->format('Y-m');
+        $month->addMonth();
+        return view('shift.sheet_detail', compact('month','days','total_wage','approveButton'
+                ,'usrs','target_usr','prev','next'));
     }
     public function punctuate ($start,$end,$extra_start,$extra_end,$monthly,$date,$d,$d2) {
         $time = 0;

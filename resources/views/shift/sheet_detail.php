@@ -2,6 +2,7 @@
 <html>
   <head>
     <meta charset="UTF-8" />
+    <title>Sheet Detail</title>
     <link rel="shortcut icon" href="" />
     <script src="/plugin/min.js"></script>
     <link rel="stylesheet" href="/css/basic.css<?=config('my.cache_v')?>" />
@@ -38,7 +39,9 @@
     <img src="/img/icon/menu.png" class="icon" id="menu_button">
   </td>
   <td style="text-align: center;">
-    
+    <a href="/Shift/SheetDetail/index/<?=$prev?>/<?=$target_usr?>/" style="padding:10px;"> < </a>
+      <?=$month->format(__('calendar.month_f'))?>
+    <a href="/Shift/SheetDetail/index/<?=$next?>/<?=$target_usr?>/" style="padding:10px;"> > </a>
   </td>
   <td style="text-align:center;width:25%;">
     <a href="/"><img src="/img/icon/home.png" class="icon"></a>
@@ -54,7 +57,10 @@
 </table>
 
 <div id="content">
-    <table style="border-collapse: collapse; width:100%;" class="shift">
+    <select style="height:40px;" v-model="target" @change="changeUsr">
+        <option v-for="(d,k) in usrs" :value="k">{{ d }}</option>
+    </select>
+    <table style="width:100%;" class="shift">
         <tr><th v-bind:rowspan="row"><?=__('calendar.day')?></th><th>出社</th><th>退社</th><th>休憩</th><th>残業</th></tr>
         <tr>                     <th colspan="4">備考</th></tr>
         <tr v-if="geo">    <th>経度</th><th>緯度</th><th>private ip</th><th>public ip</th></tr>
@@ -118,6 +124,8 @@ var content = new Vue({
       days:eval(<?=$days?>),
       total_wage : eval(<?=$total_wage?>),
       approveButton : eval(<?=$approveButton?>),
+      usrs: eval(<?=json_encode($usrs)?>),
+      target: eval(<?=json_encode($target_usr)?>),
   },
   methods: {
     update: function (e) {
@@ -139,7 +147,10 @@ var content = new Vue({
         }else{
             this.geo = true;
         }
-    }
+    },
+    changeUsr: function (e) {
+        location.href = '/Shift/SheetDetail/index/<?=$month->format('Y-m')?>/' + this.target + '/';
+    },
   },
   computed: {
     row() {

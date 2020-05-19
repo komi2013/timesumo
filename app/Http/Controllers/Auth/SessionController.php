@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Hash;
 class SessionController extends Controller {
 
     public function lang(Request $request) {
+        \Config::set('session.lifetime', 60 * 24 * 365);
         \Cookie::queue('lang', $request->lang);
         $res[0] = 1;
         return json_encode($res);

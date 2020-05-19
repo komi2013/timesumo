@@ -8,7 +8,7 @@ use Carbon\Carbon;
 
 class TimeSheetEditController extends Controller {
 
-    public function lessuri(Request $request,$directory,$controller,$action) {
+    public function lessuri(Request $request,$directory,$controller,$action=null) {
         if (!session('usr_id')) {
             return json_encode([2,'no session usr_id']);
         }

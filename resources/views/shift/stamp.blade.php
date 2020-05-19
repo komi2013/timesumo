@@ -2,6 +2,7 @@
 <html>
   <head>
     <meta charset="UTF-8" />
+    <title>stamp</title>
     <link rel="shortcut icon" href="" />
     <script src="/plugin/min.js"></script>
     <link rel="stylesheet" href="/css/basic.css<?=config('my.cache_v')?>" />
@@ -16,7 +17,6 @@
         height: 100px;
         padding: 10px;
     }
-    
 </style>
 <body>
 <table id="head_menu" style="width: 100%;">
@@ -25,7 +25,7 @@
     <img src="/img/icon/menu.png" class="icon" id="menu_button">
   </td>
   <td style="text-align: center;">
-    
+    <?=date(__('calendar.today').' H:i:s')?>
   </td>
   <td style="text-align:center;width:25%;">
     <a href="/"><img src="/img/icon/home.png" class="icon"></a>

@@ -15,19 +15,15 @@ class SheetApproveController extends Controller {
         $usr_id = session('usr_id');
         $group_id = session('group_id');
 
-        $r_group = DB::table('r_group_relate')
-                ->where('usr_id', $usr_id)
-                ->where('group_id', $group_id)
-                ->first();
         $rule = DB::table('r_rule')
-                ->where('usr_id', $usr_id)
+                ->where('usr_id', session('target_usr'))
                 ->where('group_id', $group_id)
-                ->first();
-
-        if ($r_group->owner_flg == 0 AND $rule->approver1 == 0 AND $rule->approver2 == 0 AND $usr_id != $target_usr) {
+                ->get();
+        $rule = json_decode($rule,true);
+        if ($rule[0]['approver1'] != $usr_id AND $rule[0]['approver2'] != $usr_id) {
             \Config::set('logging.channels.daily.path',storage_path('logs/warning.log'));
-            \Log::warning('no access right:line'.__LINE__.':'.$_SERVER['REQUEST_URI'] ?? "".' '. json_encode($_POST));
-            return json_encode([2,'no access right']);
+            \Log::warning('no approver:line'.__LINE__.':'.$_SERVER['REQUEST_URI'] ?? "".' '. json_encode($_POST));
+            return json_encode([2,'no approver']);
         }
         $begin = new Carbon(session('begin'));
         $begin->addSeconds();

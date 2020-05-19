@@ -32,10 +32,12 @@ class StampController extends Controller {
         $time_out =  $stamp->time_out ?? '';
         $is = isset($stamp->timestamp_id) ? true : false;
         $pause = false;
-        $start = new Carbon($stamp->time_in);
-        $break_at = new Carbon($stamp->break_at);
-        if ($start < $break_at) {
-            $pause = true;
+        if (isset($stamp->time_in)) {
+            $start = new Carbon($stamp->time_in);
+            $break_at = new Carbon($stamp->break_at);
+            if ($start < $break_at) {
+                $pause = true;
+            }            
         }
         $date = new Carbon();
         return view('shift.stamp', compact('date','time_out','is','pause','password'));

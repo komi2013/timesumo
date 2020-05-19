@@ -14,7 +14,7 @@
     th {
        text-align: center; 
     }
-    .time {
+    input[type="text"] {
         width: 40px;
     }
 </style>
@@ -46,9 +46,9 @@
         <template v-for="(d,k) in days">
         <tr>
             <td>{{d['date']}} {{d['day']}}</td>
-            <td><input type="text" v-value="d['time_in']" v-model="d['time_in']" placeholder="00:00" class="time"></td>
-            <td><input type="text" v-value="d['time_out']" v-model="d['time_out']" placeholder="00:00" class="time"></td>
-            <td>{{d['break']}}</td>
+            <td><input type="text" v-value="d['time_in']" v-model="d['time_in']" placeholder="00:00" :class="{manual_flg:d['manual_flg']}" @change="time(k,'time_in')" ></td>
+            <td><input type="text" v-value="d['time_out']" v-model="d['time_out']" placeholder="00:00" :class="{manual_flg:d['manual_flg']}" @change="time(k,'time_out')" ></td>
+            <td :class="{manual_flg:d['manual_flg']}">{{d['break']}}</td>
         </tr>
         </template>
     </table>
@@ -81,6 +81,18 @@ var content = new Vue({
                 alert('system error');
             }
         });
+    },
+    time: function (k,ini) {
+        var t = this.days[k][ini].replace(/[^0-9]/g,'');
+        var hour = t.substr(0,2) * 1;
+        hour = hour > 23 ? 23 : hour ;
+        hour = hour < 10 ? '0'+hour : hour ;
+        hour = hour < 1 ? '00' : hour ;
+        var minute =  t.substr(2,2) * 1;
+        minute = minute > 59 ? 59 : minute;
+        minute = minute < 10 ? '0' + minute : minute;
+        minute = minute < 1 ? '00' : minute;
+        this.days[k][ini] = hour + ':' + minute;
     },
   }
 });
