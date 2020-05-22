@@ -25,11 +25,30 @@ class EmailVerifyController extends Controller {
                     "password" => Hash::make(session('password'))
                     ,"updated_at" => now()
                 ]);
-            new \App\My\AfterLogin($usr->usr_id);
+            if ($_SERVER['SERVER_NAME'] == 'timebook.quigen.info') {
+                $request->session()->put('usr_id', $usr->usr_id);
+                $request->session()->put('group_id', 0);
+            } else {
+                new \App\My\AfterLogin($usr->usr_id);
+            }
         } else {
             $arr_email = explode("@", session('email'));
-            $obj = new \App\My\AfterRegister($arr_email[0]);
-            new \App\My\AfterLogin($obj->usr_id);
+            if ($_SERVER['SERVER_NAME'] == 'timebook.quigen.info') {
+                $usr_id = DB::select("select nextval('t_usr_usr_id_seq')")[0]->nextval;
+                DB::table('t_usr')->insert([
+                    "usr_id" => $usr_id
+                    ,"oauth_type" => 3
+                    ,"updated_at" => now()
+                    ,"email" => session('email')
+                    ,"password" => Hash::make(session('password'))
+                    ,"usr_name" => $arr_email[0]
+                ]);
+                $request->session()->put('usr_id', $usr_id);
+                $request->session()->put('group_id', 0);
+            } else {
+                $obj = new \App\My\AfterRegister($arr_email[0]);
+                new \App\My\AfterLogin($obj->usr_id);
+            }
         }
         $request->session()->forget('email_auth');
         $request->session()->forget('email');

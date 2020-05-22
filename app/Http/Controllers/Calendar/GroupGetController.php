@@ -26,6 +26,7 @@ class GroupGetController extends Controller {
            $arr['owner_flg'] = $d->owner_flg;
            $arr['priority'] = $d->priority;
            $arr_group[$d->group_id] = $arr;
+           $is_group = true;
         }
         $obj = DB::table('m_group')->whereIn("group_id", $group_ids)->get();
         foreach ($obj as $d) {
@@ -34,6 +35,13 @@ class GroupGetController extends Controller {
            if (!$group_id) {
                $group_id = $d->group_id;
            }
+        }
+        if (!isset($is_group)) {
+            $arr_group[0]['group_id'] = 0;
+            $arr_group[0]['group_name'] = '';
+            $arr_group[0]['owner_flg'] = 0;
+            $arr_group[0]['priority'] = 0;
+            $arr_group[0]['selected'] = '';
         }
         $group_ids = json_encode($group_ids);
         $request->session()->flash('group_ids', $group_ids);

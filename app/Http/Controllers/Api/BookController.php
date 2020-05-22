@@ -7,8 +7,6 @@ use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
 class BookController extends Controller {
-//create user 'office'@'192.168.99.99' identified by 'Qa9IZ5_s';
-//    grant all privileges on * to 'office'@'%' identified by 'Qa9IZ5_s' with grant option;
     public function lessuri(Request $request, $directory,$controller,$action=null) {
         \App::setLocale($request->lang);
         $menu_id = $request->menu_id;

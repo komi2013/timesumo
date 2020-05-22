@@ -8,38 +8,29 @@ use Carbon\Carbon;
 
 class BookController extends Controller {
 
-    public function index(Request $request, $directory=null, $controller=null,$action=null,
-            $menu_id='', $Ymd=null) {
+    public function index(Request $request, $directory,$controller,$action,
+            $menu_id, $db_id, $Ymd=null) {
         if (!session('usr_id')) {
             $request->session()->put('redirect',$_SERVER['REQUEST_URI']);
             return redirect('/Auth/EmailLogin/index/');
         }
         $usr_id = session('usr_id');
-        $group_id = session('group_id');
         \App::setLocale($request->cookie('lang'));
-        $menu = DB::table('m_menu')->where('menu_id', $menu_id)->first();
-//        if ($staff > 0) {
-//            if ($menu->group_id != $request->session()->get('group_id')) {
-//                \Config::set('logging.channels.daily.path',storage_path('logs/warning.log'));
-//                \Log::warning('you are not staff:'.$_SERVER['REQUEST_URI'] ?? "".' '. json_encode($_POST));
-//                return view('errors.404');
-//            }
-//            $customer = '';
-//        } else {
-//            $customer = \Cookie::get('usr_name');
-//        }
-        $customer = '';
+
+        $db = DB::table('c_db')->where('db_id', $db_id)->first();
+        \Config::set('database.connections.dynamic.host',$db->host);
+        \Config::set('database.connections.dynamic.database',$db->database);
+        \Config::set('database.connections.dynamic.username',$db->username);
+        \Config::set('database.connections.dynamic.password',$db->password);
+        $menu = DB::connection('dynamic')->table('m_menu')->where('menu_id', $menu_id)->first();
         $group_id = $menu->group_id;
-        $shop = DB::table('m_group')->where('group_id', $group_id)->first();
+        $shop = DB::connection('dynamic')->table('m_group')->where('group_id', $group_id)->first();
         $today = $Ymd ? new Carbon($Ymd) : Carbon::today();
-//        Carbon::setWeekStartsAt(Carbon::SUNDAY);
-//        Carbon::setWeekEndsAt(Carbon::SATURDAY);
-//        $frameDate = Carbon::createFromDate($today->year, $today->month, $today->startOfWeek()->format('d'));
         $frameDate = $Ymd ? new Carbon($Ymd) : Carbon::today();
         $openHour = substr($shop->open_time,0,2);
         $frameDate->setTime($openHour, 0, 0);
         $begin = $frameDate->format('Y-m-d H:00:00');
-        $obj = DB::table('m_menu_necessary')->where('menu_id', $menu_id)->get();
+        $obj = DB::connection('dynamic')->table('m_menu_necessary')->where('menu_id', $menu_id)->get();
         foreach ($obj as $d) {
             $required['service_'.$d->service_id] = 0;
             $required['facility_'.$d->facility_id] = 1;
@@ -47,11 +38,11 @@ class BookController extends Controller {
             $arr_facility_id[] = $d->facility_id;
         }
         $necessary = json_decode($obj,true);
-        $obj = DB::table('t_facility')->whereIn('facility_id', $arr_facility_id)->get();
+        $obj = DB::connection('dynamic')->table('t_facility')->whereIn('facility_id', $arr_facility_id)->get();
         foreach ($obj as $d) {
             $required['facility_'.$d->facility_id] = $d->amount;
         }
-        $obj = DB::table('r_ability')->whereIn('service_id', $arr_service_id)->get();
+        $obj = DB::connection('dynamic')->table('r_ability')->whereIn('service_id', $arr_service_id)->get();
         foreach ($obj as $d) {
             $arr[] = $d->service_id;
             $ability[$d->usr_id] = $arr;
@@ -84,7 +75,7 @@ class BookController extends Controller {
         $end = $frameDate->format('Y-m-d H:00:00');
         $usr_facility_id = array_unique(array_merge($arr_usr_id,$arr_facility_id));
         
-        $obj = DB::table('r_routine')
+        $obj = DB::connection('dynamic')->table('r_routine')
                 ->whereIn('usr_id', $arr_usr_id )
                 ->where('group_id', $group_id)
                 ->get();
@@ -93,6 +84,7 @@ class BookController extends Controller {
                 $routine[$d->usr_id] = $d;
             }
         }
+
         foreach ($routine as $usrId => $d) {
             for ($i = 0; $i < 7; $i++) {
                 $w = new Carbon($begin);
@@ -116,7 +108,7 @@ class BookController extends Controller {
             }
         }
         
-        $obj = DB::table('t_schedule')
+        $obj = DB::connection('dynamic')->table('t_schedule')
                 ->whereIn('usr_id', $usr_facility_id )
                 ->where('time_end', '>',date('Y-m-d H:i:s')) // more take for other booking
                 ->where('time_start', '<', $end) // more take for other booking 
@@ -185,15 +177,18 @@ class BookController extends Controller {
             }
             
         }
-        $del = array_unique($del);
-        arsort($del);
-        if (count($del) > 0) {
-            // delete statement
-        }
+//        $del = array_unique($del);
+//        arsort($del);
+//        if (count($del) > 0) {
+//            // delete statement
+//        }
+
         $today = date('Y-m-d');
         $openTime = $openHour.':00';
         $closeTime = $closeHour - 1 .':50';
+
         return view('user.book', 
-            compact('days7','today','menu_id','openTime','closeTime','menu','end_minute','customer'));
+            compact('days7','today','menu_id','openTime','closeTime',
+                    'menu','end_minute','db_id'));
     }
 }

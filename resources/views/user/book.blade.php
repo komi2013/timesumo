@@ -66,7 +66,7 @@
 </table>
 
 <div id="content">
-<p id="menu_name"><?=$menu->menu_name?></p>
+<div id="menu_name"><?=$menu->menu_name?></div>
 <table>
     <tr>
     <?php  foreach ($days7 as $date => $d) {?>
@@ -107,7 +107,6 @@ $('.available').click(function(){
     check = check + $(this).attr('date')+"\r\n";
     check = check + $(this).attr('start');
     check = check + " ~ " +$(this).attr('end')+"\r\n";
-    check = check + $('#customer').val();
     var r = confirm(check);
     if (r == true) {
         console.log(check);
@@ -115,7 +114,7 @@ $('.available').click(function(){
             _token : $('[name="csrf-token"]').attr('content')
             ,unix : $(this).attr('unix')
             ,menu_id : <?=$menu_id?>
-            ,customer : $('#customer').val()
+            ,db_id : <?=$db_id?>
             
         }
         $.post('/User/BookUpdate/',param,function(){},"json")

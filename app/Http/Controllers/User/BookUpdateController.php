@@ -12,10 +12,19 @@ class BookUpdateController extends Controller {
         if (!session('usr_id')) {
             return json_encode([2,'no session usr_id']);
         }
-        $menu = DB::table('m_menu')->where('menu_id', $request->menu_id)->first();
-        $customer = 'テスト様';
+        $usr_id = session('usr_id');
+        $u = DB::table('t_usr')->where('usr_id', $usr_id)->first();
+        $customer = $u->usr_name;
+        $db = DB::table('c_db')->where('db_id', $request->db_id)->first();
+        \Config::set('database.connections.dynamic.host',$db->host);
+        \Config::set('database.connections.dynamic.database',$db->database);
+        \Config::set('database.connections.dynamic.username',$db->username);
+        \Config::set('database.connections.dynamic.password',$db->password);
+        
+        $menu = DB::connection('dynamic')->table('m_menu')->where('menu_id', $request->menu_id)->first();
+
         $group_id = $menu->group_id;
-        $obj = DB::table('m_menu_necessary')->where('menu_id', $menu->menu_id)->get();
+        $obj = DB::connection('dynamic')->table('m_menu_necessary')->where('menu_id', $menu->menu_id)->get();
         $end = 0;
         foreach ($obj as $d) {
             $arr_service_id[] = $d->service_id;
@@ -31,7 +40,7 @@ class BookUpdateController extends Controller {
             $necessary[$d->menu_necessary_id] = $arr;
             $insertFacilities[$d->facility_id] = [0,0];
         }
-        $obj = DB::table('r_ability')
+        $obj = DB::connection('dynamic')->table('r_ability')
                 ->whereIn('service_id', $arr_service_id)
                 ->get();
         foreach ($obj as $d) {
@@ -45,7 +54,7 @@ class BookUpdateController extends Controller {
             }
             $arr_usr_id[] = $d->usr_id;
         }
-        $obj = DB::table('r_routine')
+        $obj = DB::connection('dynamic')->table('r_routine')
                 ->whereIn('usr_id', $arr_usr_id )
                 ->where('group_id', $group_id)
                 ->get();
@@ -64,7 +73,7 @@ class BookUpdateController extends Controller {
             }
         }
         $usr_facility_id = array_unique(array_merge($arr_usr_id,$arr_facility_id));
-        $obj = DB::table('t_schedule')
+        $obj = DB::connection('dynamic')->table('t_schedule')
                 ->whereIn('usr_id', $usr_facility_id )
                 ->where('time_end', '>',date('Y-m-d H:i:s',$request->unix)) // more take for other booking
                 ->where('time_start', '<', date('Y-m-d H:i:s',($request->unix + $end * 60) )) // more take for other booking 
@@ -109,9 +118,9 @@ class BookUpdateController extends Controller {
         array_multisort($sort, SORT_ASC, $necessary);
         $arr_sql = [];
         $now = date('Y-m-d H:i:s');
-        DB::beginTransaction();
-        $book_id = DB::select("select nextval('book_id')")[0]->nextval;
-        $schedule_id = DB::select("select nextval('t_schedule_schedule_id_seq')")[0]->nextval;
+        DB::connection('dynamic')->beginTransaction();
+        $book_id = DB::connection('dynamic')->select("select nextval('book_id')")[0]->nextval;
+        $schedule_id = DB::connection('dynamic')->select("select nextval('t_schedule_schedule_id_seq')")[0]->nextval;
         foreach ($necessary as $k => $d) {
             $fid = $d['facility_id'];
             if ( $d['start_minute'] == $insertFacilities[$fid][1] ) { // postpone 
@@ -196,18 +205,18 @@ class BookUpdateController extends Controller {
         $usrs = [];
         foreach ($arr_sql as $k => $d) {
             if ( in_array($d['usr_id'],$usrs) ) {
-                $arr_sql[$k]['schedule_id'] = DB::select("select nextval('t_schedule_schedule_id_seq')")[0]->nextval;
+                $arr_sql[$k]['schedule_id'] = DB::connection('dynamic')->select("select nextval('t_schedule_schedule_id_seq')")[0]->nextval;
             }
             $usrs[] = $d['usr_id'];
         }
-        DB::table('t_schedule')->insert($arr_sql);
-        DB::table('t_todo')->insert([
+        DB::connection('dynamic')->table('t_schedule')->insert($arr_sql);
+        DB::connection('dynamic')->table('t_todo')->insert([
             "schedule_id" => $schedule_id
             ,"todo" => $menu->menu_name
             ,"updated_at" => $now
         ]);
 
-        DB::commit();
+        DB::connection('dynamic')->commit();
         $res[0] = 1;
         return json_encode($res);
 

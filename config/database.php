@@ -15,7 +15,7 @@ return [
     |
     */
 
-    'default' => 'shift',
+    'default' => $_SERVER['SERVER_NAME'] == 'timebook.quigen.info' ? 'timebook' : 'shift',
 
     /*
     |--------------------------------------------------------------------------
@@ -35,20 +35,28 @@ return [
 
     'connections' => [
 
-        'timesumo' => [
-            'driver' => 'pgsql',
-            'host' => env('DB_HOST', '127.0.0.1'),
-            'database' => env('DB_DATABASE', 'forge'),
-            'username' => env('DB_USERNAME', 'forge'),
-            'password' => env('DB_PASSWORD', ''),
-            'charset' => 'utf8',
-        ],
         'shift' => [
             'driver' => 'pgsql',
-            'host' => env('DB_HOST_SHIFT', '127.0.0.1'),
-            'database' => env('DB_DATABASE_SHIFT', 'forge'),
-            'username' => env('DB_USERNAME_SHIFT', 'forge'),
-            'password' => env('DB_PASSWORD_SHIFT', ''),
+            'host' => env('DB_HOST_SHIFT'),
+            'database' => env('DB_DATABASE_SHIFT'),
+            'username' => env('DB_USERNAME_SHIFT'),
+            'password' => env('DB_PASSWORD_SHIFT'),
+            'charset' => 'utf8',
+        ],
+        'timebook' => [
+            'driver' => 'pgsql',
+            'host' => env('DB_HOST_TIME'),
+            'database' => env('DB_DATABASE_TIME'),
+            'username' => env('DB_USERNAME_TIME'),
+            'password' => env('DB_PASSWORD_TIME'),
+            'charset' => 'utf8',
+        ],
+        'dynamic' => [
+            'driver' => 'pgsql',
+            'host' => null,
+            'database' => null,
+            'username' => null,
+            'password' => null,
             'charset' => 'utf8',
         ],
     ],
