@@ -77,8 +77,13 @@
     <input style="margin: 10px;padding:10px;" v-if="owner" type="submit" value="管理者" v-on:click="staff('Admin')">
 </div>
 <div style="padding:5px;">
-    <a target="_blank" v-if="urlUsr" :href="'/Auth/EmailLogin/staff/'+group.group_id+'/'+group.password+'/'+usrs[0]+'/'">招待URL({{urlUsr}})</a>
+    <a target="_blank" v-if="urlUsr" :href="'/Auth/EmailLogin/staff/'+group.group_id+'/'+group.password+'/'+usrs[0]+'/'">招待URL(サンプル{{urlUsr}})</a>
 </div>
+
+<div style="padding:5px;">
+    <a target="_blank" href="/Auth/Sync/begin/">予約ユーザー側への同期URL</a>
+</div>
+
 <div style="width:100%;text-align: center;">
     <input style="margin: 10px;padding:10px;" type="submit" value="<?=__('auth.signout')?>" v-on:click="signout">
 </div>

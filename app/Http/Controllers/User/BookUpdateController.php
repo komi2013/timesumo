@@ -22,7 +22,6 @@ class BookUpdateController extends Controller {
         \Config::set('database.connections.dynamic.password',$db->password);
         
         $menu = DB::connection('dynamic')->table('m_menu')->where('menu_id', $request->menu_id)->first();
-
         $group_id = $menu->group_id;
         $obj = DB::connection('dynamic')->table('m_menu_necessary')->where('menu_id', $menu->menu_id)->get();
         $end = 0;
@@ -203,20 +202,51 @@ class BookUpdateController extends Controller {
             }
         }
         $usrs = [];
+        $start = new Carbon('2099-01-01');
+        $end = new Carbon('2000-01-01');
         foreach ($arr_sql as $k => $d) {
             if ( in_array($d['usr_id'],$usrs) ) {
                 $arr_sql[$k]['schedule_id'] = DB::connection('dynamic')->select("select nextval('t_schedule_schedule_id_seq')")[0]->nextval;
             }
+            $time_start = new Carbon($arr_sql[$k]['time_start']);
+            $time_end = new Carbon($arr_sql[$k]['time_end']);
+            if ($start > $time_start) {
+                $start = $time_start;
+            }
+            if ($end < $time_end) {
+                $end = $time_end;
+            }
             $usrs[] = $d['usr_id'];
         }
+        $group = DB::connection('dynamic')->table('m_group')->where('group_id', $group_id)->first();
+        $user_schedule_id = DB::select("select nextval('t_schedule_schedule_id_seq')")[0]->nextval;
+        $user_sql[] = 
+            ["schedule_id" => $user_schedule_id
+            ,"book_id" => $book_id
+            ,"title" => $group->group_name
+            ,"public_title" => $menu->menu_name
+            ,"usr_id" => $usr_id
+            ,"time_start" => $start->format('Y-m-d H:i:s')
+            ,"time_end" => $end->format('Y-m-d H:i:s')
+            ,"tag" => 7
+            ,"group_id" => 0
+            ,"updated_at" => $now
+            ,"access_right" => 666];
         DB::connection('dynamic')->table('t_schedule')->insert($arr_sql);
         DB::connection('dynamic')->table('t_todo')->insert([
             "schedule_id" => $schedule_id
             ,"todo" => $menu->menu_name
             ,"updated_at" => $now
         ]);
-
+        DB::beginTransaction();
+        DB::table('t_schedule')->insert($user_sql);
+        DB::table('t_todo')->insert([
+            "schedule_id" => $user_schedule_id
+            ,"todo" => $menu->menu_name
+            ,"updated_at" => $now
+        ]);
         DB::connection('dynamic')->commit();
+        DB::commit();
         $res[0] = 1;
         return json_encode($res);
 

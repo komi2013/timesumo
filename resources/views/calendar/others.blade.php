@@ -103,9 +103,9 @@
         <tr>
         <?php }?>
         <td class="<?= date('D',$u) == 'Sun' ? 'sunday' : 'weekday'?>" <?=count($d)? 'style="width:14%;"' : '' ?> >
-            <div style="text-align: center;"><a href="<?=$url.date('Y-m-d',$u)?>/"><?=date('d',$u)?></a></div>
+            <div style="text-align: center;"><a href="/Calendar/Schedule/edit/<?=date('Y-m-d',$u)?>/"><?=date('d',$u)?></a></div>
             <?php foreach($d as $k2 => $d2){?>
-                <div class="color<?=$d2[1]?>"><a href="<?=$d2[2].$k2?>/">
+                <div class="color<?=$d2[1]?>"><a href="/Calendar/Schedule/edit/<?=$k2?>/">
                     {{$d2[0]}}
                 </a></div>
             <?php } ?>

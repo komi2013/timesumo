@@ -1,5 +1,5 @@
 <?php
-namespace App\Http\Controllers\Calendar;
+namespace App\Http\Controllers\User;
 
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -8,7 +8,7 @@ use Carbon\Carbon;
 
 class ScheduleController extends Controller {
 
-    public function index(Request $request, $directory=null, $controller=null,$action=null, 
+    public function index(Request $request, $directory,$controller,$action, 
             $id_date=null,$tag=1) {
         if (!session('usr_id')) {
             $request->session()->put('redirect',$_SERVER['REQUEST_URI']);
@@ -26,8 +26,8 @@ class ScheduleController extends Controller {
             $arr[] = str_pad($i,2,0,STR_PAD_LEFT);
         }
         $hours = $arr;
-        $Arr = new \App\My\Calendar();
-        $arr_tags = 'tags_'.\Cookie::get('lang');
+        $Arr = new \App\My\UserTag();
+        $arr_tags = \Cookie::get('lang');
         $tags = $Arr->$arr_tags;
         $bind = [
             'usr_id' => $usr_id
@@ -84,16 +84,6 @@ class ScheduleController extends Controller {
                 \Log::warning($msg);
                 return view('errors.500', compact('msg'));
             }
-            $is = DB::table('r_group_relate')
-                    ->where("group_id", $group_id)
-                    ->where("usr_id", $usr_id)
-                    ->first();
-            if (!isset($is->usr_id)) {
-                $msg = 'group is different:line'.__LINE__.':'.$_SERVER['REQUEST_URI'] ?? "".' '. json_encode($_POST);
-                \Config::set('logging.channels.daily.path',storage_path('logs/warning.log'));
-                \Log::warning($msg);
-                return view('errors.500', compact('msg'));
-            }
             $obj = DB::table('t_todo')->where("schedule_id", $schedule_id)->first();
             $todo = $obj->todo ?? '';
             $file_paths = json_decode($obj->file_paths ?? null,true) ?: [];
@@ -134,7 +124,7 @@ class ScheduleController extends Controller {
             $dt->addDay();
             ++$i;
         }
-        return view('calendar.schedule', compact('date','date_end','schedule_id',
+        return view('user.schedule', compact('date','date_end','schedule_id',
                 'hours','hourStart','hourEnd','minutes','tags','tag','usr_id','group_id','join_usrs',
                 'todo','file_paths','title','public_title','next','access_right'));
     }
