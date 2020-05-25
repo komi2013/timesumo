@@ -36,6 +36,7 @@ class ScheduleController extends Controller {
         $todo = '';
         $public_title = '';
         $leave_id = null;
+        $open = 1;
         if ( strpos($id_date,"-") OR !$id_date ) { //new
             $date = $id_date ?: date('Y-m-d');
             $date_end = date('Y-m-d',strtotime($date));
@@ -66,7 +67,7 @@ class ScheduleController extends Controller {
                 }
                 $title = $d->title;
                 $public_title = $d->public_title;
-                $group_id = $d->group_id;
+                $db_group_id = $d->group_id;
                 $date = date('Y-m-d', strtotime($d->time_start));
                 $date_end = date('Y-m-d',strtotime($d->time_end));
                 $usr_ids[] = $d->usr_id;
@@ -77,8 +78,9 @@ class ScheduleController extends Controller {
                 } else {
                     $access_right = substr($d->access_right,2,1);
                 }
+                $open = substr($d->access_right,2,1);
             }
-            if ($access_right == 0) {
+            if ($access_right == 0 OR $group_id != $db_group_id) {
                 $msg = 'no access right:line'.__LINE__.':'.$_SERVER['REQUEST_URI'] ?? "".' '. json_encode($_POST);
                 \Config::set('logging.channels.daily.path',storage_path('logs/warning.log'));
                 \Log::warning($msg);
@@ -136,7 +138,7 @@ class ScheduleController extends Controller {
         }
         return view('calendar.schedule', compact('date','date_end','schedule_id',
                 'hours','hourStart','hourEnd','minutes','tags','tag','usr_id','group_id','join_usrs',
-                'todo','file_paths','title','public_title','next','access_right'));
+                'todo','file_paths','title','public_title','next','access_right','open'));
     }
 }
 

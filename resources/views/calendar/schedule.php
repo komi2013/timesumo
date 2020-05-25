@@ -148,7 +148,7 @@
     <br>
     
     <div class="centerize">
-    <template v-if="tag!=2 && access_right==7">
+    <template v-if="tag!=2 && access_right==7 && group_id > 0">
         <select style="height:30px;width:80%;" v-model="group_id" @change="groupChange(group_id)">
             <option disabled>所属グループ</option>
             <template v-for="(d,k) in arr_group">
@@ -196,7 +196,7 @@
         <div>使用施設</div>
     </div><br>
     <a target="_blank" v-bind:href="'/Calendar/Space/index/<?=$date?>/'+checkSchedule+'/'">空き時間を確認</a>
-    </template><template v-else-if="tag!=2 && access_right < 7">
+    </template><template v-else-if="tag!=2 && access_right < 7 && group_id > 0">
         <div class="joining">
             <div>参加者</div>
         <template v-for="(d,k) in reverseUsrs">
@@ -216,6 +216,10 @@
     <div class="centerize">
         <input type="text" placeholder="公開タイトル" style="height:50px;width:80%;"
                v-model="public_title" v-bind:value="public_title" >
+    </div>
+    <div class="centerize" style="padding:10px;">
+        公開
+        <input type="checkbox" v-model="open" :value="open" >
     </div>
     <br><br><br>
 </div>
@@ -259,6 +263,7 @@ var app = new Vue({
       ,public_title : <?=json_encode($public_title)?>
       ,access_right : eval(<?=$access_right?>)
       ,fileErr:false
+      ,open: <?=$open?>
   },
   computed: {
     reverseUsrs() {
@@ -404,6 +409,7 @@ function update(){
     fd.append("public_title", app.public_title);
     fd.append("leave_id", app.leave_id);
     fd.append("file_paths", JSON.stringify(app.file_paths));
+    fd.append("open", app.open);
     $.ajax({url:post_url,type:'post',data:fd,processData:false,contentType:false,cache:false,dataType:"json",})
     .always(function(res){
         if(res[0] == 1){

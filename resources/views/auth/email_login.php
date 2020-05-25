@@ -44,7 +44,7 @@
     <input type="password" placeholder="password" id="password" class="column1" v-model="password" v-on:change="checkPassword"><br>
     <div v-if="password_error1" style="color: red;"><?=__('auth.passwordError1')?></div>
     <div v-if="password_error2" style="color: red;"><?=__('auth.passwordError2')?></div>
-    <input type="submit" value="<?=__('auth.signin')?>" class="column1" v-on:click="login('login')"><br>
+    <input type="submit" value="<?=__('auth.signin')?>" class="column1" v-if="!sent" v-on:click="login('login')"><br>
     <div v-if="password_error4" style="color: red;"><?=__('auth.passwordError4')?></div>
     <input type="submit" v-if="!sent" value="<?=__('auth.register')?>" class="column1" v-on:click="login('reg')"><br>
     <input type="submit" v-if="!sent" value="<?=__('auth.reissue_password')?>" class="column1" v-on:click="login('reg')"><br>

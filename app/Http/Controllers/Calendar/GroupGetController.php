@@ -47,28 +47,25 @@ class GroupGetController extends Controller {
         $request->session()->flash('group_ids', $group_ids);
 
         $obj = DB::table('r_group_relate')->where("group_id", $group_id)->get();
-        $arr_usr = [];
+        $group_usrs = [];
         $usr_ids = [];
         foreach ($obj as $d) {
             $usr_ids[] = $d->usr_id;
         }
         $obj = DB::table('t_usr')
-                ->select('usr_id','usr_name')
+                ->select('usr_id','usr_name','token')
                 ->whereIn("usr_id", $usr_ids)->get();
         foreach ($obj as $d) {
-            $arr_usr[$d->usr_id][0] = $d->usr_id;
-            $arr_usr[$d->usr_id][1] = $d->usr_name;
+            $group_usrs[$d->usr_id][0] = $d->usr_id;
+            $group_usrs[$d->usr_id][1] = $d->usr_name;
+            $group_usrs[$d->usr_id][2] = $d->token;
         }
-        foreach ($arr_usr as $k => $d) {
-            $arr_usr[$k][0] = $d[0];
-            $arr_usr[$k][1] = $d[1];
-        }
-        $group_usrs = [];
-        foreach ($arr_usr as $k => $d) {
-            if (isset($d[0])) {
-                $group_usrs[$k] = $d;
-            }
-        }
+        
+//        foreach ($arr_usr as $k => $d) {
+//            if (isset($d[0])) {
+//                $group_usrs[$k] = $d;
+//            }
+//        }
         $obj = DB::table('t_facility')
                 ->select('facility_id','facility_name','amount')
                 ->where("group_id", $group_id)->get();

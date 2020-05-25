@@ -47,6 +47,7 @@ class ScheduleAddController extends Controller {
         }
         $public_title = $request->input('public_title') ?? '';
         $now = date('Y-m-d H:i:s');
+        $access_right = $request->input('open') ? 777 : 700 ;
         foreach ($usrs as $d) {
             $schedule[$d]['time_start'] = $request->input('time_start');
             $schedule[$d]['time_end'] = $request->input('time_end');
@@ -57,7 +58,7 @@ class ScheduleAddController extends Controller {
             $schedule[$d]['group_id'] = $group_id;
             $schedule[$d]['public_title'] = $public_title;
             $schedule[$d]['updated_at'] = $now;
-            $schedule[$d]['access_right'] = 777;
+            $schedule[$d]['access_right'] = $access_right;
         }
         $compensatory = [];
         $obj = DB::table('r_routine')

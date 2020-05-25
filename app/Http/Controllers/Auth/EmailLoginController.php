@@ -39,5 +39,11 @@ class EmailLoginController extends Controller {
         return view('auth.email_login');
 
     }
+    public function friend(Request $request,$directory,$controller,$action,
+            $your_owner) {
+        $request->session()->put('your_owner', $your_owner);
+        return view('auth.email_login');
+
+    }
 }
 

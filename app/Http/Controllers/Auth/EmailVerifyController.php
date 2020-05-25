@@ -27,24 +27,18 @@ class EmailVerifyController extends Controller {
                 ]);
             if ($_SERVER['SERVER_NAME'] == 'timebook.quigen.info') {
                 $request->session()->put('usr_id', $usr->usr_id);
-                $request->session()->put('group_id', 0);
+                $r_group = DB::table('r_group_relate')->where("usr_id", $usr->usr_id)->first();
+                $group_id = $r_group->group_id ?? 0;
+                $request->session()->put('group_id', $group_id);
             } else {
                 new \App\My\AfterLogin($usr->usr_id);
             }
         } else {
             $arr_email = explode("@", session('email'));
             if ($_SERVER['SERVER_NAME'] == 'timebook.quigen.info') {
-                $usr_id = DB::select("select nextval('t_usr_usr_id_seq')")[0]->nextval;
-                DB::table('t_usr')->insert([
-                    "usr_id" => $usr_id
-                    ,"oauth_type" => 3
-                    ,"updated_at" => now()
-                    ,"email" => session('email')
-                    ,"password" => Hash::make(session('password'))
-                    ,"usr_name" => $arr_email[0]
-                ]);
-                $request->session()->put('usr_id', $usr_id);
-                $request->session()->put('group_id', 0);
+                $obj = new \App\My\BookerRegister($arr_email[0]);                
+                $request->session()->put('usr_id', $obj->usr_id);
+                $request->session()->put('group_id', $obj->group_id);
             } else {
                 $obj = new \App\My\AfterRegister($arr_email[0]);
                 new \App\My\AfterLogin($obj->usr_id);

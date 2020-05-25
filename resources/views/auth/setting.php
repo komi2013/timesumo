@@ -56,31 +56,32 @@
     </template>
 </select>
 <div style="width:80%;display:inline-block;"></div>
-<!--<div style="width:10%;display:inline-block;">se</div>-->
-<template v-for="(d,k) in group_usrs">
-    <label v-bind:for="d[0]"><div style="margin:5px;">
-        <div style="width:80%;display:inline-block;">{{d[1]}}</div>
-        <div style="width:10%;display:inline-block;" v-if="owner">
-            <input type="checkbox"　v-bind:value="d[0]" v-model="usrs" v-bind:id="d[0]">
-        </div></div></label>
-</template>
-<template v-for="(d,k) in group_facility">
-    <label v-bind:for="d[0]"><div style="margin:5px;">
-        <div style="width:80%;display:inline-block;">{{d[1]}}</div>
-        <div style="width:10%;display:inline-block;" v-if="owner">
-            <input type="checkbox"　v-bind:value="d[0]" v-model="usrs" v-bind:id="d[0]">
-        </div></div></label>
-</template>
+
+<div style="margin:5px;" v-for="(d,k) in group_usrs">
+    <div style="width:80%;display:inline-block;"><a target="_blank" :href="'/Calendar/Others/index/'+k+'/'+d[2]+'/'">{{d[1]}}</a></div>
+    <label :for="d[0]">
+        <input type="checkbox" v-if="owner" :value="d[0]" v-model="usrs" :id="d[0]">
+    </label>
+</div>
+<div style="margin:5px;" v-for="(d,k) in group_facility">
+    <div style="width:80%;display:inline-block;">{{d[1]}}</div>
+    <label :for="d[0]">
+        <input type="checkbox" v-if="owner" :value="d[0]" v-model="usrs" :id="d[0]">
+    </label>
+</div>
 <div style="width:100%;text-align: center;">
 <!--    <input style="margin: 10px;padding:10px;" type="submit" value="退出" v-on:click="staff('Out')">
     <input style="margin: 10px;padding:10px;" v-if="owner" type="submit" value="削除" v-on:click="staff('Delete')">-->
     <input style="margin: 10px;padding:10px;" v-if="owner" type="submit" value="管理者" v-on:click="staff('Admin')">
 </div>
-<div style="padding:5px;">
-    <a target="_blank" v-if="urlUsr" :href="'/Auth/EmailLogin/staff/'+group.group_id+'/'+group.password+'/'+usrs[0]+'/'">招待URL(サンプル{{urlUsr}})</a>
+<div style="padding:5px;" v-if="urlUsr">
+    <a target="_blank" :href="'/Auth/EmailLogin/staff/'+group.group_id+'/'+group.password+'/'+usrs[0]+'/'">招待URL(サンプル{{urlUsr}})</a>
+</div>
+<div style="padding:5px;" v-else >
+    <a target="_blank" :href="'/Auth/EmailLogin/friend/'+usrs[0]+'/'">招待URL(サンプル{{urlUsr}})</a>
 </div>
 
-<div style="padding:5px;">
+<div style="padding:5px;" v-if="booker == 0">
     <a target="_blank" href="/Auth/Sync/begin/">予約ユーザー側への同期URL</a>
 </div>
 
@@ -105,7 +106,8 @@ const app = new Vue({
     group_id: 0,
     usrs: [<?=$usr_id?>],
     owner: 0,
-    group:<?=json_encode($group)?>
+    group:<?=json_encode($group)?>,
+    booker:<?=$_SERVER['SERVER_NAME'] == 'timebook.quigen.info' ? 1 : 0?>,
   },
   methods: {
     signout: function () {
