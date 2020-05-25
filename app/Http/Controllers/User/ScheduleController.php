@@ -36,6 +36,7 @@ class ScheduleController extends Controller {
         $todo = '';
         $public_title = '';
         $leave_id = null;
+        $open = 1;
         if ( strpos($id_date,"-") OR !$id_date ) { //new
             $date = $id_date ?: date('Y-m-d');
             $date_end = date('Y-m-d',strtotime($date));
@@ -77,6 +78,7 @@ class ScheduleController extends Controller {
                 } else {
                     $access_right = substr($d->access_right,2,1);
                 }
+                $open = substr($d->access_right,2,1);
             }
             if ($access_right == 0) {
                 $msg = 'no access right:line'.__LINE__.':'.$_SERVER['REQUEST_URI'] ?? "".' '. json_encode($_POST);
@@ -126,7 +128,7 @@ class ScheduleController extends Controller {
         }
         return view('user.schedule', compact('date','date_end','schedule_id',
                 'hours','hourStart','hourEnd','minutes','tags','tag','usr_id','group_id','join_usrs',
-                'todo','file_paths','title','public_title','next','access_right'));
+                'todo','file_paths','title','public_title','next','access_right','open'));
     }
 }
 
