@@ -77,8 +77,8 @@ class MenuController extends Controller {
                 $menu[$menu_id]['final_end_min'] = $final_end_min;
             }
         }
-        $obj = DB::table('t_facility')->whereIn('facility_id', $arr_facility_id)->get();
-        return view('salon.menu', compact('menu','shops','group_id'));
+        $db = DB::connection('timebook')->table('c_db')->where('domain', $_SERVER['SERVER_NAME'])->first();
+        return view('salon.menu', compact('menu','shops','group_id','db'));
     }
 }
 

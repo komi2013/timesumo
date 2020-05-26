@@ -48,24 +48,14 @@
     <br>
     <a href="/Salon/MenuEdit/edit/<?=$menu_id?>">
       <div style="width:93%;">
-      {{$d['menu_name']}}
+      <img src="/img/icon/pencil.png" style="max-height:20px;">{{$d['menu_name']}}
       </div>
     </a>
-    <?php foreach($d['necessary'] as $k => $d2) { ?>
-    <div style="width:90%;padding: 1%;">
-        &nbsp;{{$d2['service']}}
+    <div style="word-break:break-all;padding:10px;">
+    予約URL<br>
+    <a href="https://timebook.quigen.info/User/Book/index/<?=$menu_id?>/<?=$db->db_id?>/">
+        https://timebook.quigen.info/User/Book/index/<?=$menu_id?>/<?=$db->db_id?>/</a>
     </div>
-    <div style="width:90%;padding: 1%;">
-        &nbsp;{{$d2['facility']}}
-    </div>
-    <div style="padding: 1%; background-color:green;
-         margin-left:<?= $d2['start_minute'] / $d['final_end_min'] * 99 ?>%;
-         width:<?= ($d2['end_minute'] - $d2['start_minute']) / $d['final_end_min'] * 95 ?>%;
-         ">
-        <?=$d2['end_minute'] - $d2['start_minute']?> minute
-    </div>
-    <div style="line-height: 10px;">&nbsp;</div>
-    <?php } ?>
     <div style="line-height: 10px;width:100%;border-bottom:1px solid silver; ">&nbsp;</div>
 <?php } ?>
 </div>

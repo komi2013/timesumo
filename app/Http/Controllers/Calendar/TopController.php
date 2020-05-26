@@ -56,29 +56,30 @@ class TopController extends Controller {
                 $day35[$start->format('Y-m-d')][$d->schedule_id] = [$d->title,$d->tag,$url];
             }
         }
-        
-        $syncs = json_decode(session('syncs'),true) ?: [];
-        foreach ($syncs as $d) {
-            $db = DB::table('c_db')->where('db_id',$d[0])->first();
-            \Config::set('database.connections.dynamic.host',$db->host);
-            \Config::set('database.connections.dynamic.database',$db->database);
-            \Config::set('database.connections.dynamic.username',$db->username);
-            \Config::set('database.connections.dynamic.password',$db->password);
-            $cal_url = 'https://'.$db->domain.$cal_url;
-            $obj = DB::connection('dynamic')->table('t_schedule')
-                    ->where('time_end','>',$begin)
-                    ->where('time_start','<',$varDate->format('Y-m-d H:i:s'))
-                    ->where('usr_id',$d[1])
-                    ->orderBy('time_start','ASC')->get();
-            foreach ($obj as $d) {
-                $day35[substr($d->time_start,0,10)][$d->schedule_id] = [$d->title,$d->tag,$cal_url];
-                $start = new Carbon($d->time_start);
-                $end = new Carbon($d->time_end);
-                while ($start->diffInDays($end) > 0) {
-                    $start->addDay();
-                    $day35[$start->format('Y-m-d')][$d->schedule_id] = [$d->title,$d->tag,$cal_url];
+        if ($_SERVER['SERVER_NAME'] == 'timebook.quigen.info') {
+            $obj_sync = DB::table('t_sync')->where('usr_id',$usr_id)->get();
+            foreach ($obj_sync as $dd) {
+                $db = DB::table('c_db')->where('db_id',$dd->db_id)->first();
+                \Config::set('database.connections.dynamic.host',$db->host);
+                \Config::set('database.connections.dynamic.database',$db->database);
+                \Config::set('database.connections.dynamic.username',$db->username);
+                \Config::set('database.connections.dynamic.password',$db->password);
+                $cal_url = 'https://'.$db->domain.$cal_url;
+                $obj = DB::connection('dynamic')->table('t_schedule')
+                        ->where('time_end','>',$begin)
+                        ->where('time_start','<',$varDate->format('Y-m-d H:i:s'))
+                        ->where('usr_id',$dd->sync_usr_id)
+                        ->orderBy('time_start','ASC')->get();
+                foreach ($obj as $d) {
+                    $day35[substr($d->time_start,0,10)][$d->schedule_id] = [$d->title,$d->tag,$cal_url];
+                    $start = new Carbon($d->time_start);
+                    $end = new Carbon($d->time_end);
+                    while ($start->diffInDays($end) > 0) {
+                        $start->addDay();
+                        $day35[$start->format('Y-m-d')][$d->schedule_id] = [$d->title,$d->tag,$cal_url];
+                    }
                 }
-            }
+            }            
         }
 
         return view('calendar.top', compact('day35','today','prev','next','url'));

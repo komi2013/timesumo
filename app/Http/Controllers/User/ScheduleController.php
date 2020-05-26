@@ -68,6 +68,7 @@ class ScheduleController extends Controller {
                 $title = $d->title;
                 $public_title = $d->public_title;
                 $db_group_id = $d->group_id;
+                $db_usr_id = $d->usr_id;
                 $date = date('Y-m-d', strtotime($d->time_start));
                 $date_end = date('Y-m-d',strtotime($d->time_end));
                 $usr_ids[] = $d->usr_id;
@@ -80,7 +81,7 @@ class ScheduleController extends Controller {
                 }
                 $open = substr($d->access_right,2,1);
             }
-            if ($access_right == 0 OR $group_id != $db_group_id) {
+            if ($access_right == 0 OR $group_id != $db_group_id OR ($db_group_id == 0 AND $usr_id != $db_usr_id)) {
                 $msg = 'no access right:line'.__LINE__.':'.$_SERVER['REQUEST_URI'] ?? "".' '. json_encode($_POST);
                 \Config::set('logging.channels.daily.path',storage_path('logs/warning.log'));
                 \Log::warning($msg);

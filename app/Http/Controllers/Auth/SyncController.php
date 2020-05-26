@@ -17,9 +17,7 @@ class SyncController extends Controller {
         $usr_id = session('usr_id');
         $random = \Str::random(8);
         DB::table('t_sync')->where("usr_id",$usr_id)->delete();
-        DB::table('t_sync')
-            ->where("usr_id",$usr_id)
-            ->insert([
+        DB::table('t_sync')->insert([
                 "usr_id" => $usr_id
                 ,"sync_token" => $random
                 ,"updated_at" => now()
@@ -29,7 +27,7 @@ class SyncController extends Controller {
                 .$_SERVER['SERVER_NAME'].'/'.$usr_id.'/'.$random.'/');
     }
     public function second(Request $request, $directory,$controller,$action,
-            $domain,$sumo_usr_id,$random) {
+            $domain,$sync_usr_id,$random) {
         if(!session('usr_id')){
             $request->session()->put('redirect', $_SERVER["REQUEST_URI"]);
             return redirect('/Auth/EmailLogin/index/');
@@ -42,16 +40,19 @@ class SyncController extends Controller {
         \Config::set('database.connections.dynamic.username',$db->username);
         \Config::set('database.connections.dynamic.password',$db->password);
 
-        $sync = DB::connection('dynamic')->table('t_sync')->where('usr_id', $sumo_usr_id)->first();
+        $sync = DB::connection('dynamic')->table('t_sync')->where('usr_id', $sync_usr_id)->first();
 
         if(isset($sync->sync_token) AND $sync->sync_token == $random){
             $db_at = new Carbon( $sync->updated_at );
             $dt = new Carbon();
             if ( $db_at->diffInMinutes($dt) < 30 ) {
                 $syncs = json_decode(session('syncs'),true);
-                $syncs[] = [$db->db_id,$sumo_usr_id];
-                
-                $request->session()->put('syncs', json_encode($syncs));
+                DB::table('t_sync')->insert([
+                        "usr_id" => $usr_id
+                        ,"sync_usr_id" => $sync_usr_id
+                        ,"db_id" => $db->db_id
+                        ,"updated_at" => now()
+                    ]);
                 return redirect('/');
             }
         }
