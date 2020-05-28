@@ -38,6 +38,7 @@
 </table>
 
 <div id="content" >
+    <div v-if="!work_end">
     <template v-if="time_out || !is">
     <input type="button" value="開始" onclick="stamp('add');">
     </template><template v-else-if="pause">
@@ -47,6 +48,7 @@
     <br><br>
     <input type="button" value="休憩" onclick="stamp('breakStart');">
     </template>
+    </div>
     <br><br>
     <input type="text" id="channel" style="width:80%;height:40px;margin:10px;"
         value="https://hooks.slack.com/services/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">
@@ -68,6 +70,7 @@ var app = new Vue({
     time_out: <?=json_encode($time_out)?>,
     is: eval(<?=json_encode($is)?>),
     pause: eval(<?=json_encode($pause)?>),
+    work_end:false,
   }
 });
 var latitude;
@@ -85,7 +88,7 @@ const localVideo = document.querySelector("video");
 localVideo.width = 200;
 localVideo.height = 200;
 let localStream = null;
-var actionTxt = 'working';
+var actionTxt = 'reload';
 function gotLocalMediaStream(mediaStream) {
     localStream = mediaStream;
     localVideo.srcObject = mediaStream;
@@ -120,6 +123,7 @@ function stamp(action){
         actionTxt = 'break end';
     }else if (action == 'edit') {
         capturer.stop = true;
+        app.work_end = true;
         actionTxt = 'working end';
     }
     var param = {

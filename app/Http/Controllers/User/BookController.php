@@ -9,7 +9,7 @@ use Carbon\Carbon;
 class BookController extends Controller {
 
     public function index(Request $request, $directory,$controller,$action,
-            $menu_id, $db_id, $Ymd=null) {
+            $menu_id, $db_id, $nomination=null, $Ymd=null) {
         if (!session('usr_id')) {
             $request->session()->put('redirect',$_SERVER['REQUEST_URI']);
             return redirect('/Auth/EmailLogin/index/');
@@ -25,8 +25,7 @@ class BookController extends Controller {
         $menu = DB::connection('dynamic')->table('m_menu')->where('menu_id', $menu_id)->first();
         $group_id = $menu->group_id;
         $shop = DB::connection('dynamic')->table('m_group')->where('group_id', $group_id)->first();
-        $today = $Ymd ? new Carbon($Ymd) : Carbon::today();
-        $frameDate = $Ymd ? new Carbon($Ymd) : Carbon::today();
+        $frameDate = $Ymd ? new Carbon($Ymd) : new Carbon();
         $openHour = substr($shop->open_time,0,2);
         $frameDate->setTime($openHour, 0, 0);
         $begin = $frameDate->format('Y-m-d H:00:00');
@@ -47,6 +46,9 @@ class BookController extends Controller {
             $arr[] = $d->service_id;
             $ability[$d->usr_id] = $arr;
             $arr_usr_id[] = $d->usr_id;
+        }
+        if ($nomination) {
+            $arr_usr_id = [$nomination];
         }
         $closeHour = substr($shop->close_time,0,2);
         if (substr($shop->close_time,3,2) != '00') {
@@ -74,7 +76,7 @@ class BookController extends Controller {
         $frameDate->setTime($closeHour, 0, 0);
         $end = $frameDate->format('Y-m-d H:00:00');
         $usr_facility_id = array_unique(array_merge($arr_usr_id,$arr_facility_id));
-        
+        $routine = [];
         $obj = DB::connection('dynamic')->table('r_routine')
                 ->whereIn('usr_id', $arr_usr_id )
                 ->where('group_id', $group_id)
