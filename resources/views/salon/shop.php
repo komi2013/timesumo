@@ -39,8 +39,13 @@
 
 
 <div style="width:100%;text-align: center;">
-    <input type="text" placeholder="<?=__('salon.shop_name')?>" class="column1" :value="shop_name" v-model="shop_name" ><br>
+    <input type="text" class="column1" :value="shop_name" v-model="shop_name" ><br>
     <div style="color:red;" v-if="shopNameError"><?=__('salon.shopNameError')?></div>
+    <table style="width:100%;"><tr><td>
+    開始時間:<input type="text" style="width:40px;height:30px;" v-value="open_time" v-model="open_time" @change="time('open')" >
+    </td><td>
+    終了時間:<input type="text" style="width:40px;height:30px;" v-value="close_time" v-model="close_time" @change="time('close')" >
+    </td></tr></table>
 </div>
 
 <table style="width:100%;text-align: center;"><tbody>
@@ -68,7 +73,9 @@ const app = new Vue({
   data: {
     facilities: eval(<?=$facilities?>),
     shop_name: <?= json_encode($shop_name)?>,
-    shopNameError:false
+    shopNameError:false,
+    open_time:<?= json_encode($open_time)?>,
+    close_time:<?= json_encode($close_time)?>,
   },
   methods: {
     update: function () {
@@ -85,6 +92,28 @@ const app = new Vue({
                 alert('system error');
             }
         });
+    },
+    time: function (str) {
+        var t;
+        if(str == 'open'){
+            t = this.open_time.replace(/[^0-9]/g,'');
+        } else {
+            t = this.close_time.replace(/[^0-9]/g,'');
+        }
+        var hour = t.substr(0,2) * 1;
+        hour = hour > 23 ? 23 : hour ;
+        hour = hour < 10 ? '0'+hour : hour ;
+        hour = hour < 1 ? '00' : hour ;
+        var minute =  t.substr(2,2) * 1;
+        minute = minute > 59 ? 59 : minute;
+        minute = minute < 10 ? '0' + minute : minute;
+        minute = minute < 1 ? '00' : minute;
+        if(str == 'open'){
+            this.open_time = hour + ':' + minute;
+        } else {
+            this.close_time = hour + ':' + minute;
+        }
+        
     },
   },
 });

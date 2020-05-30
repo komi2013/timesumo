@@ -51,7 +51,7 @@
     </div>
     <br><br>
     <input type="text" id="channel" style="width:80%;height:40px;margin:10px;"
-        value="https://hooks.slack.com/services/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">
+        value="https://hooks.slack.com/services/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">
     <br>
     <a target="_blank" href="/Shift/TimeSheet/index/" style="margin:10px;display:block;">勤怠表</a>
     <br>
@@ -96,7 +96,6 @@ function gotLocalMediaStream(mediaStream) {
         capturer.stop = true;
     }
     running();
-//  localStream.getVideoTracks()[0].enabled = false;
 }
 
 function handleLocalMediaStreamError(error) {
@@ -145,23 +144,10 @@ class Capturer{
         this.timeCounterInterval = null;
         this.timeScreenshotInterval = null;
     }
-//    testshot(){
-//        this.screenshot(this.upload)
-//    }
-//    stopMonitor(){
-//        this.stop = true;
-//        this.screenshot(this.upload)
-//    }
     screenshot(){
         const hiddenCanvas = document.getElementById( 'hiddenCanvas' );
-//        hiddenCanvas.width = 200;
-//        hiddenCanvas.height = 200;
         const ctx = hiddenCanvas.getContext('2d');
         ctx.drawImage( video, 0, 0, hiddenCanvas.width, hiddenCanvas.height );
-//        const link = document.getElementById( 'hiddenLink' );
-//        link.href = hiddenCanvas.toDataURL();
-//        link.download = "test.png";
-//        link.click();
         var param = {
             _token : $('[name="csrf-token"]').attr('content')
             ,base64: hiddenCanvas.toDataURL()

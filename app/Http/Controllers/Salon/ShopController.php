@@ -34,7 +34,9 @@ class ShopController extends Controller {
         }
         $facilities = json_encode($facilities);
         $request->session()->flash('facilities',$facilities);
-        return view('salon.shop', compact('facilities','shop_name'));
+        $open_time = substr($group->open_time, 0,5);
+        $close_time = substr($group->close_time,0,5);
+        return view('salon.shop', compact('facilities','shop_name','open_time','close_time'));
     }
 }
 

@@ -93,24 +93,16 @@
     <div class="centerize">
         <?=date(__('calendar.date'),strtotime($date))?>
         <template v-if="displayTime">
-        <select class="no_arrow" v-model="hourStart" :disabled="access_right < 7">
-        <option v-for="d in hours" v-bind:value="d">{{d}}</option>
-        </select>
-        <select class="no_arrow" v-model="minuteStart" :disabled="access_right < 7">
-        <option v-for="d in minutes" v-bind:value="d">{{d}}</option>
-        </select>
+        <input type="text" style="width:40px;height:30px;" :disabled="access_right < 7"
+               v-value="start" v-model="start" @change="time('start')" >
         </template>
         <span>~</span>
         <select class="no_arrow" v-model="date_end" :disabled="access_right < 7">
             <option v-for="d in nextDay" v-bind:value="d[0]">{{d[1]}}</option>
         </select>
         <template v-if="displayTime">
-        <select class="no_arrow" v-model="hourEnd" :disabled="access_right < 7">
-        <option v-for="d in hours" v-bind:value="d">{{d}}</option>
-        </select>
-        <select class="no_arrow" v-model="minuteEnd" :disabled="access_right < 7">
-        <option v-for="d in minutes" v-bind:value="d">{{d}}</option>
-        </select>
+        <input type="text" style="width:40px;height:30px;" :disabled="access_right < 7"
+               v-value="end" v-model="end" @change="time('end')" >
         </template>
     </div>
     <br>
@@ -242,12 +234,8 @@ var app = new Vue({
       ,next:[]
       ,next_date:eval(<?=json_encode($next)?>)
       ,date_end:'<?=$date_end?>'
-      ,hours:eval(<?=json_encode($hours)?>)
-      ,minutes:['00','15','30','45']
-      ,hourStart:'<?=$hourStart?>'
-      ,minuteStart:'00'
-      ,hourEnd:'<?=$hourEnd?>'
-      ,minuteEnd:'00'
+      ,start:<?=json_encode($start)?>
+      ,end:<?=json_encode($end)?>
       ,off_base : 'day'
       ,todo : <?=json_encode($todo)?>
       ,todoEdit : <?=json_encode($todo)?> ? false : true
@@ -301,10 +289,8 @@ var app = new Vue({
                 }
                 if(this.off_tags[i]['leave_id'] == this.leave_id && !this.off_tags[i]['leave_amount_flg']){
                     this.displayTime = false;
-                    this.hourStart = '00';
-                    this.minuteStart = '00';
-                    this.hourEnd = '23';
-                    this.minuteEnd = '59';
+                    this.start = '00:00';
+                    this.end = '23:59';                    
                 }
             }
             var next = next.slice(0,available);
@@ -349,6 +335,27 @@ var app = new Vue({
             this.title = title;
         }else if(!this.public_title){
             this.public_title = this.title;
+        }
+    },
+    time: function (str) {
+        var t;
+        if(str == 'start'){
+            t = this.start.replace(/[^0-9]/g,'');
+        } else {
+            t = this.end.replace(/[^0-9]/g,'');
+        }
+        var hour = t.substr(0,2) * 1;
+        hour = hour > 23 ? 23 : hour ;
+        hour = hour < 10 ? '0'+hour : hour ;
+        hour = hour < 1 ? '00' : hour ;
+        var minute =  t.substr(2,2) * 1;
+        minute = minute > 59 ? 59 : minute;
+        minute = minute < 10 ? '0' + minute : minute;
+        minute = minute < 1 ? '00' : minute;
+        if(str == 'start'){
+            this.start = hour + ':' + minute;
+        } else {
+            this.end = hour + ':' + minute;
         }
     },
   }
@@ -400,8 +407,8 @@ function update(){
     fd.append("_token", $('[name="csrf-token"]').attr('content'));
     fd.append("tag", app.tag);
     fd.append("title", app.title);
-    fd.append("time_start", date +' '+ app.hourStart+':'+app.minuteStart+':00');
-    fd.append("time_end", app.date_end +' '+ app.hourEnd+':'+app.minuteEnd+':59');
+    fd.append("time_start", date +' '+ app.start+':00');
+    fd.append("time_end", app.date_end +' '+ app.end+':59');
     fd.append("todo", app.todo);
     fd.append("usrs", JSON.stringify(arr));
     fd.append("group_id", app.group_id);
