@@ -89,4 +89,20 @@ INSERT INTO "t_sync" ("sync_id", "usr_id", "sync_token", "updated_at") VALUES
 INSERT INTO "t_usr" ("usr_id", "oauth_type", "oauth_id", "email", "usr_name", "created_at", "updated_at", "usr_name_mb", "password", "token") VALUES
 (1,	3,	'',	'sample@sample.com',	'komatsu',	'2020-05-31 06:32:04',	'2020-05-31 06:32:04',	'komatsu',	'123456',	'12345');
 
+INSERT INTO "c_link" ("link_id", "url", "ja", "en", "priority", "updated_at", "group_owner", "approver", "public") VALUES
+(4,	'/Salon/Ability/edit/',	'自分の可能サービス',	'my available service',	10,	'2020-05-05 09:41:07.809436',	0,	0,	0),
+(7,	'/Salon/Menu/index/',	'メニュー編集',	'edit menu',	10,	'2020-05-05 09:49:57.928342',	1,	0,	0),
+(8,	'/Salon/Shift/regular/',	'シフト編集',	'edit shift',	10,	'2020-05-05 09:58:09.878063',	0,	0,	0),
+(9,	'/Salon/ShiftManagement/index/',	'シフト管理',	'shift management',	10,	'2020-05-05 09:59:36.550159',	0,	0,	0),
+(10,	'/Shift/Qrcode/index/',	'QRコード',	'QR code',	10,	'2020-05-07 02:30:23.009274',	1,	0,	0),
+(11,	'/Shift/Routine/index/',	'シフト',	'shift',	10,	'2020-05-07 02:32:12.91457',	0,	0,	0),
+(13,	'/Shift/TimeSheet/index/',	'勤怠表',	'shift sheet',	10,	'2020-05-07 02:51:19.251645',	0,	0,	0),
+(14,	'/Auth/EmailLogin/index/',	'ログイン',	'sign in',	10,	'2020-05-07 06:19:18.883924',	0,	0,	1),
+(12,	'/Shift/SheetDetail/index/2020-04/2/',	'シフト承認',	'approve shift',	10,	'2020-05-07 02:33:51.522402',	1,	0,	0),
+(16,	'/Salon/Menu/index/',	'メニュー',	'menu',	10,	'2020-05-15 08:51:18.218166',	0,	0,	0),
+(5,	'/Salon/Shop/edit/',	'ショップ編集',	'edit shop',	10,	'2020-05-05 09:42:35.156355',	0,	0,	0),
+(15,	'/Auth/Setting/index/',	'設定',	'setting',	100,	'2020-05-07 06:20:32.099109',	0,	0,	0),
+(17,	'/Shift/Extra/index/',	'残業設定',	'extra work',	10,	'2020-05-16 10:33:57.156652',	0,	1,	0),
+(6,	'/Salon/Cancel/index/',	'キャンセル処理',	'cancel',	10,	'2020-05-05 09:43:39.654973',	0,	0,	0),
+(3,	'/Calendar/Schedule/index/',	'スケジュール登録',	'add schedule',	1,	'2020-05-05 08:19:22.283687',	0,	0,	0);
 -- 2020-05-31 08:14:42.209757+03
