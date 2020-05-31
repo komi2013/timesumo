@@ -165,15 +165,12 @@ td {
 <table v-show="advance"><tr><td>
     <a style="color: blue;" v-on:click="advanceToggle"> - - <?=__('salon.simple')?> - - </a>
 </td></tr></table>
-<table v-show="advance && !advance2"><tr><td>
-    <a style="color: blue;" v-on:click="advance2Toggle"> - - <?=__('salon.advance')?> - - </a>
-</td></tr></table>
 
 <div style="width:100%;text-align: center;">
     <input type="submit" value="<?=__('salon.update')?>" class="column1" v-on:click="update">
 </div>
 
-<div style="width:100%;text-align: center;">
+<div style="width:100%;text-align: center;" v-if="!routine[0]['fix_flg']">
     <input type="submit" value="<?=__('salon.shiftAdd')?>" class="column1" v-on:click="shiftAdd">
 </div>
 

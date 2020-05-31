@@ -23,9 +23,14 @@ class MenuController extends Controller {
         $request->session()->put('group_ids', json_encode($arr_group_id));
         $obj = DB::table('m_group')->whereIn('group_id',$arr_group_id)->get();
         $shops = [];
+        $arr_area_id = [];
         foreach ($obj as $d) {
             $shops[$d->group_id] = $d->group_name;
             $group_id = $group_id ?: $d->group_id;
+            $arr = json_decode($d->area_id,true);
+            foreach ($arr as $d2) {
+                $arr_area_id[] = $d2;
+            }
         }
 
         $obj = DB::table('m_menu')->where('group_id',$group_id)->get();
@@ -56,7 +61,7 @@ class MenuController extends Controller {
         foreach ($obj as $d) {
             $facilitys[$d->facility_id] = $d->facility_name;
         }
-        $obj = DB::table('m_service')->get();
+        $obj = DB::table('m_service')->whereIn('area_id', $arr_area_id)->get();
         $services = [];
         foreach ($obj as $d) {
             $services[$d->service_id] = $d->service_name;

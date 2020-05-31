@@ -73,6 +73,7 @@ class ShiftController extends Controller {
                 }
                 ++$i;
             }
+            $arr['fix_flg'] = $d->fix_flg;
         }
         $routine[0] = $arr;
         $request->session()->put('routine_id',$arr['routine_id']);

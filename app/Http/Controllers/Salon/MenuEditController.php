@@ -47,7 +47,8 @@ class MenuEditController extends Controller {
         foreach ($obj as $d) {
             $facilitys[$d->facility_id] = $d->facility_name;
         }
-        $obj = DB::table('m_service')->get();
+        $group = DB::table('m_group')->where('group_id', $menu->group_id)->first();
+        $obj = DB::table('m_service')->whereIn('area_id', json_decode($group->area_id,true))->get();
         $services = [];
         foreach ($obj as $d) {
             $services[$d->service_id] = $d->service_name;
