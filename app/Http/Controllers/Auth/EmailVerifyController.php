@@ -11,7 +11,6 @@ class EmailVerifyController extends Controller {
     public function code(Request $request, $directory=null, $controller=null,$action=null,
             $auth) {
         if ($auth != session('email_auth')) {
-            $request->session()->put('redirect',$_SERVER['REQUEST_URI']);
             return redirect('/Auth/EmailLogin/index/');
         }
         \App::setLocale($request->cookie('lang'));

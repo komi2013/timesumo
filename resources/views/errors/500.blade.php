@@ -37,9 +37,10 @@
 
 <div id="ad" style="text-align: center;"><iframe src="/htm/ad/" width="320" height="50" frameborder="0" scrolling="no"></iframe></div>
 <?php if(isset($exception)){ ?>
-<p><?=$exception->getMessage()?></p>
+<div style="word-break: break-all;"><?=$exception->getMessage()?></div>
 <?php } ?>
-<p><?=$msg ?? '' ?></p>
+<div style="word-break: break-all;"><?=$msg ?? '' ?></div>
+<br>
 </div>
 <div id="ad_right"><iframe src="/htm/ad_right/" width="160" height="600" frameborder="0" scrolling="no"></iframe></div>
 

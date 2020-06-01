@@ -1,4 +1,3 @@
--- Adminer 4.7.1 PostgreSQL dump
 
 INSERT INTO "m_group" ("group_id", "group_name", "updated_at", "password", "open_time", "close_time", "area_id", "token") VALUES
 (1,	'グループ１',	'2019-05-07 15:19:00',	'12345678',	'10:00:00',	'20:00:00',	'[1]',	'');
@@ -105,4 +104,6 @@ INSERT INTO "c_link" ("link_id", "url", "ja", "en", "priority", "updated_at", "g
 (17,	'/Shift/Extra/index/',	'残業設定',	'extra work',	10,	'2020-05-16 10:33:57.156652',	0,	1,	0),
 (6,	'/Salon/Cancel/index/',	'キャンセル処理',	'cancel',	10,	'2020-05-05 09:43:39.654973',	0,	0,	0),
 (3,	'/Calendar/Schedule/index/',	'スケジュール登録',	'add schedule',	1,	'2020-05-05 08:19:22.283687',	0,	0,	0);
--- 2020-05-31 08:14:42.209757+03
+
+INSERT INTO "c_area" ("area_id", "area_name", "updated_at", "group_id", "usr_id") VALUES
+(1,	'hair japan',	'2020-05-10 05:37:32.864775',	1,	1);

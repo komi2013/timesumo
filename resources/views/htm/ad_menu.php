@@ -15,7 +15,9 @@
        data-ad-client="ca-pub-1763935619573577"
        data-ad-slot="3701545641"></ins>
   <script>
-  (adsbygoogle = window.adsbygoogle || []).push({});
+  setTimeout(function(){
+      (adsbygoogle = window.adsbygoogle || []).push({});
+  }, 2000);
   </script>
 
 </body>

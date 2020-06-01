@@ -35,12 +35,24 @@ class EmailLoginController extends Controller {
     }
     public function owner(Request $request,$directory,$controller,$action,
             $area_id) {
+        if ($request->session()->get('group_id')) {
+            $msg = 'have group_id:line'.__LINE__.':'.$_SERVER['REQUEST_URI'] ?? "".' '. json_encode($_POST);
+            \Config::set('logging.channels.daily.path',storage_path('logs/warning.log'));
+            \Log::warning($msg);
+            return view('errors.500', compact('msg'));            
+        }
         $request->session()->put('area_id', $area_id);
         return view('auth.email_login');
 
     }
     public function friend(Request $request,$directory,$controller,$action,
             $your_owner) {
+        if ($request->session()->get('group_id')) {
+            $msg = 'have group_id:line'.__LINE__.':'.$_SERVER['REQUEST_URI'] ?? "".' '. json_encode($_POST);
+            \Config::set('logging.channels.daily.path',storage_path('logs/warning.log'));
+            \Log::warning($msg);
+            return view('errors.500', compact('msg'));            
+        }
         $request->session()->put('your_owner', $your_owner);
         return view('auth.email_login');
 

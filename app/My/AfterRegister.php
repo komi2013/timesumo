@@ -21,7 +21,7 @@ class AfterRegister
             foreach ($group as $k => $d) {
                 $group[$k]['group_id'] = $group_id;
                 $group[$k]['updated_at'] = $now;
-                $group[$k]['password'] = Str::random(8);
+                $group[$k]['password'] = \Str::random(8);
             }
             $obj = DB::table('t_facility')->where("group_id", $init_group_id)->get();
             $facility = json_decode($obj,true);
