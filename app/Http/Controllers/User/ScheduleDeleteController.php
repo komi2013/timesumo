@@ -23,6 +23,7 @@ class ScheduleDeleteController extends Controller {
         $mydata = false;
         $overwrite = false;
         $access_right = 0;
+        $book_id = 0;
         foreach ($obj as $d) {
             if ($d->usr_id == $usr_id AND $access_right < substr($d->access_right,0,1)) {
                 $access_right = substr($d->access_right,0,1);
@@ -39,7 +40,6 @@ class ScheduleDeleteController extends Controller {
             $time_end = $d->time_end;
             $title = $d->title;
             $tag = $d->tag;
-            $access_right = $d->access_right;
             $group_id = $d->group_id;
             $updated_at = $d->updated_at;
             $arr = [];
@@ -47,6 +47,7 @@ class ScheduleDeleteController extends Controller {
             $db[$d->usr_id] = $arr;
             $usr_ids[] = $d->usr_id;
             $accessRight = $d->access_right;
+            $book_id = $d->book_id;
         }
         if ($access_right < 6) {
             \Config::set('logging.channels.daily.path',storage_path('logs/warning.log'));
@@ -59,6 +60,45 @@ class ScheduleDeleteController extends Controller {
         }
         $todo = DB::table('t_todo')->where("schedule_id", $schedule_id)->first();
         $now = date('Y-m-d H:i:s');
+        if ($book_id) {
+            $var = DB::table('t_variation')
+                    ->where('schedule_id', $schedule_id)
+                    ->where('variation_name', 'db_id')
+                    ->first();
+            $db = DB::table('c_db')->where('db_id', $var->variation_value)->first();
+            \Config::set('database.connections.dynamic.host',$db->host);
+            \Config::set('database.connections.dynamic.database',$db->database);
+            \Config::set('database.connections.dynamic.username',$db->username);
+            \Config::set('database.connections.dynamic.password',$db->password);
+
+            $obj = DB::connection('dynamic')->table('t_schedule')->where('book_id', $book_id)->get();
+            $s = json_decode($obj,true);
+            $arr_schedule_id = [];
+            $arr_usr_id = [];
+            foreach ($s as $k => $d) {
+                $s[$k]['action_by'] = $usr_id;
+                $s[$k]['action_at'] = $now;
+                $s[$k]['action_flg'] = 0;
+                $s[$k]['original_by'] = 'User_ScheduleDelete';
+                $arr_schedule_id[] = $d['schedule_id'];
+                $arr_usr_id[] = $d['usr_id'];
+                $s[$k]['usr_id_json'] = json_encode($arr_usr_id);
+            }
+            $obj = DB::connection('dynamic')->table('t_todo')->whereIn('schedule_id', $arr_schedule_id)->get();
+            $arr_todo = json_decode($obj,true);
+            foreach ($arr_todo as $k => $d) {
+                $arr_todo[$k]['action_by'] = $usr_id;
+                $arr_todo[$k]['action_at'] = $now;
+                $arr_todo[$k]['action_flg'] = 0;
+            }
+            DB::connection('dynamic')->beginTransaction();
+            DB::connection('dynamic')->table('h_schedule')->insert($s);
+            DB::connection('dynamic')->table('h_todo')->insert($arr_todo);
+            DB::connection('dynamic')->table('t_schedule')->where('book_id', $book_id)->delete();
+            DB::connection('dynamic')->table('t_todo')->whereIn('schedule_id', $arr_schedule_id)->delete();
+            DB::connection('dynamic')->commit();
+        }
+
         DB::beginTransaction();
         DB::table('h_schedule')->insert([
                 "schedule_id" => $schedule_id
@@ -73,7 +113,7 @@ class ScheduleDeleteController extends Controller {
                 ,"action_by" => $usr_id
                 ,"action_at" => $now
                 ,"action_flg" => 0
-                ,"original_by" => 'ScheduleDelete'
+                ,"original_by" => 'User_ScheduleDelete'
                 ,"usr_id_json" => json_encode($usr_ids)
             ]);
         DB::table('t_schedule')->where('schedule_id', $schedule_id)->delete();

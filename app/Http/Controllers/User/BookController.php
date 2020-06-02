@@ -55,7 +55,7 @@ class BookController extends Controller {
             ++$closeHour;
         }
         $i = 0;
-        while ($i < 7) {
+        while ($i < 3) {
             $hour = $openHour;
             while ($hour < $closeHour) {
                 $frame = 0;

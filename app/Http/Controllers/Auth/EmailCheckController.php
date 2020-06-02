@@ -15,7 +15,14 @@ class EmailCheckController extends Controller {
         
         if (isset($usr->usr_id) AND Hash::check($request->password, $usr->password)) {
             $login = true;
-            new \App\My\AfterLogin($usr->usr_id);
+            if ($_SERVER['SERVER_NAME'] == 'timebook.quigen.info') {
+                $request->session()->put('usr_id', $usr->usr_id);
+                $r_group = DB::table('r_group_relate')->where("usr_id", $usr->usr_id)->first();
+                $group_id = $r_group->group_id ?? 0;
+                $request->session()->put('group_id', $group_id);
+            } else {
+                new \App\My\AfterLogin($usr->usr_id);
+            }
             $redirect = session('redirect') ?: '/';
             $request->session()->forget('redirect');
         } else {

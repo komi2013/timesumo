@@ -21,11 +21,6 @@ class ScheduleController extends Controller {
         $mystaff = session('mystaff') ?: 0;
 
         $schedule_id = null;
-        $minutes = ['00','15','30','45'];
-        for ($i=0; $i<24; $i++) {
-            $arr[] = str_pad($i,2,0,STR_PAD_LEFT);
-        }
-        $hours = $arr;
         $Arr = new \App\My\UserTag();
         $arr_tags = \Cookie::get('lang');
         $tags = $Arr->$arr_tags;
@@ -41,8 +36,8 @@ class ScheduleController extends Controller {
             $date = $id_date ?: date('Y-m-d');
             $date_end = date('Y-m-d',strtotime($date));
             $dt = new Carbon();
-            $hourStart = $dt->addHour()->format('H');
-            $hourEnd = $dt->addHour()->format('H');
+            $start = $dt->addHour()->format('H:00');
+            $end = $dt->addHour()->format('H:00');
             $obj = DB::table('t_usr')->where("usr_id", $usr_id)->get();
             foreach ($obj as $d) {
                 $arr = [];
@@ -56,10 +51,8 @@ class ScheduleController extends Controller {
             $obj = DB::table('t_schedule')->where("schedule_id", $schedule_id)->get();
             $access_right = 0;
             foreach ($obj as $d) {
-                $hourStart = date('H', strtotime($d->time_start));
-                $minuteStart = date('i', strtotime($d->time_start));
-                $hourEnd = date('H', strtotime($d->time_end));
-                $minuteEnd = date('i', strtotime($d->time_end));
+                $start = date('H:i', strtotime($d->time_start));
+                $end = date('H:i', strtotime($d->time_end));
                 $tag = $d->tag;
 
                 if(isset($arr_group[$d->group_id]['selected'])) {
@@ -81,8 +74,19 @@ class ScheduleController extends Controller {
                 }
                 $open = substr($d->access_right,2,1);
             }
-            if ($access_right == 0 OR $group_id != $db_group_id OR ($db_group_id == 0 AND $usr_id != $db_usr_id)) {
-                $msg = 'no access right:line'.__LINE__.':'.$_SERVER['REQUEST_URI'] ?? "".' '. json_encode($_POST);
+            if ($access_right == 0) {
+                $msg = 'access right is 0:line'.__LINE__.':'.$_SERVER['REQUEST_URI'] ?? "".' '. json_encode($_POST);
+                \Config::set('logging.channels.daily.path',storage_path('logs/warning.log'));
+                \Log::warning($msg);
+                return view('errors.500', compact('msg'));
+            }
+            $obj = DB::table('r_group_relate')->where("usr_id", $usr_id)->get();
+            $arr_group_id[] = 0;
+            foreach ($obj as $d) {
+                $arr_group_id[] = $d->group_id;
+            }
+            if (!in_array($db_group_id,$arr_group_id) OR ($db_group_id == 0 AND $usr_id != $db_usr_id)) {
+                $msg = 'another group or usr:line'.__LINE__.':'.$_SERVER['REQUEST_URI'] ?? "".' '. json_encode($_POST);
                 \Config::set('logging.channels.daily.path',storage_path('logs/warning.log'));
                 \Log::warning($msg);
                 return view('errors.500', compact('msg'));
@@ -128,7 +132,7 @@ class ScheduleController extends Controller {
             ++$i;
         }
         return view('user.schedule', compact('date','date_end','schedule_id',
-                'hours','hourStart','hourEnd','minutes','tags','tag','usr_id','group_id','join_usrs',
+                'start','end','tags','tag','usr_id','group_id','join_usrs',
                 'todo','file_paths','title','public_title','next','access_right','open'));
     }
 }

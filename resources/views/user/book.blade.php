@@ -86,7 +86,7 @@
                 } ?>
                 <?=$d['available'] ? 'available' : 'unavailable'?>
                 ">
-                <?php if ( date('i',$u ) == '00' && $d['available'] ) {?>
+                <?php if ( date('i',$u ) == '00' ) {?>
                     <?=date('H:i',$u)?>
                 <?php } ?>
             </div>
@@ -95,7 +95,7 @@
     <?php } ?>
     </tr>
 </table>
-
+<br><br>
 </div>
 <div id="ad_right"><iframe src="/htm/ad_right/" width="160" height="600" frameborder="0" scrolling="no"></iframe></div>
 

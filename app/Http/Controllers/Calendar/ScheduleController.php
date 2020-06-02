@@ -73,18 +73,19 @@ class ScheduleController extends Controller {
                 }
                 $open = substr($d->access_right,2,1);
             }
-            if ($access_right == 0 OR $group_id != $db_group_id) {
-                $msg = 'no access right:line'.__LINE__.':'.$_SERVER['REQUEST_URI'] ?? "".' '. json_encode($_POST);
+            if ($access_right == 0) {
+                $msg = 'access right is 0:line'.__LINE__.':'.$_SERVER['REQUEST_URI'] ?? "".' '. json_encode($_POST);
                 \Config::set('logging.channels.daily.path',storage_path('logs/warning.log'));
                 \Log::warning($msg);
                 return view('errors.500', compact('msg'));
             }
-            $is = DB::table('r_group_relate')
-                    ->where("group_id", $group_id)
-                    ->where("usr_id", $usr_id)
-                    ->first();
-            if (!isset($is->usr_id)) {
-                $msg = 'group is different:line'.__LINE__.':'.$_SERVER['REQUEST_URI'] ?? "".' '. json_encode($_POST);
+            $obj = DB::table('r_group_relate')->where("usr_id", $usr_id)->get();
+            $arr_group_id[] = 0;
+            foreach ($obj as $d) {
+                $arr_group_id[] = $d->group_id;
+            }
+            if (!in_array($db_group_id,$arr_group_id) OR ($db_group_id == 0 AND $usr_id != $db_usr_id)) {
+                $msg = 'another group or usr:line'.__LINE__.':'.$_SERVER['REQUEST_URI'] ?? "".' '. json_encode($_POST);
                 \Config::set('logging.channels.daily.path',storage_path('logs/warning.log'));
                 \Log::warning($msg);
                 return view('errors.500', compact('msg'));

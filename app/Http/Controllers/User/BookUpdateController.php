@@ -57,6 +57,7 @@ class BookUpdateController extends Controller {
                 ->whereIn('usr_id', $arr_usr_id )
                 ->where('group_id', $group_id)
                 ->get();
+                
         foreach ($obj as $d) {
             foreach ($usr_time as $k2 => $d2) {
                 $necessary_id = explode("_", $k2)[0];
@@ -65,8 +66,8 @@ class BookUpdateController extends Controller {
                 $endw = 'end_'.date('w',$request->unix);
                 if ($d->usr_id == $uid AND $d->fix_flg AND
                     $d->$startw AND $d->$endw AND
-                    $d->$startw <= $d2['end_minute'] AND
-                    $d->$endw >= $d2['start_minute'] ) {
+                    date('Y-m-d ',$request->unix).$d->$startw <= $d2['end_minute'] AND
+                    date('Y-m-d ',$request->unix).$d->$endw >= $d2['start_minute'] ) {
                     ++$necessary_usr[$necessary_id.'_'.$uid];
                 }
             }
@@ -228,10 +229,10 @@ class BookUpdateController extends Controller {
             ,"usr_id" => $usr_id
             ,"time_start" => $start->format('Y-m-d H:i:s')
             ,"time_end" => $end->format('Y-m-d H:i:s')
-            ,"tag" => 7
+            ,"tag" => 6
             ,"group_id" => 0
             ,"updated_at" => $now
-            ,"access_right" => 666];
+            ,"access_right" => 600];
         DB::connection('dynamic')->table('t_schedule')->insert($arr_sql);
         DB::connection('dynamic')->table('t_todo')->insert([
             "schedule_id" => $schedule_id
@@ -245,6 +246,14 @@ class BookUpdateController extends Controller {
             ,"todo" => $menu->menu_name
             ,"updated_at" => $now
         ]);
+        DB::table('t_variation')->insert([
+            "schedule_id" => $user_schedule_id
+            ,"variation_category" => 'book'
+            ,"variation_name" => 'db_id'
+            ,"variation_value" => $request->db_id
+            ,"updated_at" => $now
+        ]);
+        
         DB::connection('dynamic')->commit();
         DB::commit();
         $res[0] = 1;

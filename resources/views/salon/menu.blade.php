@@ -53,7 +53,7 @@
     </a>
     <div style="word-break:break-all;padding:10px;">
     予約URL<br>
-    <a href="https://timebook.quigen.info/User/Book/index/<?=$menu_id?>/<?=$db->db_id?>/">
+    <a target="_blank" href="https://timebook.quigen.info/User/Book/index/<?=$menu_id?>/<?=$db->db_id?>/">
         https://timebook.quigen.info/User/Book/index/<?=$menu_id?>/<?=$db->db_id?>/</a>
     </div>
     <div style="line-height: 10px;width:100%;border-bottom:1px solid silver; ">&nbsp;</div>
