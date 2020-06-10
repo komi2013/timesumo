@@ -20,11 +20,11 @@ class RoutineUpdateController extends Controller {
         $i = 0;
         while ($i < 7) {
             if ($r[0]['shift_'.$i] === 'O') {
-                $arr['start_'.$i] = $r[0]['Hstart_'.$i].':'.$r[0]['Mstart_'.$i].':00';
-                $arr['end_'.$i] = $r[0]['Hend_'.$i].':'.$r[0]['Mend_'.$i].':00';
+                $routine['start_'.$i] = $r[0]['start_'.$i].':00';
+                $routine['end_'.$i] = $r[0]['end_'.$i].':00';
             } else {
-                $arr['start_'.$i] = null;
-                $arr['end_'.$i] = null;
+                $routine['start_'.$i] = null;
+                $routine['end_'.$i] = null;
             }
             ++$i;
         }
@@ -33,12 +33,12 @@ class RoutineUpdateController extends Controller {
             DB::table('r_routine')
                 ->where('usr_id',$usr_id)
                 ->where('group_id',$group_id)
-                ->update($arr);
+                ->update($routine);
         } else {
             DB::beginTransaction();
-            $arr['usr_id'] = $usr_id;
-            $arr['group_id'] = $group_id;
-            DB::table('r_routine')->insert($arr);
+            $routine['usr_id'] = $usr_id;
+            $routine['group_id'] = $group_id;
+            DB::table('r_routine')->insert($routine);
         }
         DB::commit();
         $res[0] = 1;
