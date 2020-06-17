@@ -233,11 +233,41 @@ class BookUpdateController extends Controller {
             ,"group_id" => 0
             ,"updated_at" => $now
             ,"access_right" => 600];
+        $booked_sql[] = [
+            "schedule_id" => $schedule_id
+            ,"time_start" => $start->format('Y-m-d H:i:s')
+            ,"time_end" => $end->format('Y-m-d H:i:s')
+            ,"booked_at" => $now
+            ,"updated_at" => $now
+            ,"group_id" => $group_id
+            ,"group_name" => $group->group_name
+            ,"menu_id" => $menu->menu_id
+            ,"menu_name" => $menu->menu_name
+            ,"book_id" => $book_id
+            ,"usr_id" => $usr_id
+            ,"usr_name" => $customer
+            ,"book_action" => 0
+            ];
         DB::connection('dynamic')->table('t_schedule')->insert($arr_sql);
-        DB::connection('dynamic')->table('t_todo')->insert([
+        DB::connection('dynamic')->table('h_todo')->insert([
             "schedule_id" => $schedule_id
             ,"todo" => $menu->menu_name
             ,"updated_at" => $now
+        ]);
+        DB::connection('dynamic')->table('h_booked')->insert([
+            "schedule_id" => $schedule_id
+            ,"time_start" => $start->format('Y-m-d H:i:s')
+            ,"time_end" => $end->format('Y-m-d H:i:s')
+            ,"booked_at" => $now
+            ,"updated_at" => $now
+            ,"group_id" => $group_id
+            ,"group_name" => $group->group_name
+            ,"menu_id" => $menu->menu_id
+            ,"menu_name" => $menu->menu_name
+            ,"book_id" => $book_id
+            ,"usr_id" => $usr_id
+            ,"usr_name" => $customer
+            ,"book_action" => 0
         ]);
         DB::beginTransaction();
         DB::table('t_schedule')->insert($user_sql);
@@ -246,14 +276,23 @@ class BookUpdateController extends Controller {
             ,"todo" => $menu->menu_name
             ,"updated_at" => $now
         ]);
-        DB::table('t_variation')->insert([
+        DB::table('h_booked')->insert([
             "schedule_id" => $user_schedule_id
-            ,"variation_category" => 'book'
-            ,"variation_name" => 'db_id'
-            ,"variation_value" => $request->db_id
+            ,"time_start" => $start->format('Y-m-d H:i:s')
+            ,"time_end" => $end->format('Y-m-d H:i:s')
+            ,"booked_at" => $now
             ,"updated_at" => $now
+            ,"group_id" => $group_id
+            ,"group_name" => $group->group_name
+            ,"menu_id" => $menu->menu_id
+            ,"menu_name" => $menu->menu_name
+            ,"book_id" => $book_id
+            ,"usr_id" => $usr_id
+            ,"usr_name" => $customer
+            ,"book_action" => 0
+            ,"db_id" => $request->db_id
         ]);
-        
+
         DB::connection('dynamic')->commit();
         DB::commit();
         $res[0] = 1;

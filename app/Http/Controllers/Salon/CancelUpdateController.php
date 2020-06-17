@@ -34,7 +34,7 @@ class CancelUpdateController extends Controller {
                 ,"tag" => $schedule['tag']
                 ,"group_id" => $schedule['group_id']
                 ,"updated_at" => $schedule['updated_at']
-                ,"editable_flg" => $schedule['editable_flg']
+                ,"access_right" => $schedule['access_right']
                 ,"action_by" => $usr_id
                 ,"action_at" => date('Y-m-d H:i:s')
                 ,"action_flg" => 0

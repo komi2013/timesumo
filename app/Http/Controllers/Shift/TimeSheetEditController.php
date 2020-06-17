@@ -71,7 +71,11 @@ class TimeSheetEditController extends Controller {
                     $monthly[$d['date']]['time_out'] ){
                     $arr = $monthly[$d['date']];
                     $time_in = $request->month.'-'.$d['date'].' '.$monthly[$d['date']]['time_in'].':00';
-                    $time_out = $request->month.'-'.$d['date'].' '.$monthly[$d['date']]['time_out'].':00';
+                    if ($monthly[$d['date']]['time_out']) {
+                        $time_out = $request->month.'-'.$d['date'].' '.$monthly[$d['date']]['time_out'].':00';
+                    } else {
+                        $time_out = null;
+                    }
                     $arr['time_in'] = $time_in;
                     $arr['time_out'] = $time_out;
                     $arr['action_by'] = $usr_id;

@@ -11,11 +11,17 @@ class EmailLoginController extends Controller {
         if (\Cookie::get('lang')) {
             $lang = \Cookie::get('lang');
         } else {
-            $lang = explode(',', $_SERVER['HTTP_ACCEPT_LANGUAGE'])[0];
-            $lang = (strpos($lang,'en') !== false) ? 'en' : $lang;
+            $lang = 'en';
+            if ( isset($_SERVER['HTTP_ACCEPT_LANGUAGE'] ) AND $_SERVER['HTTP_ACCEPT_LANGUAGE']) {
+                $lang = explode(',', $_SERVER['HTTP_ACCEPT_LANGUAGE'])[0];
+            }
+            $arr = ['en','ja'];
+            if ( !in_array($lang, $arr) ) {
+                $lang = 'en';
+            }
         }
         \Config::set('session.lifetime', 60 * 24 * 365);
-        \Cookie::queue('lang', $lang);
+        \Cookie::queue('lang',$lang, 60 * 24 * 365);
         \App::setLocale($lang);
     }
     public function index(Request $request,$directory,$controller,$action) {

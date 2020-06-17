@@ -17,6 +17,7 @@
     }
     .time {
         width: 40px;
+        padding: 10px;
     }
     .disable {
         background-color: silver;

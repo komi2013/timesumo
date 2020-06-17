@@ -41,12 +41,14 @@ class AfterRegister
                 $arr_menu[$d['menu_id']] = $menu_id;
                 $arr_menu_id[] = $d['menu_id'];
             }
-            $obj = DB::table('m_menu_necessary')->whereIn("menu_id", $arr_menu_id)->get();
-            $necessary = json_decode($obj,true);
-            foreach ($necessary as $k => $d) {
-                $necessary[$k]['updated_at'] = $now;
-                $necessary[$k]['menu_id'] = $arr_menu[$d['menu_id']];
-                unset($necessary[$k]['menu_necessary_id']);
+            if ( count($arr_menu) ) {
+                $obj = DB::table('m_menu_necessary')->whereIn("menu_id", $arr_menu_id)->get();
+                $necessary = json_decode($obj,true);
+                foreach ($necessary as $k => $d) {
+                    $necessary[$k]['updated_at'] = $now;
+                    $necessary[$k]['menu_id'] = $arr_menu[$d['menu_id']];
+                    unset($necessary[$k]['menu_necessary_id']);
+                }
             }
             $obj = DB::table('m_leave')->where("group_id", $init_group_id)->get();
             $leave = json_decode($obj,true);
@@ -70,8 +72,10 @@ class AfterRegister
             DB::beginTransaction();
             DB::table('m_group')->insert($group);
             DB::table('t_facility')->insert($facility);
-            DB::table('m_menu')->insert($menu);
-            DB::table('m_menu_necessary')->insert($necessary);
+            if ( count($arr_menu) ) {
+                DB::table('m_menu')->insert($menu);
+                DB::table('m_menu_necessary')->insert($necessary);
+            }
             DB::table('m_leave')->insert($leave);
             DB::table('t_leave_amount')->insert($leave_amount);
             DB::commit();
@@ -121,7 +125,10 @@ class AfterRegister
             $rule[$k]['group_id'] = $group_id;
             $rule[$k]['usr_id'] = $usr_id;
             $rule[$k]['updated_at'] = $now;
-        }   
+            if (!session('group_id')) {
+                $rule[$k]['approver1'] = $usr_id;
+            }
+        }
         $obj = DB::table('r_ability')->where("usr_id", $init_usr_id)->get();
         $ability = json_decode($obj,true);
         foreach ($ability as $k => $d) {
@@ -145,7 +152,9 @@ class AfterRegister
         DB::table('r_extra')->insert($extra);
         DB::table('r_routine')->insert($routine);
         DB::table('r_rule')->insert($rule);
-        DB::table('r_ability')->insert($ability);
+        if ( count($ability) ) {
+            DB::table('r_ability')->insert($ability);
+        }
         DB::table('r_group_relate')->insert($relate);
         DB::table('t_usr')->insert($usr);
         DB::commit();

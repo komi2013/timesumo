@@ -31,7 +31,7 @@ class CancelingController extends Controller {
                     $schedule['tag'] = $d->tag;
                     $schedule['group_id'] = $d->group_id;
                     $schedule['updated_at'] = $d->updated_at;
-                    $schedule['editable_flg'] = $d->editable_flg;
+                    $schedule['access_right'] = $d->access_right;
                 }
                 if ($d->tag == 6) {
                     $arr_customer[$d->usr_id] = '';

@@ -46,7 +46,7 @@
 </div>
 
 <div style="padding:10px;">
-    <?=__('salon.customer')?>
+    お客様
     <?php foreach ($arr_customer as $d) {?>
         <div style="padding:10px;"> {{$d}} </div>
     <?php }?>
@@ -56,9 +56,13 @@
     <div style="padding:10px;display:inline-block;"> {{$d}} </div>
 <?php }?>
 
+<table style="width:100%;text-align: center;"><tr>
+    <td style="height:50px;"><input type="radio" name="payment" id="pay" checked><label for="pay">キャンセル料金支払い</label></td>
+    <td style="height:50px;"><input type="radio" name="payment" id="nopay"><label for="nopay">キャンセル料金支払いなし</label></td>
+</tr></table>
 
 <div style="width:100%;text-align: center;">
-    <input type="submit" value="<?=__('salon.delete')?>" class="column1 cancel"><br>
+    <input type="submit" value="キャンセル" class="column1 cancel"><br>
 </div>
 </div>
 <div id="ad_right"><iframe src="/htm/ad_right/" width="160" height="600" frameborder="0" scrolling="no"></iframe></div>
@@ -66,8 +70,10 @@
 <script>
 
 $('.cancel').click(function(){
+
     var param = {
         _token : $('[name="csrf-token"]').attr('content')
+        ,payment : $('[name="payment"]:checked').attr('id')
         ,schedule : eval(<?=json_encode($schedule)?>)
     }
     $.post('/Salon/CancelUpdate/',param,function(){},"json")

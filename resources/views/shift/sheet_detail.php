@@ -75,7 +75,7 @@
         <tr v-bind:class="{offday:d['offday']}">
             <td colspan="4" style="font-size: 12px;">
                 <template v-for="(d2,k2) in d['schedules']">
-                <a target="_blank" v-bind:href="'/Calendar/Schedule/edit/'+k2+'/'" >{{d2}}</a>
+                <a target="_blank" v-bind:href="'/Calendar/Schedule/index/'+k2+'/'" >{{d2}}</a>
                 </template>
             </td>
         </tr>
