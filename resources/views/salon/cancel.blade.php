@@ -56,7 +56,9 @@
     <img src="/img/icon/menu.png" class="icon" id="menu_button">
   </td>
   <td style="text-align: center;">
-    
+      <a href="/Salon/Cancel/index/<?=$prev?>/" style="padding:10px;"> < </a>
+        <?=$today?>
+      <a href="/Salon/Cancel/index/<?=$next?>/" style="padding:10px;"> > </a>
   </td>
   <td style="text-align:center;width:25%;">
     <a href="/"><img src="/img/icon/home.png" class="icon"></a>
@@ -79,7 +81,7 @@
         <th class="day_th"><?=__('salon.day'.$i)?></th>
     <?php ++$i; } ?>
     </tr></thead>
-    <?php foreach ($days21 as $date => $d) {?>
+    <?php foreach ($day35 as $date => $d) {?>
         <?php $u = strtotime($date.' 00:00:00');?>
         <?php if(date('D',$u) == 'Sun'){?>
         <tr>

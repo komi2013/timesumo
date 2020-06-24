@@ -49,7 +49,26 @@
     <input type="submit" v-if="!sent" value="<?=__('auth.register')?>" class="column1" v-on:click="login('reg')"><br>
     <input type="submit" v-if="!sent" value="<?=__('auth.reissue_password')?>" class="column1" v-on:click="login('reg')"><br>
     <div v-if="sent" style="color: green;"><?=__('auth.sent')?></div>
+<br>
+<div style="width:80%;padding:20px;line-height:20px;outline:solid;text-align: left;margin-left: 10px;">
+<a style="font-size: 20px;font-weight:bold;">店舗様向け利用規約</a>
+<br>・無料でご利用いただけます
+<br>・ユーザー様都合での予約のキャンセルの場合、ユーザー様が1000円支払う事になります
+  その代金は店舗様に支払われる事はありません
+<br>・店舗様都合での予約のキャンセルは決済は発生しません
+<br>・メニュー作成、施設設定、労務管理の機能も全て無料でご利用できます
 </div>
+<br>
+<div style="width:80%;padding:20px;line-height:20px;outline:solid;text-align: left;margin-left: 10px;">
+<a style="font-size: 20px;font-weight:bold;">ユーザー様向け利用規約</a>
+<br>・予約した内容をカレンダー機能で確認ができます
+<br>・ユーザー様都合での予約のキャンセルの場合、ユーザー様が1000円支払う事になります
+</div>
+
+
+</div>
+
+
 
 </div>
 <div id="ad_right"><iframe src="/htm/ad_right/" width="160" height="600" frameborder="0" scrolling="no"></iframe></div>

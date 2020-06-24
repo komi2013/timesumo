@@ -119,7 +119,7 @@ class BookUpdateController extends Controller {
         $arr_sql = [];
         $now = date('Y-m-d H:i:s');
         DB::connection('dynamic')->beginTransaction();
-        $book_id = DB::connection('dynamic')->select("select nextval('book_id')")[0]->nextval;
+        $book_id = DB::select("select nextval('t_book_book_id_seq')")[0]->nextval;
         $schedule_id = DB::connection('dynamic')->select("select nextval('t_schedule_schedule_id_seq')")[0]->nextval;
         foreach ($necessary as $k => $d) {
             $fid = $d['facility_id'];
@@ -254,21 +254,6 @@ class BookUpdateController extends Controller {
             ,"todo" => $menu->menu_name
             ,"updated_at" => $now
         ]);
-        DB::connection('dynamic')->table('h_booked')->insert([
-            "schedule_id" => $schedule_id
-            ,"time_start" => $start->format('Y-m-d H:i:s')
-            ,"time_end" => $end->format('Y-m-d H:i:s')
-            ,"booked_at" => $now
-            ,"updated_at" => $now
-            ,"group_id" => $group_id
-            ,"group_name" => $group->group_name
-            ,"menu_id" => $menu->menu_id
-            ,"menu_name" => $menu->menu_name
-            ,"book_id" => $book_id
-            ,"usr_id" => $usr_id
-            ,"usr_name" => $customer
-            ,"book_action" => 0
-        ]);
         DB::beginTransaction();
         DB::table('t_schedule')->insert($user_sql);
         DB::table('t_todo')->insert([
@@ -276,8 +261,9 @@ class BookUpdateController extends Controller {
             ,"todo" => $menu->menu_name
             ,"updated_at" => $now
         ]);
-        DB::table('h_booked')->insert([
-            "schedule_id" => $user_schedule_id
+        DB::table('t_book')->insert([
+            "schedule_id" => $schedule_id
+            ,"user_schedule_id" => $user_schedule_id
             ,"time_start" => $start->format('Y-m-d H:i:s')
             ,"time_end" => $end->format('Y-m-d H:i:s')
             ,"booked_at" => $now

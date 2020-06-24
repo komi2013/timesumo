@@ -36,33 +36,30 @@
 <div id="content">
 
 <div id="ad" style="text-align: center;"><iframe src="/htm/ad/" width="320" height="50" frameborder="0" scrolling="no"></iframe></div>
-<div style="width:100%;text-align: center;">
-    <?=$schedule['title']?>
-</div>
-<div style="padding:10px;">
-    <?php foreach ($todo as $k => $d) {?>
-        <div style="padding:10px;"> {{$d['todo']}} </div>
-    <?php }?>
-</div>
 
-<div style="padding:10px;">
-    お客様
-    <?php foreach ($arr_customer as $d) {?>
-        <div style="padding:10px;"> {{$d}} </div>
-    <?php }?>
-</div>
-
-<?php foreach ($arr_staff as $d) {?>
-    <div style="padding:10px;display:inline-block;"> {{$d}} </div>
-<?php }?>
+<table style="width:100%;">
+    <tr><th>予定日時</th><td><?=substr($book->time_start, 11, 5)?> ~ <?=substr($book->time_end, 11, 5)?></td></tr>
+    <tr><th>予約した日時</th><td><?=date(__('calendar.today').' H:i',strtotime($book->booked_at))?></td></tr>
+    <tr><th>メニュー</th><td><?=$book->menu_name?></td></tr>
+    <tr><th>ユーザー名</th><td><?=$book->usr_name?></td></tr>
+</table>
 
 <table style="width:100%;text-align: center;"><tr>
-    <td style="height:50px;"><input type="radio" name="payment" id="pay" checked><label for="pay">キャンセル料金支払い</label></td>
-    <td style="height:50px;"><input type="radio" name="payment" id="nopay"><label for="nopay">キャンセル料金支払いなし</label></td>
+    <td style="height:50px;"><input type="radio" name="payment" id="pay" action="1" checked><label for="pay">キャンセル料金支払い</label></td>
+    <td style="height:50px;"><input type="radio" name="payment" id="nopay" action="2" ><label for="nopay">キャンセル料金支払いなし</label></td>
+</tr></table>
+
+<table style="width:100%;text-align: center;"><tr>
+    <td style="height:50px;"><input type="radio" name="review" id="r_1" review="1" checked><label for="r_1">悪い</label></td>
+    <td style="height:50px;"><input type="radio" name="review" id="r_5" review="5" ><label for="r_5">良い</label></td>
 </tr></table>
 
 <div style="width:100%;text-align: center;">
-    <input type="submit" value="キャンセル" class="column1 cancel"><br>
+    <textarea class="column1" id="comment"></textarea>
+</div>
+
+<div style="width:100%;text-align: center;">
+    <input type="submit" value="予約削除" class="column1 cancel"><br>
 </div>
 </div>
 <div id="ad_right"><iframe src="/htm/ad_right/" width="160" height="600" frameborder="0" scrolling="no"></iframe></div>
@@ -73,8 +70,10 @@ $('.cancel').click(function(){
 
     var param = {
         _token : $('[name="csrf-token"]').attr('content')
-        ,payment : $('[name="payment"]:checked').attr('id')
-        ,schedule : eval(<?=json_encode($schedule)?>)
+        ,action : $('[name="payment"]:checked').attr('action')
+        ,book_id : <?=json_encode($book->book_id)?>
+        ,review : $('[name="review"]:checked').attr('review')
+        ,comment : $('#comment').val()
     }
     $.post('/Salon/CancelUpdate/',param,function(){},"json")
     .always(function(res){

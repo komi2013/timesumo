@@ -13,41 +13,29 @@ class CancelUpdateController extends Controller {
             return json_encode([2,'no session usr_id']);
         }
         $usr_id = session('usr_id');
-        $schedule = $request->schedule;
-        $schedule_id = $schedule['schedule_id'];
+        $group_id = session('group_id');
+        \App::setLocale($request->cookie('lang'));
         
-        $todo = DB::table('t_todo')->where('schedule_id',$schedule_id)->get();
-        $todo = json_decode($todo,true);
-
-        foreach ($todo as $k => $d) {
-            $todo[$k]['action_by'] = $usr_id;
-            $todo[$k]['action_at'] = date('Y-m-d H:i:s');
-            $todo[$k]['action_flg'] = 0;
+        $book = DB::connection('timebook')->table('t_book')
+                ->where('book_id',$request->book_id)->first();
+        if (!isset($book->group_id) OR $book->group_id != $group_id) {
+            $msg = 'no access right:line'.__LINE__.':'.$_SERVER['REQUEST_URI'] ?? "".' '. json_encode($_POST);
+            \Config::set('logging.channels.daily.path',storage_path('logs/warning.log'));
+            \Log::warning($msg);
+            return view('errors.500', compact('msg'));
         }
-        DB::beginTransaction();
-        DB::table('h_schedule')->insert([
-                "schedule_id" => $schedule_id
-                ,"title" => $schedule['title']
-                ,"usr_id" => $schedule['usr_id']
-                ,"time_start" => $schedule['time_start']
-                ,"time_end" => $schedule['time_end']
-                ,"tag" => $schedule['tag']
-                ,"group_id" => $schedule['group_id']
-                ,"updated_at" => $schedule['updated_at']
-                ,"access_right" => $schedule['access_right']
-                ,"action_by" => $usr_id
-                ,"action_at" => date('Y-m-d H:i:s')
-                ,"action_flg" => 0
-                ,"original_by" => $schedule['title']
+        $now = date('Y-m-d H:i:s');
+        DB::connection('timebook')->beginTransaction();
+        DB::connection('timebook')->table('t_book')
+            ->where("book_id",$request->book_id)
+            ->update([
+                "book_action" => $request->action
+                ,"review_to_usr" => $request->review
+                ,"comment" => $request->comment
+                ,"canceled_at" => $now
+                ,"updated_at" => $now
             ]);
-        DB::table('h_todo')->insert($todo);
-        DB::table('t_schedule')
-                ->where('schedule_id',$schedule_id)
-                ->delete();
-        DB::table('t_todo')
-                ->where("schedule_id",$schedule_id)
-                ->delete();
-        DB::commit();
+        DB::connection('timebook')->commit();
 
         $res[0] = 1;
         die( json_encode($res) );
