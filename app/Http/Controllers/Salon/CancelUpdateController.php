@@ -31,7 +31,7 @@ class CancelUpdateController extends Controller {
             ->update([
                 "book_action" => $request->action
                 ,"review_to_usr" => $request->review
-                ,"comment" => $request->comment
+                ,"salon_comment" => $request->comment
                 ,"canceled_at" => $now
                 ,"updated_at" => $now
             ]);

@@ -27,7 +27,7 @@
 </table>
 <?php $side = new \App\My\Side(); ?>
 <table id="drawer">
-  <tr><td id="ad_menu"><iframe src="/htm/ad_menu/" width="300" height="250" frameborder="0" scrolling="no"></iframe></td></tr>
+  <tr><td id="ad_menu"></td></tr>
 <?php foreach ($side->gets() as $d) {?>
   <tr><td <?=$d['thisPage']?> ><a href="<?=$d['url']?>" >&nbsp;<?=$d['name']?></a></td></tr>
 <?php }?>
@@ -35,8 +35,6 @@
 </table>
 
 <div id="content">
-
-<div id="ad" style="text-align: center;"><iframe src="/htm/ad/" width="320" height="50" frameborder="0" scrolling="no"></iframe></div>
 
 <div style="width:100%;text-align: center;">
     <input type="text" placeholder="email" id="email" v-model="email" v-on:change="checkEmail" class="column1"><br>
@@ -71,7 +69,6 @@
 
 
 </div>
-<div id="ad_right"><iframe src="/htm/ad_right/" width="160" height="600" frameborder="0" scrolling="no"></iframe></div>
 
 <script>
 
