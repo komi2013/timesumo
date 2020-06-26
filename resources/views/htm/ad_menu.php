@@ -8,8 +8,8 @@
 <body>
 <style> * {  margin: 0 auto; padding: 0;} </style>
 
-  <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
-  <!-- レクタングル -->
+<!--  <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+   レクタングル 
   <ins class="adsbygoogle"
        style="display:inline-block;width:300px;height:250px"
        data-ad-client="ca-pub-1763935619573577"
@@ -18,7 +18,7 @@
   setTimeout(function(){
       (adsbygoogle = window.adsbygoogle || []).push({});
   }, 2000);
-  </script>
+  </script>-->
 
 </body>
 </html>

@@ -7,8 +7,8 @@
 <body>
 <style> * {  margin: 0 auto; padding: 0; text-align: center;} </style>
 
-  <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
-  <!-- 320*50のバナー -->
+<!--  <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+   320*50のバナー 
   <ins class="adsbygoogle"
        style="display:inline-block;width:320px;height:50px"
        data-ad-client="ca-pub-1763935619573577"
@@ -17,7 +17,7 @@
     setTimeout(function(){
       (adsbygoogle = window.adsbygoogle || []).push({});
     },1000);
-  </script>
+  </script>-->
 
 </body>
 </html>
