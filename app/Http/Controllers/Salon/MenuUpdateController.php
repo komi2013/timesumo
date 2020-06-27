@@ -6,8 +6,6 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
-
-
 class MenuUpdateController extends Controller {
 
     public function lessuri(Request $request, $directory=null, $controller=null,
@@ -23,6 +21,7 @@ class MenuUpdateController extends Controller {
                 ->where("menu_id",$request->menu_id)
                 ->update([
                     "menu_name" => $request->menu_name
+                    ,"deposit" => $request->deposit
                 ]);
             DB::table('m_menu_necessary')
                 ->where("menu_id",$request->menu_id)
@@ -40,6 +39,7 @@ class MenuUpdateController extends Controller {
             DB::table('m_menu')->insert([
                 "menu_id" => $menu_id
                 ,"menu_name" => $request->menu_name
+                ,"deposit" => $request->deposit
                 ,"group_id" => $group_id
             ]);
         }

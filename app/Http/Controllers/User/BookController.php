@@ -23,6 +23,10 @@ class BookController extends Controller {
         \Config::set('database.connections.dynamic.username',$db->username);
         \Config::set('database.connections.dynamic.password',$db->password);
         $menu = DB::connection('dynamic')->table('m_menu')->where('menu_id', $menu_id)->first();
+        $usr = DB::table('t_usr')->where('usr_id', $usr_id)->first();
+        if ($usr->deposit < $menu->deposit) {
+            return redirect('/User/Contact/index/?msg=1&deposit='.$menu->deposit);
+        }
         $group_id = $menu->group_id;
         $shop = DB::connection('dynamic')->table('m_group')->where('group_id', $group_id)->first();
         $frameDate = $Ymd ? new Carbon($Ymd) : new Carbon();

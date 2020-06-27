@@ -40,6 +40,7 @@
 <div style="width:100%;text-align: center;">
     <input type="text" v-model="menu_name" class="column1" v-on:change="checkMenu"><br>
     <div id="menu_name_error" style="color: red;" v-if="menu_error"><?=__('salon.menuNameError')?></div>
+    必要デポジット<input type="number" style="padding:10px;margin:5px;width:100px;" v-model="deposit">¥<br>
 </div>
 
 <div v-for="(d,k) in necessary" style="width:100%;text-align: center;">
@@ -73,6 +74,7 @@ const app = new Vue({
   el: '#content',
   data: {
     menu_name: <?=json_encode($menu->menu_name)?>,
+    deposit: <?=json_encode($menu->deposit)?>,
     necessary: eval(<?=$necessary?>),
     services: eval(<?=$services?>),
     facilitys: eval(<?=$facilitys?>),
@@ -103,6 +105,7 @@ const app = new Vue({
         var param = {
             _token : $('[name="csrf-token"]').attr('content')
             ,menu_name : this.menu_name
+            ,deposit : this.deposit
             ,necessary : this.necessary
             ,menu_id : menu_id
         }
