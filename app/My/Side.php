@@ -9,7 +9,6 @@ class Side
             $obj = DB::table('c_link')
                     ->where("group_owner",'<=', session('group_owner') ?: 0)
                     ->where("approver",'<=', session('approver') ?: 0)
-                    ->where("public", 0)
                     ->orderBy('priority','ASC')
                     ->get();
         } else {
@@ -31,7 +30,9 @@ class Side
             } else {
                 $arr['thisPage'] = '';
             }
-            $link[] = $arr;
+            if ($d->url != '/Auth/EmailLogin/index/' OR !session('usr_id')) {
+                $link[] = $arr;
+            }
         }
         $arr['url'] = '';
         $arr['name'] = '';
