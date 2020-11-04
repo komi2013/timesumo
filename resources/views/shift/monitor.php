@@ -51,7 +51,7 @@
     </div>
     <br><br>
     <input type="text" id="channel" style="width:80%;height:40px;margin:10px;"
-        value="https://hooks.slack.com/services/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">
+        value="https://hooks.slack.com/services/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">
     <br>
     <a target="_blank" href="/Shift/TimeSheet/index/" style="margin:10px;display:block;">勤怠表</a>
     <br>
